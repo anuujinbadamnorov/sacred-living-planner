@@ -18,17 +18,19 @@
   --font-heading: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
 
-  --cream: #F6F2EB;
-  --cream-dark: #EDE8DF;
+  --cream: #F5F0E8;
+  --cream-dark: #EDE6D8;
   --espresso: #2C2420;
-  --espresso-light: #6B6056;
-  --espresso-muted: #9B9086;
-  --border-light: #E5E0D8;
-  --border-medium: #D5CFC6;
-  --rose-soft: #C9A0A0;
-  --sage: #7A8B65;
+  --espresso-light: #5C4D42;
+  --espresso-muted: #8B7D70;
+  --border-light: #E5DDD0;
+  --border-medium: #D5CBB8;
+  --rose-soft: #C9A8A0;
+  --sage: #7A8B6A;
   --gold: #C9A96E;
   --cognac: #A67C52;
+  --terracotta: #C4704B;
+  --terracotta-light: #D4886A;
   --lake: #7B9EA8;
 
   /* shadcn theme variables */

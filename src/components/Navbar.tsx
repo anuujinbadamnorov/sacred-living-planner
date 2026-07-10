@@ -50,8 +50,8 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
           fontSize: '14px',
           width: '100%',
           textDecoration: 'none',
-          backgroundColor: active ? 'rgba(244, 63, 94, 0.1)' : 'transparent',
-          color: active ? '#e11d48' : '#6B6056',
+          backgroundColor: active ? 'rgba(196, 112, 75, 0.15)' : 'transparent',
+          color: active ? '#B85C3A' : '#5C4D42',
           fontWeight: active ? 500 : 400,
           transition: 'all 0.2s ease',
           minHeight: '40px',
@@ -59,14 +59,14 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         }}
         onMouseEnter={(e) => {
           if (!active) {
-            e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'
+            e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'
             e.currentTarget.style.color = '#2C2420'
           }
         }}
         onMouseLeave={(e) => {
           if (!active) {
             e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#6B6056'
+            e.currentTarget.style.color = '#5C4D42'
           }
         }}
       >
@@ -84,10 +84,10 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         fontWeight: 600,
         letterSpacing: '0.15em',
         textTransform: 'uppercase',
-        color: '#9B9086',
+        color: '#8B7D70',
         margin: 0,
         flexShrink: 0,
-      }}>
+      }}>>
         {title}
       </p>
     )
@@ -101,10 +101,10 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid #E5E0D8',
+        borderRight: '1px solid #E5DDD0',
         zIndex: 50,
         width: collapsed ? 64 : 240,
-        backgroundColor: '#EDE8DF',
+        backgroundColor: '#F5F0E8',
         transition: 'width 0.3s ease',
       }}
     >
@@ -112,8 +112,8 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '20px 16px', flexShrink: 0 }}>
         <div style={{
           width: 32, height: 32, borderRadius: 8,
-          backgroundColor: '#f43f5e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-        }}>
+          backgroundColor: '#C4704B', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+        }}>>
           <Star className="w-4 h-4 text-white" />
         </div>
         {!collapsed && (
@@ -134,7 +134,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
-          color: '#6B6056',
+          color: '#5C4D42',
           flexShrink: 0,
         }}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
