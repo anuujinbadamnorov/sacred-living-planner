@@ -435,21 +435,134 @@ export function usePlanner() {
     }
   }, [refresh]);
 
+  const setTasks = useCallback((date: string, tasks: Task[]) => {
+    const all = getItem<Record<string, Task[]>>(LS.tasks, {});
+    all[date] = tasks;
+    setItem(LS.tasks, all);
+    if (user) {
+      supabase.rpc('save_daily_entry_field', {
+        p_user_id: user.id,
+        p_date: date,
+        p_field: 'tasks',
+        p_value: tasks,
+      }).catch(() => {});
+    }
+    refresh();
+  }, [user, supabase, refresh]);
+
+  const setEvents = useCallback((date: string, events: Event[]) => {
+    const all = getItem<Record<string, Event[]>>(LS.events, {});
+    all[date] = events;
+    setItem(LS.events, all);
+    if (user) {
+      supabase.rpc('save_daily_entry_field', {
+        p_user_id: user.id,
+        p_date: date,
+        p_field: 'events',
+        p_value: events,
+      }).catch(() => {});
+    }
+    refresh();
+  }, [user, supabase, refresh]);
+
+  const setBudget = useCallback((date: string, budget: Budget[]) => {
+    const all = getItem<Record<string, Budget[]>>(LS.budget, {});
+    all[date] = budget;
+    setItem(LS.budget, all);
+    refresh();
+  }, [refresh]);
+
+  const setHabits = useCallback((habits: Habit[]) => {
+    setItem(LS.habits, habits);
+    refresh();
+  }, [refresh]);
+
+  const setNotes = useCallback((date: string, notes: Note[]) => {
+    const all = getItem<Record<string, Note[]>>(LS.notes, {});
+    all[date] = notes;
+    setItem(LS.notes, all);
+    refresh();
+  }, [refresh]);
+
+  const setMood = useCallback((date: string, mood: MoodEntry | null) => {
+    const all = getItem<Record<string, MoodEntry>>(LS.mood, {});
+    if (mood) all[date] = mood;
+    else delete all[date];
+    setItem(LS.mood, all);
+    if (user && mood) {
+      supabase.rpc('save_daily_entry_field', {
+        p_user_id: user.id,
+        p_date: date,
+        p_field: 'mood',
+        p_value: mood,
+      }).catch(() => {});
+    }
+    refresh();
+  }, [user, supabase, refresh]);
+
+  const setJournal = useCallback((date: string, entry: JournalEntry | null) => {
+    const all = getItem<Record<string, JournalEntry>>(LS.journal, {});
+    if (entry) all[date] = entry;
+    else delete all[date];
+    setItem(LS.journal, all);
+    refresh();
+  }, [refresh]);
+
+  const setFocus = useCallback((date: string, focus: FocusEntry | null) => {
+    const all = getItem<Record<string, FocusEntry>>(LS.focus, {});
+    if (focus) all[date] = focus;
+    else delete all[date];
+    setItem(LS.focus, all);
+    refresh();
+  }, [refresh]);
+
+  const setOura = useCallback((date: string, data: OuraData | null) => {
+    const all = getItem<Record<string, OuraData>>(LS.oura, {});
+    if (data) all[date] = data;
+    else delete all[date];
+    setItem(LS.oura, all);
+    refresh();
+  }, [refresh]);
+
+  const setGoals = useCallback((goals: any[]) => {
+    setItem(LS.goals, goals);
+    refresh();
+  }, [refresh]);
+
+  const setReflections = useCallback((month: string, reflections: any[]) => {
+    const all = getItem<Record<string, any[]>>(LS.reflections, {});
+    all[month] = reflections;
+    setItem(LS.reflections, all);
+    refresh();
+  }, [refresh]);
+
+  const setHealth = useCallback((health: any[]) => {
+    setItem(LS.health, health);
+    refresh();
+  }, [refresh]);
+
+  const setMeals = useCallback((date: string, meals: any[]) => {
+    const all = getItem<Record<string, any[]>>(LS.meals, {});
+    all[date] = meals;
+    setItem(LS.meals, all);
+    refresh();
+  }, [refresh]);
+
   return {
-    getTasks, saveTask, deleteTask,
-    getEvents, saveEvent, deleteEvent,
-    getBudget, saveBudget, deleteBudget,
-    getHabits, saveHabit, deleteHabit, toggleHabit,
-    getNotes, saveNote, deleteNote,
-    getMood, saveMood,
-    getJournal, saveJournal,
-    getFocus, saveFocus,
-    getOura, saveOura,
+    getTasks, saveTask, deleteTask, setTasks,
+    getEvents, saveEvent, deleteEvent, setEvents,
+    getBudget, saveBudget, deleteBudget, setBudget,
+    getHabits, saveHabit, deleteHabit, toggleHabit, setHabits,
+    getNotes, saveNote, deleteNote, setNotes,
+    getMood, saveMood, setMood,
+    getJournal, saveJournal, setJournal,
+    getFocus, saveFocus, setFocus,
+    getOura, saveOura, setOura,
     getTheme, saveTheme,
-    getGoals, saveGoal, deleteGoal,
-    getReflections, saveReflection, deleteReflection,
-    getHealth, saveHealth, deleteHealth,
-    getMeals, saveMeal, deleteMeal,
+    getGoals, saveGoal, deleteGoal, setGoals,
+    getReflections, saveReflection, deleteReflection, setReflections,
+    getHealth, saveHealth, deleteHealth, setHealth,
+    getMeals, saveMeal, deleteMeal, setMeals,
     refresh,
   };
 }
