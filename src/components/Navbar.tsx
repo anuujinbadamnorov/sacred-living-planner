@@ -43,7 +43,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
   const navItem = (to: string, icon: ReactNode, label: string) => (
     <Link
       href={to}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 ${
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 w-full ${
         isActive(to)
           ? 'bg-rose-500/10 text-rose-600 font-medium'
           : 'text-espresso-light hover:bg-black/5 hover:text-espresso'
@@ -56,7 +56,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
 
   const section = (title: string) =>
     !collapsed && (
-      <p className="px-3 pt-5 pb-1.5 text-[11px] font-semibold tracking-widest uppercase text-espresso-muted">
+      <p className="px-3 mt-4 mb-1 text-[11px] font-semibold tracking-widest uppercase text-espresso-muted">
         {title}
       </p>
     )
@@ -90,7 +90,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
       </button>
 
       {/* Scrollable nav */}
-      <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-0.5">
+      <div className="flex-1 overflow-y-auto px-2 pb-4 flex flex-col gap-1">
         {section('My Sacred Space')}
         {navItem('/planner', <LayoutDashboard className="w-4 h-4 shrink-0" />, 'Dashboard')}
         {navItem('/planner/yearly', <CalendarDays className="w-4 h-4 shrink-0" />, 'Yearly')}
