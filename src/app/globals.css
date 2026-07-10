@@ -3,6 +3,21 @@
 @tailwind utilities;
 
 :root {
+  /* Sacred Living default theme (warm cream) */
+  --color-bg: #FAF7F2;
+  --color-surface: #FFFFFF;
+  --color-text: #2D2A26;
+  --color-text-muted: #8B8680;
+  --color-accent: #D4A574;
+  --color-accent-hover: #C49464;
+  --color-border: #E8E4DE;
+  --color-success: #6B8E6B;
+  --color-warning: #D4A574;
+  --color-error: #C4706B;
+  --color-calendar-weekend: #F5F0EB;
+  --font-heading: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
   --cream: #F6F2EB;
   --cream-dark: #EDE8DF;
   --espresso: #2C2420;
