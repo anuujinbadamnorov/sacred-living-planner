@@ -28,6 +28,8 @@ import {
   Droplets,
 } from 'lucide-react'
 import { usePlanner } from '@/hooks/usePlanner'
+import { useSupabaseDashboard } from '@/hooks/useSupabaseDashboard'
+import { useAuth } from '@/components/AuthProvider'
 import { dateKey } from '@/lib/dateUtils'
 import { getMoonPhase } from '@/lib/moonPhase'
 
@@ -103,7 +105,9 @@ function getCyclePhase(dayOfCycle: number): { name: string; emoji: string } {
 
 export default function Dashboard() {
   const router = useRouter()
+  const { user, profile } = useAuth()
   const { getEvents, getTasks, getGoals, getHabits } = usePlanner()
+  const { habitsCount, habitsCompletedToday, todaysEntry, notesCount, loading: sbLoading, error: sbError } = useSupabaseDashboard()
   const today = new Date()
   const todayKey = dateKey(today)
 
@@ -295,6 +299,47 @@ export default function Dashboard() {
         >
           {affirmation}
         </motion.div>
+
+        {/* ── Cloud Sync Status ── */}
+        {user && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45, duration: 0.5 }}
+            className="sage-card"
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--sage-700)' }}>
+                ☁️ Cloud Sync
+              </h4>
+              {sbLoading ? (
+                <span className="text-xs" style={{ color: 'var(--stone)' }}>Loading…</span>
+              ) : sbError ? (
+                <span className="text-xs" style={{ color: 'var(--terracotta-500)' }}>{sbError}</span>
+              ) : (
+                <span className="text-xs" style={{ color: 'var(--sage)' }}>Connected</span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="text-center p-3 rounded-lg" style={{ background: 'var(--cream-dark)' }}>
+                <p className="text-2xl font-playfair font-semibold" style={{ color: 'var(--sage-800)' }}>{habitsCount}</p>
+                <p className="text-[0.625rem] uppercase tracking-wider mt-1" style={{ color: 'var(--stone)' }}>Active Habits</p>
+              </div>
+              <div className="text-center p-3 rounded-lg" style={{ background: 'var(--cream-dark)' }}>
+                <p className="text-2xl font-playfair font-semibold" style={{ color: 'var(--sage-800)' }}>{habitsCompletedToday}</p>
+                <p className="text-[0.625rem] uppercase tracking-wider mt-1" style={{ color: 'var(--stone)' }}>Done Today</p>
+              </div>
+              <div className="text-center p-3 rounded-lg" style={{ background: 'var(--cream-dark)' }}>
+                <p className="text-2xl font-playfair font-semibold" style={{ color: todaysEntry ? 'var(--sage)' : 'var(--stone)' }}>{todaysEntry ? '✓' : '—'}</p>
+                <p className="text-[0.625rem] uppercase tracking-wider mt-1" style={{ color: 'var(--stone)' }}>Daily Entry</p>
+              </div>
+              <div className="text-center p-3 rounded-lg" style={{ background: 'var(--cream-dark)' }}>
+                <p className="text-2xl font-playfair font-semibold" style={{ color: 'var(--sage-800)' }}>{notesCount}</p>
+                <p className="text-[0.625rem] uppercase tracking-wider mt-1" style={{ color: 'var(--stone)' }}>Notes</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* ── Top Cards Grid ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
