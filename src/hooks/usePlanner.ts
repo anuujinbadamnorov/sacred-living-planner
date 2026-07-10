@@ -548,6 +548,16 @@ export function usePlanner() {
     refresh();
   }, [refresh]);
 
+  // ─── Generic Storage (backward compat) ───
+  const getStorageItem = useCallback(<T = any>(key: string, defaultValue: T): T => {
+    return getItem<T>(key, defaultValue);
+  }, []);
+
+  const setStorageItem = useCallback((key: string, value: unknown) => {
+    setItem(key, value);
+    refresh();
+  }, [refresh]);
+
   return {
     getTasks, saveTask, deleteTask, setTasks,
     getEvents, saveEvent, deleteEvent, setEvents,
@@ -563,6 +573,7 @@ export function usePlanner() {
     getReflections, saveReflection, deleteReflection, setReflections,
     getHealth, saveHealth, deleteHealth, setHealth,
     getMeals, saveMeal, deleteMeal, setMeals,
+    getStorageItem, setStorageItem,
     refresh,
   };
 }
