@@ -10,14 +10,10 @@ import {
   Menu, X
 } from 'lucide-react'
 
-/* ── Types ─────────────────────────────────────────────────────────── */
-
 interface NavbarProps {
   collapsed?: boolean
   onToggle?: () => void
 }
-
-/* ── Component ─────────────────────────────────────────────────────── */
 
 export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
   const pathname = usePathname() || ''
@@ -40,57 +36,121 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
     return false
   }
 
-  const navItem = (to: string, icon: ReactNode, label: string) => (
-    <Link
-      href={to}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 w-full ${
-        isActive(to)
-          ? 'bg-rose-500/10 text-rose-600 font-medium'
-          : 'text-espresso-light hover:bg-black/5 hover:text-espresso'
-      }`}
-    >
-      {icon}
-      {!collapsed && <span className="whitespace-nowrap">{label}</span>}
-    </Link>
-  )
+  const navItem = (to: string, icon: ReactNode, label: string) => {
+    const active = isActive(to)
+    return (
+      <Link
+        href={to}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          padding: '10px 12px',
+          borderRadius: '12px',
+          fontSize: '14px',
+          width: '100%',
+          textDecoration: 'none',
+          backgroundColor: active ? 'rgba(244, 63, 94, 0.1)' : 'transparent',
+          color: active ? '#e11d48' : '#6B6056',
+          fontWeight: active ? 500 : 400,
+          transition: 'all 0.2s ease',
+          minHeight: '40px',
+          flexShrink: 0,
+        }}
+        onMouseEnter={(e) => {
+          if (!active) {
+            e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.05)'
+            e.currentTarget.style.color = '#2C2420'
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!active) {
+            e.currentTarget.style.backgroundColor = 'transparent'
+            e.currentTarget.style.color = '#6B6056'
+          }
+        }}
+      >
+        {icon}
+        {!collapsed && <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>}
+      </Link>
+    )
+  }
 
   const section = (title: string) =>
     !collapsed && (
-      <p className="px-3 mt-4 mb-1 text-[11px] font-semibold tracking-widest uppercase text-espresso-muted">
+      <p style={{
+        padding: '16px 12px 4px 12px',
+        fontSize: '11px',
+        fontWeight: 600,
+        letterSpacing: '0.15em',
+        textTransform: 'uppercase',
+        color: '#9B9086',
+        margin: 0,
+        flexShrink: 0,
+      }}>
         {title}
       </p>
     )
 
   return (
     <nav
-      className="fixed left-0 top-0 h-full flex flex-col border-r transition-all duration-300 z-50"
       style={{
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRight: '1px solid #E5E0D8',
+        zIndex: 50,
         width: collapsed ? 64 : 240,
-        background: 'var(--cream-dark)',
-        borderColor: 'var(--border-light)',
+        backgroundColor: '#EDE8DF',
+        transition: 'width 0.3s ease',
       }}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5">
-        <div className="w-8 h-8 rounded-lg bg-rose-500 flex items-center justify-center shrink-0">
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '20px 16px', flexShrink: 0 }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: 8,
+          backgroundColor: '#f43f5e', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+        }}>
           <Star className="w-4 h-4 text-white" />
         </div>
         {!collapsed && (
-          <span className="font-display text-lg text-espresso">Sacred Living</span>
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '18px', color: '#2C2420', whiteSpace: 'nowrap' }}>
+            Sacred Living
+          </span>
         )}
       </div>
 
       {/* Toggle */}
       <button
         onClick={onToggle}
-        className="mx-3 mb-2 p-1.5 rounded-lg hover:bg-black/5 transition-colors self-end"
+        style={{
+          margin: '0 12px 8px 12px',
+          padding: '6px',
+          borderRadius: 8,
+          alignSelf: 'flex-end',
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          color: '#6B6056',
+          flexShrink: 0,
+        }}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         {collapsed ? <Menu className="w-4 h-4" /> : <X className="w-4 h-4" />}
       </button>
 
       {/* Scrollable nav */}
-      <div className="flex-1 overflow-y-auto px-2 pb-4 flex flex-col gap-1">
+      <div style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: '0 8px 16px 8px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '4px',
+      }}>
         {section('My Sacred Space')}
         {navItem('/planner', <LayoutDashboard className="w-4 h-4 shrink-0" />, 'Dashboard')}
         {navItem('/planner/yearly', <CalendarDays className="w-4 h-4 shrink-0" />, 'Yearly')}
