@@ -1,0 +1,835 @@
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  format,
+  parseISO,
+  isValid,
+  startOfWeek,
+  endOfWeek,
+  eachDayOfInterval,
+  addWeeks,
+  subWeeks,
+  isToday,
+  getWeek,
+  getYear,
+  getDate,
+  addDays,
+} from 'date-fns'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Trash2,
+  Check,
+  UtensilsCrossed,
+  ShoppingCart,
+  Dumbbell,
+  Flame,
+} from 'lucide-react'
+import { usePlanner } from '@/hooks/usePlanner'
+import { dateKey } from '@/lib/dateUtils'
+
+/* ─────────────────────── types ─────────────────────── */
+
+type MealType = 'breakfast' | 'lunch' | 'dinner'
+
+interface MealPlan {
+  [dayKey: string]: {
+    breakfast: string
+    lunch: string
+    dinner: string
+  }
+}
+
+interface GroceryItem {
+  id: string
+  name: string
+  category: string
+  checked: boolean
+}
+
+interface WorkoutEntry {
+  type: string
+  duration: string
+  intensity: 'low' | 'medium' | 'high'
+  notes: string
+}
+
+const MEAL_TYPES: MealType[] = ['breakfast', 'lunch', 'dinner']
+const MEAL_LABELS = { breakfast: 'B', lunch: 'L', dinner: 'D' }
+const DAY_ABBREVS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+
+const GROCERY_CATEGORIES = ['Produce', 'Dairy', 'Meat', 'Pantry', 'Frozen', 'Other']
+const CATEGORY_COLORS: Record<string, string> = {
+  Produce: '#7a9e7a',
+  Dairy: '#7a8e9e',
+  Meat: '#c47272',
+  Pantry: '#d4a76a',
+  Frozen: '#9c8a74',
+  Other: '#b8a896',
+}
+
+const DEFAULT_HABITS = [
+  { id: 'h1', name: 'Read 30 min' },
+  { id: 'h2', name: 'Exercise' },
+  { id: 'h3', name: 'Meditate' },
+  { id: 'h4', name: 'Drink 8 water' },
+  { id: 'h5', name: 'No sugar' },
+  { id: 'h6', name: 'Sleep by 10pm' },
+  { id: 'h7', name: 'Journal' },
+  { id: 'h8', name: 'Clean space' },
+]
+
+/* ─────────────────────── helpers ─────────────────────── */
+
+function generateId() {
+  return Math.random().toString(36).substring(2, 9)
+}
+
+function getWeekStartDate(weekParam: string): Date {
+  if (!weekParam || weekParam === 'current') return startOfWeek(new Date(), { weekStartsOn: 0 })
+  // Parse format: 2026-W25
+  const match = weekParam.match(/(\d{4})-W(\d+)/)
+  if (match) {
+    const year = parseInt(match[1], 10)
+    const weekNum = parseInt(match[2], 10)
+    const jan1 = new Date(year, 0, 1)
+    const start = startOfWeek(addDays(jan1, (weekNum - 1) * 7), { weekStartsOn: 0 })
+    return isValid(start) ? start : startOfWeek(new Date(), { weekStartsOn: 0 })
+  }
+  const parsed = parseISO(weekParam)
+  return isValid(parsed) ? startOfWeek(parsed, { weekStartsOn: 0 }) : startOfWeek(new Date(), { weekStartsOn: 0 })
+}
+
+function formatWeekParam(date: Date): string {
+  return `${getYear(date)}-W${getWeek(date)}`
+}
+
+/* ─────────────────────── component ─────────────────────── */
+
+export default function Weekly() {
+  const { week: weekParam } = useParams<{ week: string }>()
+  const router = useRouter()
+  const { getStorageItem, setStorageItem, getHabits, setHabits, getTasks } = usePlanner()
+
+  /* ── Week date range ── */
+  const weekStart = useMemo(() => getWeekStartDate(weekParam || 'current'), [weekParam])
+  const weekEnd = useMemo(() => endOfWeek(weekStart, { weekStartsOn: 0 }), [weekStart])
+  const weekDays = useMemo(() => eachDayOfInterval({ start: weekStart, end: weekEnd }), [weekStart, weekEnd])
+  const weekStr = formatWeekParam(weekStart)
+  const weekNumber = getWeek(weekStart)
+
+  /* ── Navigation ── */
+  const goToWeek = useCallback(
+    (d: Date) => router.push(`/planner/weekly/${formatWeekParam(d)}`),
+    [router]
+  )
+  const goPrevWeek = () => goToWeek(subWeeks(weekStart, 1))
+  const goNextWeek = () => goToWeek(addWeeks(weekStart, 1))
+  const goThisWeek = () => router.push('/planner/weekly/current')
+
+  /* ── Data: Week Focus ── */
+  const [weekFocus, setWeekFocus] = useState<string[]>(() =>
+    getStorageItem<string[]>(`planner-weekly-focus-${weekStr}`, Array(7).fill(''))
+  )
+  const saveWeekFocus = useCallback(
+    (idx: number, val: string) => {
+      const current = getStorageItem<string[]>(`planner-weekly-focus-${weekStr}`, Array(7).fill(''))
+      current[idx] = val
+      setStorageItem(`planner-weekly-focus-${weekStr}`, current)
+    },
+    [getStorageItem, setStorageItem, weekStr]
+  )
+
+  /* ── Data: Meals ── */
+  const [meals, setMeals] = useState<MealPlan>(() => {
+    const stored = getStorageItem<MealPlan>(`planner-meals-${weekStr}`, {})
+    return stored
+  })
+  const saveMeal = useCallback(
+    (dayKey: string, meal: MealType, val: string) => {
+      setMeals((prev) => {
+        const updated = {
+          ...prev,
+          [dayKey]: { ...prev[dayKey], [meal]: val },
+        }
+        setStorageItem(`planner-meals-${weekStr}`, updated)
+        return updated
+      })
+    },
+    [setStorageItem, weekStr]
+  )
+
+  /* ── Data: Grocery ── */
+  const [groceryItems, setGroceryItems] = useState<GroceryItem[]>(() =>
+    getStorageItem<GroceryItem[]>(`planner-grocery-${weekStr}`, [])
+  )
+  const [newGroceryText, setNewGroceryText] = useState('')
+  const [newGroceryCategory, setNewGroceryCategory] = useState('Other')
+
+  const addGroceryItem = () => {
+    if (!newGroceryText.trim()) return
+    const item: GroceryItem = {
+      id: generateId(),
+      name: newGroceryText.trim(),
+      category: newGroceryCategory,
+      checked: false,
+    }
+    const updated = [...groceryItems, item]
+    setGroceryItems(updated)
+    setStorageItem(`planner-grocery-${weekStr}`, updated)
+    setNewGroceryText('')
+  }
+
+  const toggleGroceryItem = (id: string) => {
+    const updated = groceryItems.map((item) =>
+      item.id === id ? { ...item, checked: !item.checked } : item
+    )
+    // Move checked items to bottom
+    updated.sort((a, b) => (a.checked === b.checked ? 0 : a.checked ? 1 : -1))
+    setGroceryItems(updated)
+    setStorageItem(`planner-grocery-${weekStr}`, updated)
+  }
+
+  const deleteGroceryItem = (id: string) => {
+    const updated = groceryItems.filter((item) => item.id !== id)
+    setGroceryItems(updated)
+    setStorageItem(`planner-grocery-${weekStr}`, updated)
+  }
+
+  const clearCompletedGrocery = () => {
+    const updated = groceryItems.filter((item) => !item.checked)
+    setGroceryItems(updated)
+    setStorageItem(`planner-grocery-${weekStr}`, updated)
+  }
+
+  /* ── Data: Workouts ── */
+  const [workouts, setWorkouts] = useState<Record<string, WorkoutEntry>>(() =>
+    getStorageItem<Record<string, WorkoutEntry>>(`planner-workouts-${weekStr}`, {})
+  )
+  const saveWorkout = useCallback(
+    (dayKey: string, field: keyof WorkoutEntry, val: string) => {
+      setWorkouts((prev) => {
+        const updated = {
+          ...prev,
+          [dayKey]: { ...prev[dayKey], [field]: val },
+        }
+        setStorageItem(`planner-workouts-${weekStr}`, updated)
+        return updated
+      })
+    },
+    [setStorageItem, weekStr]
+  )
+
+  /* ── Data: Weekly Habits ── */
+  const [habitsList, setHabitsList] = useState(() => getHabits())
+  const activeHabits = useMemo(() => {
+    return habitsList.length > 0 ? habitsList : DEFAULT_HABITS.map((h) => ({ ...h, dates: {} as Record<string, boolean> }))
+  }, [habitsList])
+
+  const toggleWeeklyHabit = (habitId: string, dayKey: string) => {
+    const updated = habitsList.map((h) =>
+      h.id === habitId ? { ...h, dates: { ...h.dates, [dayKey]: !h.dates[dayKey] } } : h
+    )
+    setHabitsList(updated)
+    setHabits(updated)
+  }
+
+  /* ── Fetch tasks for each day ── */
+  const dayTasks = useMemo(() => {
+    const result: Record<string, { text: string; completed: boolean }[]> = {}
+    weekDays.forEach((day) => {
+      const dKey = dateKey(day)
+      result[dKey] = getTasks(dKey).slice(0, 3)
+    })
+    return result
+  }, [weekDays, getTasks])
+
+  /* ── Fetch mood for each day ── */
+  const dayMoods = useMemo(() => {
+    const result: Record<string, number | null> = {}
+    weekDays.forEach((day) => {
+      const dKey = dateKey(day)
+      result[dKey] = getStorageItem<number | null>(`planner-mood-${dKey}`, null)
+    })
+    return result
+  }, [weekDays, getStorageItem])
+
+  /* ── Effects ── */
+  useEffect(() => {
+    setWeekFocus(getStorageItem<string[]>(`planner-weekly-focus-${weekStr}`, Array(7).fill('')))
+    setMeals(getStorageItem<MealPlan>(`planner-meals-${weekStr}`, {}))
+    setGroceryItems(getStorageItem<GroceryItem[]>(`planner-grocery-${weekStr}`, []))
+    setWorkouts(getStorageItem<Record<string, WorkoutEntry>>(`planner-workouts-${weekStr}`, {}))
+    setHabitsList(getHabits())
+  }, [weekStr, getStorageItem, getHabits])
+
+  /* ── Workout summary ── */
+  const workoutSummary = useMemo(() => {
+    let totalDays = 0
+    let totalMinutes = 0
+    const intensities: number[] = []
+    weekDays.forEach((day) => {
+      const w = workouts[dateKey(day)]
+      if (w?.type && w.type.trim() !== '' && w.type !== 'Rest day') {
+        totalDays++
+        const mins = parseInt(w.duration, 10) || 0
+        totalMinutes += mins
+        if (w.intensity === 'low') intensities.push(1)
+        else if (w.intensity === 'medium') intensities.push(2)
+        else if (w.intensity === 'high') intensities.push(3)
+      }
+    })
+    const avgIntensity = intensities.length > 0 ? intensities.reduce((a, b) => a + b, 0) / intensities.length : 0
+    return { totalDays, totalMinutes: Math.round(totalMinutes), avgIntensity }
+  }, [workouts, weekDays])
+
+  /* ── Animation variants ── */
+  const containerStagger = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.06, delayChildren: 0.05 },
+    },
+  }
+  const fadeUp = {
+    hidden: { opacity: 0, y: 12 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
+  }
+  const fadeRight = {
+    hidden: { opacity: 0, x: 20 },
+    show: { opacity: 1, x: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
+  }
+
+  /* ════════════════════════ RENDER ════════════════════════ */
+
+  return (
+    <div className="space-y-6 max-w-[1440px] mx-auto">
+      {/* ── Week Header ── */}
+      <motion.div variants={containerStagger} initial="hidden" animate="show" className="space-y-6">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={goPrevWeek}
+            className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-warm-100 text-warm-600 transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span className="text-sm font-inter hidden sm:inline">Previous</span>
+          </button>
+
+          <div className="text-center">
+            <motion.div
+              key={weekStr}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <h1
+                className="font-playfair font-semibold text-warm-900"
+                style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.75rem)', lineHeight: 1.2 }}
+              >
+                {format(weekStart, 'MMM d')} &ndash; {format(weekEnd, 'MMM d, yyyy')}
+              </h1>
+              <p className="font-inter text-sm text-warm-500 mt-1">
+                Week {weekNumber}
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={goThisWeek}
+              className="px-3 py-2 rounded-md text-sm font-inter font-medium text-rose-600 border border-rose-300 hover:bg-rose-50 transition-colors"
+            >
+              This Week
+            </button>
+            <button
+              onClick={goNextWeek}
+              className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-warm-100 text-warm-600 transition-colors"
+            >
+              <span className="text-sm font-inter hidden sm:inline">Next</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* ── 7-Day Overview ── */}
+        <motion.div variants={fadeUp} className="card-planner overflow-x-auto">
+          <div className="min-w-[700px]">
+            <div className="grid grid-cols-7 gap-2">
+              {weekDays.map((day, idx) => {
+                const dKey = dateKey(day)
+                const dayIsToday = isToday(day)
+                const isWeekend = idx === 0 || idx === 6
+                const tasks = dayTasks[dKey] || []
+                const moodVal = dayMoods[dKey]
+                const focusText = weekFocus[idx] || ''
+
+                return (
+                  <motion.div
+                    key={dKey}
+                    variants={fadeRight}
+                    className={`rounded-lg border transition-all duration-200 cursor-pointer min-h-[280px] flex flex-col ${
+                      dayIsToday
+                        ? 'bg-rose-50 border-rose-500 border-t-[3px]'
+                        : isWeekend
+                          ? 'bg-rose-50/30 border-warm-100'
+                          : 'bg-white border-warm-200 hover:bg-warm-50'
+                    }`}
+                  >
+                    {/* Day Header */}
+                    <Link
+                      href={`/planner/daily/${dKey}`}
+                      className="block p-3 text-center border-b border-warm-100"
+                    >
+                      <p className="text-[0.6875rem] font-inter font-semibold text-warm-500 uppercase tracking-wider">
+                        {DAY_ABBREVS[idx]}
+                      </p>
+                      <p
+                        className={`text-xl font-inter font-medium mt-1 ${
+                          dayIsToday ? 'text-rose-500' : 'text-warm-800'
+                        }`}
+                      >
+                        {getDate(day)}
+                      </p>
+                    </Link>
+
+                    {/* Quick Focus */}
+                    <div className="p-2 border-b border-warm-100">
+                      <input
+                        type="text"
+                        value={focusText}
+                        onChange={(e) => {
+                          const updated = [...weekFocus]
+                          updated[idx] = e.target.value
+                          setWeekFocus(updated)
+                          saveWeekFocus(idx, e.target.value)
+                        }}
+                        placeholder="Focus..."
+                        className="w-full font-caveat text-sm text-warm-700 bg-transparent outline-none placeholder:text-warm-400 border-b border-transparent focus:border-warm-300 transition-colors"
+                      />
+                    </div>
+
+                    {/* Tasks */}
+                    <div className="flex-1 p-2 space-y-1.5">
+                      {tasks.map((task, tIdx) => (
+                        <div key={tIdx} className="flex items-start gap-1.5">
+                          <div
+                            className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 mt-0.5 ${
+                              task.completed ? 'bg-rose-500 border-rose-500' : 'border-warm-300'
+                            }`}
+                          >
+                            {task.completed && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
+                          </div>
+                          <span
+                            className={`text-xs font-inter leading-tight ${
+                              task.completed ? 'line-through text-warm-400' : 'text-warm-700'
+                            }`}
+                          >
+                            {task.text}
+                          </span>
+                        </div>
+                      ))}
+                      {tasks.length === 0 && (
+                        <p className="text-[0.6875rem] text-warm-400 font-inter italic text-center py-2">
+                          No tasks
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Mood */}
+                    {moodVal !== null && moodVal !== undefined && (
+                      <div className="px-2 pb-2 text-center">
+                        <span className="text-base" title={`Mood: ${moodVal}/5`}>
+                          {moodVal === 1 && '\u{1F634}'}
+                          {moodVal === 2 && '\u{1F615}'}
+                          {moodVal === 3 && '\u{1F610}'}
+                          {moodVal === 4 && '\u{1F642}'}
+                          {moodVal === 5 && '\u{1F929}'}
+                        </span>
+                      </div>
+                    )}
+                  </motion.div>
+                )
+              })}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ── Weekly Planning Tools ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Meal Planner */}
+          <motion.div variants={fadeUp} className="card-planner">
+            <h3 className="flex items-center gap-2 mb-4">
+              <UtensilsCrossed className="w-5 h-5 text-rose-500" />
+              Meal Plan
+            </h3>
+
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[300px]">
+                <thead>
+                  <tr>
+                    <th className="text-left text-[0.6875rem] font-inter font-semibold text-warm-500 uppercase pb-2 w-10"></th>
+                    {MEAL_TYPES.map((m) => (
+                      <th key={m} className="text-center text-[0.6875rem] font-inter font-semibold text-warm-500 uppercase pb-2">
+                        {MEAL_LABELS[m]}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {weekDays.map((day, dIdx) => {
+                    const dKey = dateKey(day)
+                    const dayMeals = meals[dKey] || {}
+                    return (
+                      <tr key={dKey} className="border-t border-warm-100">
+                        <td className="py-1.5 pr-2">
+                          <span className="text-[0.6875rem] font-inter font-semibold text-warm-500">
+                            {DAY_ABBREVS[dIdx]}
+                          </span>
+                        </td>
+                        {MEAL_TYPES.map((mealType) => (
+                          <td key={mealType} className="p-0.5">
+                            <input
+                              type="text"
+                              value={dayMeals[mealType] || ''}
+                              onChange={(e) => saveMeal(dKey, mealType, e.target.value)}
+                              placeholder="..."
+                              className="w-full min-h-[36px] px-1.5 py-1 font-caveat text-sm text-warm-700 bg-transparent border border-warm-100 rounded text-center outline-none focus:border-rose-300 transition-colors placeholder:text-warm-300"
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+
+          {/* Grocery List */}
+          <motion.div variants={fadeUp} className="card-planner">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="flex items-center gap-2">
+                <ShoppingCart className="w-5 h-5 text-rose-500" />
+                Grocery List
+              </h3>
+              {groceryItems.some((i) => i.checked) && (
+                <button
+                  onClick={clearCompletedGrocery}
+                  className="text-xs font-inter text-rose-500 hover:text-rose-600 hover:underline"
+                >
+                  Clear Completed
+                </button>
+              )}
+            </div>
+
+            {/* Add item */}
+            <div className="flex gap-2 mb-3">
+              <select
+                value={newGroceryCategory}
+                onChange={(e) => setNewGroceryCategory(e.target.value)}
+                className="text-xs font-inter px-2 py-2 rounded-md border border-warm-200 outline-none bg-white text-warm-700 shrink-0"
+              >
+                {GROCERY_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={newGroceryText}
+                onChange={(e) => setNewGroceryText(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addGroceryItem()}
+                placeholder="Add item..."
+                className="flex-1 text-sm font-inter px-3 py-2 rounded-md border border-warm-200 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all placeholder:text-warm-400"
+              />
+              <button
+                onClick={addGroceryItem}
+                className="btn-primary p-2"
+                aria-label="Add item"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Items */}
+            <div className="space-y-1 max-h-[320px] overflow-y-auto pr-1">
+              <AnimatePresence>
+                {groceryItems.length === 0 ? (
+                  <p className="text-sm text-warm-400 font-inter text-center py-4 italic">
+                    No items yet. Add groceries above!
+                  </p>
+                ) : (
+                  groceryItems.map((item) => (
+                    <motion.div
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="flex items-center gap-2 py-1.5 group"
+                    >
+                      <motion.button
+                        whileTap={{ scale: 0.85 }}
+                        onClick={() => toggleGroceryItem(item.id)}
+                        className={`w-[18px] h-[18px] rounded-[3px] border-[1.5px] flex items-center justify-center shrink-0 transition-all duration-200 ${
+                          item.checked
+                            ? 'bg-rose-500 border-rose-500'
+                            : 'border-warm-300 hover:border-rose-300'
+                        }`}
+                      >
+                        {item.checked && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                          >
+                            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+                          </motion.div>
+                        )}
+                      </motion.button>
+
+                      <span
+                        className={`flex-1 font-inter text-sm transition-all duration-300 ${
+                          item.checked ? 'line-through text-warm-400' : 'text-warm-700'
+                        }`}
+                      >
+                        {item.name}
+                      </span>
+
+                      <span
+                        className="text-[0.625rem] font-inter font-medium px-1.5 py-0.5 rounded-full text-white shrink-0"
+                        style={{ backgroundColor: CATEGORY_COLORS[item.category] || '#b8a896' }}
+                      >
+                        {item.category}
+                      </span>
+
+                      <button
+                        onClick={() => deleteGroceryItem(item.id)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-warm-100"
+                      >
+                        <Trash2 className="w-3 h-3 text-warm-400" />
+                      </button>
+                    </motion.div>
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
+
+          {/* Workout Schedule */}
+          <motion.div variants={fadeUp} className="card-planner">
+            <h3 className="flex items-center gap-2 mb-4">
+              <Dumbbell className="w-5 h-5 text-rose-500" />
+              Workouts
+            </h3>
+
+            <div className="space-y-2">
+              {weekDays.map((day, idx) => {
+                const dKey = dateKey(day)
+                const workout = workouts[dKey] || { type: '', duration: '30', intensity: 'low' as const, notes: '' }
+                return (
+                  <motion.div
+                    key={dKey}
+                    whileHover={{ backgroundColor: 'var(--warm-50)' }}
+                    className="flex items-center gap-2 py-1.5 px-2 rounded-md transition-colors"
+                  >
+                    <span className="text-xs font-inter font-medium text-warm-600 w-10 shrink-0">
+                      {DAY_ABBREVS[idx]}
+                    </span>
+
+                    <input
+                      type="text"
+                      value={workout.type}
+                      onChange={(e) => saveWorkout(dKey, 'type', e.target.value)}
+                      placeholder="Rest day..."
+                      className="flex-1 min-w-0 font-caveat text-sm text-warm-700 bg-transparent outline-none border-b border-transparent focus:border-warm-300 transition-colors placeholder:text-warm-400"
+                    />
+
+                    <select
+                      value={workout.duration}
+                      onChange={(e) => saveWorkout(dKey, 'duration', e.target.value)}
+                      className="text-[0.6875rem] font-inter px-1.5 py-1 rounded border border-warm-200 outline-none bg-white text-warm-700 shrink-0 w-[60px]"
+                    >
+                      <option value="">-</option>
+                      <option value="30">30m</option>
+                      <option value="45">45m</option>
+                      <option value="60">1h</option>
+                      <option value="90">1.5h</option>
+                    </select>
+
+                    <div className="flex gap-0.5 shrink-0">
+                      {(['low', 'medium', 'high'] as const).map((int) => (
+                        <button
+                          key={int}
+                          onClick={() => saveWorkout(dKey, 'intensity', int)}
+                          className={`w-2.5 h-2.5 rounded-full transition-all duration-200 ${
+                            workout.intensity === int
+                              ? int === 'low'
+                                ? 'bg-success scale-110'
+                                : int === 'medium'
+                                  ? 'bg-warning scale-110'
+                                  : 'bg-error scale-110'
+                              : 'bg-warm-200 hover:bg-warm-300'
+                          }`}
+                          title={int}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )
+              })}
+            </div>
+
+            {/* Summary */}
+            {workoutSummary.totalDays > 0 && (
+              <div className="mt-4 pt-3 border-t border-warm-200 flex items-center justify-between text-xs font-inter text-warm-600">
+                <span>{workoutSummary.totalDays} days</span>
+                <span>{Math.round(workoutSummary.totalMinutes / 60 * 10) / 10}h total</span>
+                <div className="flex items-center gap-1">
+                  {workoutSummary.avgIntensity >= 2 && <Flame className="w-3 h-3 text-warning" />}
+                  <span>
+                    {workoutSummary.avgIntensity <= 1 ? 'Low' : workoutSummary.avgIntensity <= 2 ? 'Medium' : 'High'}
+                  </span>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        </div>
+
+        {/* ── Weekly Habit Tracker ── */}
+        <motion.div variants={fadeUp} className="card-planner overflow-x-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="flex items-center gap-2">
+              <Check className="w-5 h-5 text-rose-500" />
+              Weekly Habits
+            </h3>
+            <Link
+              href="/planner/goals"
+              className="text-xs font-inter text-rose-500 hover:text-rose-600 hover:underline"
+            >
+              Manage Habits &rarr;
+            </Link>
+          </div>
+
+          <div className="min-w-[500px]">
+            {/* Header row */}
+            <div className="grid gap-1 mb-1" style={{ gridTemplateColumns: '140px repeat(7, 1fr)' }}>
+              <div></div>
+              {weekDays.map((day, idx) => {
+                const isTodayCol = isToday(day)
+                return (
+                  <div key={idx} className={`text-center py-2 rounded-t-md ${isTodayCol ? 'bg-rose-50' : ''}`}>
+                    <p className="text-[0.6875rem] font-inter font-semibold text-warm-500 uppercase">
+                      {DAY_ABBREVS[idx]}
+                    </p>
+                    <p className={`text-sm font-inter font-medium ${isTodayCol ? 'text-rose-500' : 'text-warm-700'}`}>
+                      {getDate(day)}
+                    </p>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Habit rows */}
+            <AnimatePresence>
+              {activeHabits.map((habit, hIdx) => {
+                const streak = Object.values(habit.dates).filter(Boolean).length
+                return (
+                  <motion.div
+                    key={habit.id}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: hIdx * 0.02 }}
+                    className="grid gap-1 items-center border-t border-warm-100 py-1"
+                    style={{ gridTemplateColumns: '140px repeat(7, 1fr)' }}
+                  >
+                    {/* Habit name */}
+                    <div className="flex items-center gap-1.5 pr-2">
+                      <span className="text-sm font-inter font-medium text-warm-700 truncate">
+                        {habit.name}
+                      </span>
+                      {streak > 2 && (
+                        <span className="flex items-center gap-0.5 text-[0.625rem] font-inter font-medium text-warning shrink-0">
+                          <Flame className="w-3 h-3" />
+                          {streak}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Day cells */}
+                    {weekDays.map((day, dIdx) => {
+                      const dKey = dateKey(day)
+                      const isFilled = !!habit.dates[dKey]
+                      const isTodayCol = isToday(day)
+                      return (
+                        <div key={dIdx} className={`flex justify-center py-1 rounded-md ${isTodayCol ? 'bg-rose-50/50' : ''}`}>
+                          <motion.button
+                            whileHover={{ scale: 1.15 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => toggleWeeklyHabit(habit.id, dKey)}
+                            className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 border ${
+                              isFilled
+                                ? 'bg-rose-500 border-rose-500'
+                                : 'bg-warm-100 border-warm-200 hover:border-rose-300'
+                            }`}
+                          >
+                            {isFilled && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                              >
+                                <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                              </motion.div>
+                            )}
+                          </motion.button>
+                        </div>
+                      )
+                    })}
+                  </motion.div>
+                )
+              })}
+            </AnimatePresence>
+
+            {/* Empty state */}
+            {activeHabits.length === 0 && (
+              <p className="text-sm text-warm-400 font-inter text-center py-6">
+                No habits configured.{' '}
+                <Link href="/planner/goals" className="text-rose-500 hover:underline">
+                  Create habits &rarr;
+                </Link>
+              </p>
+            )}
+
+            {/* Summary row */}
+            {activeHabits.length > 0 && (
+              <div className="grid gap-1 mt-2 pt-2 border-t border-warm-200" style={{ gridTemplateColumns: '140px repeat(7, 1fr)' }}>
+                <div className="text-[0.6875rem] font-inter font-medium text-warm-500">Completion</div>
+                {weekDays.map((day, dIdx) => {
+                  const dKey = dateKey(day)
+                  const completed = activeHabits.filter((h) => h.dates[dKey]).length
+                  const pct = Math.round((completed / activeHabits.length) * 100)
+                  return (
+                    <div key={dIdx} className="text-center">
+                      <span className="text-[0.6875rem] font-inter text-warm-500">{pct}%</span>
+                      <div className="w-full h-1 bg-warm-100 rounded-full mt-0.5 overflow-hidden">
+                        <div
+                          className="h-full bg-rose-400 rounded-full transition-all duration-500"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  )
+}

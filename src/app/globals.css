@@ -1,26 +1,207 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: #F6F2EB;
+  --cream-dark: #EDE8DF;
+  --espresso: #2C2420;
+  --espresso-light: #6B6056;
+  --espresso-muted: #9B9086;
+  --border-light: #E5E0D8;
+  --border-medium: #D5CFC6;
+  --rose-soft: #C9A0A0;
+  --sage: #7A8B65;
+  --gold: #C9A96E;
+  --cognac: #A67C52;
+  --lake: #7B9EA8;
+
+  /* shadcn theme variables */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.5rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+[data-theme="night"] {
+  --cream: #1E1A16;
+  --cream-dark: #2A2420;
+  --espresso: #EDE8DF;
+  --espresso-light: #B5ADA4;
+  --espresso-muted: #8A8278;
+  --border-light: #3A3530;
+  --border-medium: #4A453E;
+  --rose-soft: #D4A5A5;
+  --sage: #8A9B75;
+  --gold: #D4B87A;
+  --cognac: #B8885A;
+  --lake: #8BAFB9;
+
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--cream);
+  color: var(--espresso);
+  transition: background 0.4s ease, color 0.4s ease;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+}
+
+.font-handwriting {
+  font-family: 'Caveat', cursive;
+  font-size: 1.15em;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 3px; }
+
+@layer base {
+  button, [role="button"] { touch-action: manipulation; }
+}
+
+input, textarea, select {
+  background: var(--cream-dark) !important;
+  color: var(--espresso) !important;
+  border-color: var(--border-medium) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--espresso-muted) !important;
+}
+
+/* Custom component classes from Vite app */
+@layer components {
+  .sage-card {
+    background: var(--cream);
+    border: 1px solid var(--border-light);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+  }
+
+  .crystal-card {
+    background: rgba(255,255,255,0.4);
+    border: 1px solid var(--border-light);
+    border-radius: 1rem;
+    padding: 1rem;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease;
+  }
+
+  .spiritual-quote {
+    font-family: 'Caveat', cursive;
+    font-size: 1.35rem;
+    color: var(--sage);
+    text-align: center;
+    padding: 1.5rem;
+    border-left: 3px solid var(--sage);
+    background: rgba(122,139,101,0.05);
+    border-radius: 0 1rem 1rem 0;
+  }
+
+  .intention-textarea {
+    width: 100%;
+    background: var(--cream-dark);
+    border: 1px solid var(--border-light);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    font-family: 'Caveat', cursive;
+    font-size: 1.1rem;
+    color: var(--espresso);
+    resize: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .intention-textarea:focus {
+    outline: none;
+    border-color: var(--sage);
+  }
+
+  .intention-textarea::placeholder {
+    color: var(--espresso-muted);
+  }
+
+  .ritual-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .ritual-checkbox:hover {
+    background: rgba(122,139,101,0.05);
+  }
+
+  .ritual-checkbox input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--sage);
+  }
+
+  .card-planner-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(44,36,32,0.08);
+  }
+
+  .taurus-hero-overlay {
+    background: linear-gradient(135deg, rgba(246,242,235,0.85) 0%, rgba(246,242,235,0.4) 50%, rgba(246,242,235,0.7) 100%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+/* Tailwind color utility mappings */
+.text-espresso { color: var(--espresso); }
+.text-espresso-light { color: var(--espresso-light); }
+.text-espresso-muted { color: var(--espresso-muted); }
+.bg-cream { background-color: var(--cream); }
+.bg-cream-dark { background-color: var(--cream-dark); }
+.border-light { border-color: var(--border-light); }
