@@ -87,7 +87,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         color: '#8B7D70',
         margin: 0,
         flexShrink: 0,
-      }}>>
+      }}>
         {title}
       </p>
     )
@@ -113,7 +113,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         <div style={{
           width: 32, height: 32, borderRadius: 8,
           backgroundColor: '#C4704B', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
-        }}>>
+        }}>
           <Star className="w-4 h-4 text-white" />
         </div>
         {!collapsed && (
