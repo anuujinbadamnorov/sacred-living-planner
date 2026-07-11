@@ -90,7 +90,7 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
       />
 
       <header
-        className="fixed top-0 right-0 h-14 z-40 flex items-center justify-between px-6 transition-all duration-300"
+        className="fixed top-0 right-0 h-16 z-40 flex items-center justify-between px-8 transition-all duration-300"
         style={{
           left: sidebarWidth,
           background: 'var(--cream)',
@@ -99,7 +99,7 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
         }}
       >
         <div className="flex items-center gap-4">
-          <h3 className="font-display text-base" style={{ color: 'var(--espresso)' }}>
+          <h3 className="font-display text-lg" style={{ color: 'var(--espresso)' }}>
             {pageTitle}
           </h3>
         </div>
@@ -159,10 +159,10 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
       </header>
 
       <main
-        className="pt-14 min-h-[100dvh] transition-all duration-300"
+        className="pt-16 min-h-[100dvh] transition-all duration-300"
         style={{ marginLeft: sidebarWidth, background: 'var(--cream)' }}
       >
-        <div className="p-6 lg:p-8">
+        <div className="p-8 lg:p-12 max-w-6xl mx-auto">
           {children}
         </div>
         <Footer />

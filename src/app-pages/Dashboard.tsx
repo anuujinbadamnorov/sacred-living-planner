@@ -32,6 +32,7 @@ import { useSupabaseDashboard } from '@/hooks/useSupabaseDashboard'
 import { useAuth } from '@/components/AuthProvider'
 import { dateKey } from '@/lib/dateUtils'
 import { getMoonPhase } from '@/lib/moonPhase'
+import HeroSection from '@/components/HeroSection'
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number]
 
@@ -231,74 +232,14 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-        {/* ── Hero Banner ── */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: EASE }}
-          className="relative w-full h-52 rounded-lg overflow-hidden -mt-6 -mx-6 lg:-mx-8"
-          style={{ width: 'calc(100% + 3rem)', marginLeft: '-1.5rem' }}
+        <HeroSection
+          title={greeting}
+          subtitle={`${format(today, 'EEEE, MMMM do')} · ${moon.emoji} ${moon.name} — ${moon.illumination}% illuminated`}
         >
-          <img src="/dashboard-taurus.jpg" alt="" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 taurus-hero-overlay" />
-          {/* Floating decorations */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
-            transition={{ delay: 1 }}
-            className="absolute top-[15%] right-[8%] text-3xl"
-          >
-            🌙
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.5 }}
-            transition={{ delay: 1.3 }}
-            className="absolute bottom-[20%] left-[6%] text-2xl"
-          >
-            ✨
-          </motion.div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="font-caveat text-xl mb-1"
-              style={{ color: 'var(--sage-700)' }}
-            >
-              {greeting}
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="font-playfair text-2xl font-medium"
-              style={{ color: 'var(--sage-800)' }}
-            >
-              {format(today, 'EEEE, MMMM do')}
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
-              className="flex items-center gap-2 mt-2 font-inter text-xs"
-              style={{ color: 'var(--stone)' }}
-            >
-              <span className="text-base">{moon.emoji}</span>
-              <span>{moon.name} — {moon.illumination}% illuminated</span>
-            </motion.div>
+          <div className="spiritual-quote max-w-2xl mx-auto">
+            {affirmation}
           </div>
-        </motion.div>
-
-        {/* ── Affirmation of the Day ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="spiritual-quote"
-        >
-          {affirmation}
-        </motion.div>
+        </HeroSection>
 
         {/* ── Cloud Sync Status ── */}
         {user && (

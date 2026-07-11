@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  /* Sacred Living default theme (warm cream) */
+  /* Sacred Living — warm cream & earthy tones */
   --color-bg: #FAF7F2;
   --color-surface: #FFFFFF;
   --color-text: #2D2A26;
@@ -18,8 +18,8 @@
   --font-heading: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
 
-  --cream: #F5F0E8;
-  --cream-dark: #EDE6D8;
+  --cream: #FAF7F2;
+  --cream-dark: #F5F0E8;
   --espresso: #2C2420;
   --espresso-light: #5C4D42;
   --espresso-muted: #8B7D70;
@@ -32,6 +32,16 @@
   --terracotta: #C4704B;
   --terracotta-light: #D4886A;
   --lake: #7B9EA8;
+  --warm-50: #FDFBF7;
+  --warm-100: #FAF7F2;
+  --warm-200: #F5F0E8;
+  --warm-300: #EDE6D8;
+  --warm-400: #E5DDD0;
+  --warm-500: #D5CBB8;
+  --warm-600: #8B7D70;
+  --warm-700: #5C4D42;
+  --warm-800: #3D3228;
+  --warm-900: #2C2420;
 
   /* shadcn theme variables */
   --background: 0 0% 100%;
@@ -72,6 +82,16 @@
   --terracotta: #B86B4A;
   --terracotta-light: #C97D5C;
   --lake: #6B8F9A;
+  --warm-50: #1A1612;
+  --warm-100: #1E1A14;
+  --warm-200: #251F1A;
+  --warm-300: #2E2820;
+  --warm-400: #3A3328;
+  --warm-500: #4D4438;
+  --warm-600: #7A7062;
+  --warm-700: #B8AFA3;
+  --warm-800: #D5CCBF;
+  --warm-900: #EDE6D8;
 
   --background: 30 18% 9%;
   --foreground: 35 30% 90%;
@@ -100,15 +120,17 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
+  font-size: 18px;
   background: var(--cream);
   color: var(--espresso);
   transition: background 0.4s ease, color 0.4s ease;
   -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
 }
 
 .font-display {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-weight: 500;
+  font-weight: 300;
   letter-spacing: -0.01em;
   line-height: 1.15;
 }
@@ -116,6 +138,35 @@ body {
 .font-handwriting {
   font-family: 'Caveat', cursive;
   font-size: 1.15em;
+}
+
+/* Elegant text containers */
+.prose-elegant {
+  max-width: 70ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.prose-elegant p {
+  margin-bottom: 1.5em;
+  line-height: 1.7;
+}
+
+.prose-elegant h2 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 300;
+  font-size: 2.5rem;
+  margin-top: 2em;
+  margin-bottom: 0.75em;
+  color: var(--espresso);
+}
+
+.prose-elegant h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-weight: 400;
+  font-size: 1.75rem;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
 }
 
 ::-webkit-scrollbar { width: 5px; }
@@ -222,7 +273,7 @@ input::placeholder, textarea::placeholder {
 
   .card-planner-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(44,36,32,0.08);
+    box-shadow: 0 8px 24px rgba(44,36,32,0.06);
   }
 
   /* ─── Core planner component classes ─── */
@@ -230,7 +281,7 @@ input::placeholder, textarea::placeholder {
     background: var(--cream);
     border: 1px solid var(--border-light);
     border-radius: 1rem;
-    padding: 1.25rem;
+    padding: 2rem;
     transition: all 0.3s ease;
   }
 
@@ -239,7 +290,7 @@ input::placeholder, textarea::placeholder {
     background: var(--cream-dark);
     border: 1px solid var(--border-light);
     border-radius: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem 1rem;
     font-family: 'Inter', system-ui, sans-serif;
     font-size: 0.9375rem;
     color: var(--espresso);
@@ -268,8 +319,61 @@ input::placeholder, textarea::placeholder {
     color: var(--espresso-muted);
   }
 
-  .taurus-hero-overlay {
-    background: linear-gradient(135deg, rgba(246,242,235,0.85) 0%, rgba(246,242,235,0.4) 50%, rgba(246,242,235,0.7) 100%);
+  .image-elegant {
+    border-radius: 0.5rem;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .image-elegant:hover {
+    transform: scale(1.02);
+  }
+
+  .hero-section {
+    position: relative;
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero-section img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(250,247,242,0.92) 0%, rgba(250,247,242,0.6) 50%, rgba(250,247,242,0.85) 100%);
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 70ch;
+    padding: 2rem;
+  }
+
+  .section-padding {
+    padding: 3rem 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .section-padding {
+      padding: 5rem 3rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .section-padding {
+      padding: 6rem 4rem;
+    }
   }
 }
 
