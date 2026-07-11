@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   ExternalLink,
   Sun,
+  Moon,
   Clock,
   Home,
 } from 'lucide-react'
@@ -65,7 +66,7 @@ function saveSettings(settings: AppSettings) {
 /* ------------------------------------------------------------------ */
 
 export default function Settings() {
-  const { currentThemeId, setTheme: setThemeId } = useThemeStore()
+  const { currentThemeId, isNightMode, setTheme: setThemeId, setNightMode } = useThemeStore()
   const { theme: currentTheme } = useTheme()
   const [themesList, setThemesList] = useState<Theme[]>([])
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
@@ -177,6 +178,49 @@ export default function Settings() {
           <p className="text-warm-500 font-inter text-sm mt-1">Personalize your planner experience.</p>
         </motion.div>
 
+        {/* ====== DAY / NIGHT MODE ====== */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.04 }}
+          className="card-planner"
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <Sun className="w-5 h-5 text-rose-500" />
+            <h2 className="font-playfair text-xl font-medium text-warm-800">Day & Night</h2>
+          </div>
+          <p className="text-warm-500 font-inter text-sm mb-4">Switch between warm day and cozy night modes.</p>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => setNightMode(false)}
+              className={cn(
+                'flex-1 p-4 rounded-lg border-2 text-center transition-all duration-200',
+                !isNightMode
+                  ? 'border-rose-500 bg-rose-50 shadow-sm'
+                  : 'border-warm-200 bg-white hover:border-warm-300'
+              )}
+            >
+              <Sun className={cn('w-6 h-6 mx-auto mb-2', !isNightMode ? 'text-rose-500' : 'text-warm-400')} />
+              <p className={cn('font-inter font-medium text-warm-800', !isNightMode && 'text-rose-700')}>Day</p>
+              <p className="text-xs text-warm-500 font-inter mt-1">Warm cream & gold</p>
+            </button>
+            <button
+              onClick={() => setNightMode(true)}
+              className={cn(
+                'flex-1 p-4 rounded-lg border-2 text-center transition-all duration-200',
+                isNightMode
+                  ? 'border-rose-500 bg-rose-50 shadow-sm'
+                  : 'border-warm-200 bg-white hover:border-warm-300'
+              )}
+            >
+              <Moon className={cn('w-6 h-6 mx-auto mb-2', isNightMode ? 'text-rose-500' : 'text-warm-400')} />
+              <p className={cn('font-inter font-medium text-warm-800', isNightMode && 'text-rose-700')}>Night</p>
+              <p className="text-xs text-warm-500 font-inter mt-1">Cozy cognac & charcoal</p>
+            </button>
+          </div>
+        </motion.div>
+
         {/* ====== THEME SELECTOR ====== */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -192,14 +236,14 @@ export default function Settings() {
 
           <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
             {themesList.map((t) => {
-              const isActive = currentThemeId === t.name
+              const isActive = currentThemeId === t.id
               const accent = t.colors?.accent || '#c9a87c'
               const accentHover = t.colors?.accentHover || '#b8996a'
               const bg = t.colors?.bg || '#faf8f5'
               return (
                 <motion.button
-                  key={t.name}
-                  onClick={() => setThemeId(t.name)}
+                  key={t.id}
+                  onClick={() => setThemeId(t.id)}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.98 }}
                   className={cn(

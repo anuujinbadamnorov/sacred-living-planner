@@ -36,7 +36,16 @@ export function useTheme() {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { currentThemeId, customColors, customBackgroundUrl } = useThemeStore();
+  const { currentThemeId, isNightMode, customColors, customBackgroundUrl } = useThemeStore();
+
+  // Apply night mode to document
+  useEffect(() => {
+    if (isNightMode) {
+      document.documentElement.setAttribute('data-theme', 'night');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }, [isNightMode]);
 
   useEffect(() => {
     const loadTheme = async () => {
