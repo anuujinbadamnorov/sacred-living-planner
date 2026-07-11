@@ -34,6 +34,7 @@ import {
 } from 'lucide-react'
 import { usePlanner } from '@/hooks/usePlanner'
 import { dateKey, getWeekDays } from '@/lib/dateUtils'
+import HeroSection from '@/components/HeroSection'
 
 /* ─────────────────────── types ─────────────────────── */
 
@@ -422,6 +423,25 @@ export default function Daily() {
         >
           &ldquo;{getQuoteForDate(currentDateStr)}&rdquo;
         </motion.p>
+
+        {/* ── Daily Routine Inspiration ── */}
+        <motion.div
+          variants={fadeUp}
+          className="relative rounded-2xl overflow-hidden h-48 md:h-64"
+        >
+          <img
+            src="/inspo/IMG_1314.JPG"
+            alt="Sacred morning routine"
+            className="absolute inset-0 w-full h-full object-cover image-elegant"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/20 to-transparent" />
+          <div className="absolute inset-0 flex flex-col justify-center px-6 md:px-10">
+            <p className="font-caveat text-white/90 text-xl md:text-2xl mb-1">Sacred Morning Ritual</p>
+            <p className="text-white/70 text-sm md:text-base max-w-md">
+              5:30 AM · Wake, hydrate, stretch · 15 min sacred space prep
+            </p>
+          </div>
+        </motion.div>
 
         {/* ── Focus + Priorities Banner ── */}
         <motion.div variants={fadeUp} className="card-planner">
