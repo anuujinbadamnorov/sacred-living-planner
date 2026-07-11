@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { AuthProvider } from '@/components/AuthProvider';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import PWAProvider from '@/components/PWAProvider';
+import RealtimeSyncProvider from '@/components/RealtimeSyncProvider';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -36,7 +37,9 @@ export default function RootLayout({
       <body className="antialiased min-h-screen">
         <AuthProvider>
           <ThemeProvider>
-            <PWAProvider>{children}</PWAProvider>
+            <PWAProvider>
+              <RealtimeSyncProvider>{children}</RealtimeSyncProvider>
+            </PWAProvider>
           </ThemeProvider>
         </AuthProvider>
       </body>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { createClient } from '@/lib/supabase';
 import type { Database } from '@/lib/database.types';
+import { usePlannerRefresh } from './useRealtimeSync';
 
 // ─── Types ───
 
@@ -55,6 +56,9 @@ export function usePlanner() {
   const supabase = createClient();
 
   const refresh = useCallback(() => setForceUpdate((n) => n + 1), []);
+
+  // Listen for external refresh events (from realtime sync, other tabs, etc.)
+  usePlannerRefresh(refresh);
 
   // ─── Tasks ───
   const getTasks = useCallback((date: string) => {
