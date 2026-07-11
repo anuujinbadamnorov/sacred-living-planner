@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Dumbbell,
   Trophy,
@@ -1079,6 +1080,11 @@ function ExpandedWorkoutCard({
 function WorkoutSection({ title, color, children }: { title: string; color: string; children: React.ReactNode }) {
   return (
     <div className="mb-4 last:mb-0">
+      <HeroSection
+        title={`Body Temple`}
+        subtitle="Honor your vessel with movement and strength"
+        imageIndex={6}
+      />
       <h4 className="font-inter text-sm font-semibold text-warm-700 mb-2 flex items-center gap-2">
         <div className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
         {title}

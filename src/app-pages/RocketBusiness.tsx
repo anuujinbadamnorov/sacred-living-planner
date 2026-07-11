@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Briefcase,
   DollarSign,
@@ -696,6 +697,11 @@ export default function RocketBusiness() {
                     const pct = totalExpenses > 0 ? (catTotal / totalExpenses) * 100 : 0
                     return (
                       <div key={cat} className="flex items-center gap-3">
+      <HeroSection
+        title={`Rocket's Business`}
+        subtitle="The business of caring"
+        imageIndex={12}
+      />
                         <span className="font-inter text-sm text-warm-600 w-28 shrink-0">{cat}</span>
                         <div className="flex-1 h-4 bg-warm-100 rounded-full overflow-hidden">
                           <motion.div

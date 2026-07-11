@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   FileText,
   Plus,
@@ -170,7 +171,12 @@ function Whiteboard() {
   }
 
   return (
-    <div className="rounded-xl p-6" style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}>
+    <div className="rounded-xl p-8" style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}>
+      <HeroSection
+        title={`Sacred Notes`}
+        subtitle="Your thoughts, captured in elegance"
+        imageIndex={18}
+      />
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <PenTool className="w-5 h-5" style={{ color: 'var(--sage)' }} />
@@ -244,7 +250,7 @@ function Whiteboard() {
 
 function SacredDocuments() {
   return (
-    <div className="rounded-xl p-6" style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}>
+    <div className="rounded-xl p-8" style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}>
       <div className="flex items-center gap-2 mb-4">
         <FolderOpen className="w-5 h-5" style={{ color: 'var(--gold)' }} />
         <h3 className="font-display text-lg" style={{ color: 'var(--espresso)' }}>Sacred Documents</h3>

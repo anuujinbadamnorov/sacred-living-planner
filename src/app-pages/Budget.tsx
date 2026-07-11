@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Home,
   Utensils,
@@ -747,6 +748,11 @@ function EditableAmount({ value, onChange }: { value: number; onChange: (v: numb
   if (editing) {
     return (
       <div className="relative">
+      <HeroSection
+        title={`Budget & Expenses`}
+        subtitle="Financial clarity and abundance"
+        imageIndex={20}
+      />
         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-warm-400 text-xs">$</span>
         <input
           type="number"

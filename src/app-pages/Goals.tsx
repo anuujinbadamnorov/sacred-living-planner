@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Sprout,
   Briefcase,
@@ -662,6 +663,11 @@ function AddMilestoneInput({ onAdd }: { onAdd: (text: string) => void }) {
   const [text, setText] = useState('')
   return (
     <div className="flex items-center gap-2 mt-1">
+      <HeroSection
+        title={`Goals & Tracking`}
+        subtitle="Dreams turned into daily action"
+        imageIndex={22}
+      />
       <div className="w-[18px] h-[18px] rounded-[3px] border-[1.5px] border-warm-200 shrink-0" />
       <input
         type="text"

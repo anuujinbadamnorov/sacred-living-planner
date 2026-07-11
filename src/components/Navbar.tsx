@@ -152,38 +152,38 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         gap: '4px',
       }}>
         {section('My Sacred Space')}
-        {navItem('/planner', <LayoutDashboard className="w-4 h-4 shrink-0" />, 'Dashboard')}
-        {navItem('/planner/yearly', <CalendarDays className="w-4 h-4 shrink-0" />, 'Yearly')}
-        {navItem('/planner/monthly', <Calendar className="w-4 h-4 shrink-0" />, 'Monthly')}
-        {navItem('/planner/weekly', <CalendarRange className="w-4 h-4 shrink-0" />, 'Weekly')}
-        {navItem('/planner/daily', <Clock className="w-4 h-4 shrink-0" />, 'Daily')}
+        {navItem('/planner', <LayoutDashboard className="w-5 h-5 shrink-0" />, 'Dashboard')}
+        {navItem('/planner/yearly', <CalendarDays className="w-5 h-5 shrink-0" />, 'Yearly')}
+        {navItem('/planner/monthly', <Calendar className="w-5 h-5 shrink-0" />, 'Monthly')}
+        {navItem('/planner/weekly', <CalendarRange className="w-5 h-5 shrink-0" />, 'Weekly')}
+        {navItem('/planner/daily', <Clock className="w-5 h-5 shrink-0" />, 'Daily')}
 
         {section('Body & Ritual')}
-        {navItem('/planner/sacred-routines', <Sun className="w-4 h-4 shrink-0" />, 'Sacred Routines')}
-        {navItem('/planner/body-temple', <Flame className="w-4 h-4 shrink-0" />, 'Body Temple')}
-        {navItem('/planner/medicine-ritual', <Heart className="w-4 h-4 shrink-0" />, 'Medicine & Ritual')}
+        {navItem('/planner/sacred-routines', <Sun className="w-5 h-5 shrink-0" />, 'Sacred Routines')}
+        {navItem('/planner/body-temple', <Flame className="w-5 h-5 shrink-0" />, 'Body Temple')}
+        {navItem('/planner/medicine-ritual', <Heart className="w-5 h-5 shrink-0" />, 'Medicine & Ritual')}
 
         {section('Nourishment')}
-        {navItem('/planner/nourishment', <Leaf className="w-4 h-4 shrink-0" />, 'Nourishment')}
-        {navItem('/planner/moon-cycle', <Moon className="w-4 h-4 shrink-0" />, 'Moon & Cycle')}
+        {navItem('/planner/nourishment', <Leaf className="w-5 h-5 shrink-0" />, 'Nourishment')}
+        {navItem('/planner/moon-cycle', <Moon className="w-5 h-5 shrink-0" />, 'Moon & Cycle')}
 
         {section('Home & Life')}
-        {navItem('/planner/home-sanctuary', <Home className="w-4 h-4 shrink-0" />, 'Home Sanctuary')}
-        {navItem('/planner/rocket-realm', <PawPrint className="w-4 h-4 shrink-0" />, "Rocket's Realm")}
-        {navItem('/planner/rocket-business', <Briefcase className="w-4 h-4 shrink-0" />, "Rocket's Business")}
+        {navItem('/planner/home-sanctuary', <Home className="w-5 h-5 shrink-0" />, 'Home Sanctuary')}
+        {navItem('/planner/rocket-realm', <PawPrint className="w-5 h-5 shrink-0" />, "Rocket's Realm")}
+        {navItem('/planner/rocket-business', <Briefcase className="w-5 h-5 shrink-0" />, "Rocket's Business")}
 
         {section('Abundance')}
-        {navItem('/planner/content-creation', <Sparkles className="w-4 h-4 shrink-0" />, 'Content & Creation')}
-        {navItem('/planner/money', <Gem className="w-4 h-4 shrink-0" />, 'Abundance')}
+        {navItem('/planner/content-creation', <Sparkles className="w-5 h-5 shrink-0" />, 'Content & Creation')}
+        {navItem('/planner/money', <Gem className="w-5 h-5 shrink-0" />, 'Abundance')}
 
         {section('Health')}
-        {navItem('/planner/oura', <Activity className="w-4 h-4 shrink-0" />, 'Health Tracking')}
+        {navItem('/planner/oura', <Activity className="w-5 h-5 shrink-0" />, 'Health Tracking')}
 
         {section('Reflection')}
-        {navItem('/planner/reflection', <Star className="w-4 h-4 shrink-0" />, 'Reflection')}
-        {navItem('/planner/inspiration', <ImageIcon className="w-4 h-4 shrink-0" />, 'Inspiration')}
-        {navItem('/planner/notes', <StickyNote className="w-4 h-4 shrink-0" />, 'Notes')}
-        {navItem('/planner/settings', <Settings className="w-4 h-4 shrink-0" />, 'Settings')}
+        {navItem('/planner/reflection', <Star className="w-5 h-5 shrink-0" />, 'Reflection')}
+        {navItem('/planner/inspiration', <ImageIcon className="w-5 h-5 shrink-0" />, 'Inspiration')}
+        {navItem('/planner/notes', <StickyNote className="w-5 h-5 shrink-0" />, 'Notes')}
+        {navItem('/planner/settings', <Settings className="w-5 h-5 shrink-0" />, 'Settings')}
       </div>
     </nav>
   )

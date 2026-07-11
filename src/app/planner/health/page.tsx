@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/components/AuthProvider';
 import { format, subDays } from 'date-fns';
+import HeroSection from '@/components/HeroSection';
 
 export default function HealthPage() {
   const { user, isPro } = useAuth();
@@ -57,9 +58,11 @@ export default function HealthPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <h2 className="text-2xl font-serif" style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-text)' }}>
-        Health
-      </h2>
+      <HeroSection
+        title="Health"
+        subtitle="Data-driven insights for your wellbeing"
+        imageIndex={15}
+      />
 
       {/* Stats Overview */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -370,6 +370,11 @@ export default function Daily() {
 
   return (
     <div className="space-y-6 max-w-[1440px] mx-auto">
+      <HeroSection
+        imageIndex={1}
+        title="Daily Planner"
+        subtitle="Hour by hour, moment by moment"
+      />
       {/* ── Header ── */}
       <motion.div variants={containerStagger} initial="hidden" animate="show" className="space-y-4">
         {/* Date Navigation */}

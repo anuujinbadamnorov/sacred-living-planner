@@ -90,16 +90,17 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
       />
 
       <header
-        className="fixed top-0 right-0 h-16 z-40 flex items-center justify-between px-8 transition-all duration-300"
+        className="fixed top-0 right-0 z-40 flex items-center justify-between px-8 transition-all duration-500"
         style={{
           left: sidebarWidth,
+          height: 80,
           background: 'var(--cream)',
           borderBottom: '1px solid var(--border-light)',
           boxShadow: scrolled ? '0 2px 8px rgba(44,36,32,0.06)' : 'none',
         }}
       >
         <div className="flex items-center gap-4">
-          <h3 className="font-display text-lg" style={{ color: 'var(--espresso)' }}>
+          <h3 className="font-display text-xl" style={{ color: 'var(--espresso)' }}>
             {pageTitle}
           </h3>
         </div>
@@ -159,8 +160,8 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
       </header>
 
       <main
-        className="pt-16 min-h-[100dvh] transition-all duration-300"
-        style={{ marginLeft: sidebarWidth, background: 'var(--cream)' }}
+        className="min-h-[100dvh] transition-all duration-300"
+        style={{ marginLeft: sidebarWidth, paddingTop: 80, background: 'var(--cream)' }}
       >
         <div className="p-8 lg:p-12 max-w-6xl mx-auto">
           {children}

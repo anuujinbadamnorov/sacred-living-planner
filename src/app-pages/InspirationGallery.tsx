@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Grid3X3, LayoutGrid, Heart } from 'lucide-react';
 import Image from 'next/image';
+import HeroSection from '@/components/HeroSection'
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
 
@@ -44,6 +45,11 @@ export default function InspirationGallery() {
 
   return (
     <div className="space-y-6">
+      <HeroSection
+        title={`Inspiration`}
+        subtitle="Curated beauty for your vision"
+        imageIndex={17}
+      />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}

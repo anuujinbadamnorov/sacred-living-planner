@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Moon,
   Sun,
@@ -784,6 +785,11 @@ export default function MoonCycle() {
               const maxVal = field.max || 10
               return (
                 <div key={field.label} className="p-3 rounded-lg border border-warm-200 bg-warm-50/30">
+      <HeroSection
+        title={`Moon & Cycle`}
+        subtitle="Flow with lunar rhythms and inner wisdom"
+        imageIndex={9}
+      />
                   <div className="flex items-center gap-2 mb-2">
                     <Icon className="w-4 h-4" style={{ color: field.color }} />
                     <span className="font-inter text-xs font-semibold text-warm-700">

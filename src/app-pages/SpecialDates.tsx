@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Gift,
   Calendar,
@@ -498,6 +499,11 @@ export default function SpecialDates() {
                         const isCurrent = gift.status === step
                         return (
                           <div key={step} className="flex items-center">
+      <HeroSection
+        title={`Special Dates`}
+        subtitle="Celebrate the moments that matter"
+        imageIndex={26}
+      />
                             <button
                               onClick={() => advanceGiftStatus(gift.id)}
                               className={cn(

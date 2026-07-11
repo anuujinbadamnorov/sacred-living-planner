@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Heart,
   Target,
@@ -156,6 +157,11 @@ function WheelSVG({ categories, average }: { categories: WheelCategory[]; averag
 
   return (
     <div className="flex flex-col items-center gap-4">
+      <HeroSection
+        title={`Life Integration`}
+        subtitle="Balance all the threads of your life"
+        imageIndex={23}
+      />
       <svg viewBox="0 0 200 200" className="w-72 h-72 drop-shadow-sm">
         {gridLines}
         {axisLines}

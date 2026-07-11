@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/components/AuthProvider';
 import type { Habit, HabitCompletion } from '@/types';
+import HeroSection from '@/components/HeroSection';
 
 export default function HabitsPage() {
   const { user } = useAuth();
@@ -131,9 +132,11 @@ export default function HabitsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <h2 className="text-2xl font-serif" style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-text)' }}>
-        Habits
-      </h2>
+      <HeroSection
+        title="Habits"
+        subtitle="Build sacred rituals, one day at a time"
+        imageIndex={28}
+      />
 
       {/* Add Habit */}
       <form onSubmit={addHabit} className="planner-card space-y-4">

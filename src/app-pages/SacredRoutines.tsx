@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Sun,
   Moon,
@@ -438,7 +439,7 @@ export default function SacredRoutines() {
           initial="initial"
           whileInView="animate"
           viewport={{ once: true }}
-          className="rounded-xl p-6"
+          className="rounded-xl p-8"
           style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
         >
           <motion.div variants={fadeUp} className="flex items-center gap-3 mb-5">
@@ -718,7 +719,7 @@ export default function SacredRoutines() {
           initial="initial"
           whileInView="animate"
           viewport={{ once: true }}
-          className="rounded-xl p-6"
+          className="rounded-xl p-8"
           style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
         >
           <motion.div variants={fadeUp} className="flex items-center gap-3 mb-5">
@@ -791,7 +792,7 @@ export default function SacredRoutines() {
           initial="initial"
           whileInView="animate"
           viewport={{ once: true }}
-          className="rounded-xl p-6"
+          className="rounded-xl p-8"
           style={{
             background: 'var(--cream)',
             border: '1px solid var(--border-light)',

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Dog,
   Heart,
@@ -302,6 +303,11 @@ export default function HuskyOptimization() {
   /* ─── Render ─── */
   return (
     <div className="space-y-8 pb-12">
+      <HeroSection
+        title={`Husky Optimization`}
+        subtitle="Fine-tune your daily systems"
+        imageIndex={24}
+      />
       {/* Hero */}
       <motion.section
         initial={{ opacity: 0, y: 20 }}

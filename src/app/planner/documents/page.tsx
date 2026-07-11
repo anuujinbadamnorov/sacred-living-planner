@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/components/AuthProvider';
 import type { Document } from '@/types';
 import ImageUpload from '@/components/ImageUpload';
+import HeroSection from '@/components/HeroSection';
 
 const categories = ['All', 'Income', 'Expense', 'Receipt', 'Contract', 'Other'];
 
@@ -102,6 +103,12 @@ export default function DocumentsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      <HeroSection
+        title="Documents"
+        subtitle="Your important records and files"
+        imageIndex={29}
+      />
+
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-serif" style={{ fontFamily: 'var(--font-heading)', color: 'var(--color-text)' }}>
           Documents

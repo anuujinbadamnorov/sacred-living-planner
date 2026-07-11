@@ -233,6 +233,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
         <HeroSection
+          imageIndex={0}
           title={greeting}
           subtitle={`${format(today, 'EEEE, MMMM do')} · ${moon.emoji} ${moon.name} — ${moon.illumination}% illuminated`}
         >

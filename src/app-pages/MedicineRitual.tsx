@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { motion } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Pill,
   Heart,
@@ -641,6 +642,11 @@ export default function MedicineRitual() {
                   const hasData = day.anxiety > 0 || day.sleep > 0 || day.mood > 0
                   return (
                     <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
+      <HeroSection
+        title={`Medicine & Ritual`}
+        subtitle="Healing practices for body and soul"
+        imageIndex={7}
+      />
                       <div className="w-full flex flex-col items-center gap-px">
                         {/* Anxiety bar */}
                         <div

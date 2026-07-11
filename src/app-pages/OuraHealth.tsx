@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { format, subDays } from 'date-fns'
+import HeroSection from '@/components/HeroSection'
 import {
   Moon,
   Zap,
@@ -95,7 +96,7 @@ function ScoreCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: EASE, delay }}
       onClick={onClick}
-      className="relative rounded-xl p-6 cursor-pointer transition-all duration-200 hover:shadow-md overflow-hidden"
+      className="relative rounded-xl p-8 cursor-pointer transition-all duration-200 hover:shadow-md overflow-hidden"
       style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
     >
       <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: color }} />
@@ -142,6 +143,11 @@ function MiniBarChart({
 
   return (
     <div className="space-y-3">
+      <HeroSection
+        title={`Health Tracking`}
+        subtitle="Data-driven insights for your wellbeing"
+        imageIndex={15}
+      />
       <div className="flex items-center justify-between">
         <span className="font-body text-xs font-medium" style={{ color: 'var(--espresso-light)' }}>{label}</span>
         <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>Avg: {avg}</span>
@@ -231,7 +237,7 @@ function EditModal({
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-lg rounded-xl p-6 max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-lg rounded-xl p-8 max-h-[90vh] overflow-y-auto"
         style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
       >
         <h3 className="font-display text-xl mb-4" style={{ color: 'var(--espresso)' }}>Edit Today&apos;s Scores</h3>
@@ -408,7 +414,7 @@ export default function OuraHealth() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: EASE, delay: 0.4 }}
-          className="rounded-xl p-6"
+          className="rounded-xl p-8"
           style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
         >
           <div className="flex items-center justify-between mb-6">
@@ -430,7 +436,7 @@ export default function OuraHealth() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: EASE, delay: 0.5 }}
-          className="rounded-xl p-6"
+          className="rounded-xl p-8"
           style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
         >
           <div className="flex items-center justify-between mb-6">
@@ -451,7 +457,7 @@ export default function OuraHealth() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: EASE, delay: 0.55 }}
-          className="rounded-xl p-6"
+          className="rounded-xl p-8"
           style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
         >
           <div className="flex items-center gap-2 mb-5">

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   PawPrint,
   Sun,
@@ -118,6 +119,11 @@ const cardVariants = {
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div className="flex gap-0.5">
+      <HeroSection
+        title={`Rocket's Realm`}
+        subtitle="Care for your loyal companion"
+        imageIndex={11}
+      />
       {[1, 2, 3, 4, 5].map((s) => (
         <button key={s} onClick={() => onChange(s)} className="p-0.5">
           <Star className={`w-4 h-4 ${s <= value ? 'text-amber-400 fill-amber-400' : 'text-warm-300'}`} />

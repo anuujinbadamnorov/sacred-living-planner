@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Plane,
   Plus,
@@ -666,6 +667,11 @@ function TripDetail({ trip, onBack, onDelete }: { trip: Trip; onBack: () => void
                   const catDone = cat.items.filter((i) => i.checked).length
                   return (
                     <div key={cat.id} className="card-planner">
+      <HeroSection
+        title={`Travel Planner`}
+        subtitle="Adventures await with intention"
+        imageIndex={25}
+      />
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-inter text-sm font-semibold text-warm-700">{cat.name}</h4>
                         <span className="text-xs text-warm-500 font-inter">{catDone}/{cat.items.length}</span>

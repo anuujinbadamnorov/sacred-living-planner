@@ -7,15 +7,43 @@ interface HeroSectionProps {
   title: string;
   subtitle?: string;
   imageUrl?: string;
+  imageIndex?: number;
   children?: React.ReactNode;
   compact?: boolean;
+  minHeight?: string;
 }
 
-export default function HeroSection({ title, subtitle, imageUrl, children, compact = false }: HeroSectionProps) {
+const INSPO_IMAGES = [
+  'IMG_1310.JPG', 'IMG_1312.JPG', 'IMG_1313.JPG', 'IMG_1315.JPG', 'IMG_1319.JPG',
+  'IMG_1329.JPG', 'IMG_1331.JPG', 'IMG_1332.JPG', 'IMG_1336.JPG', 'IMG_1338.JPG',
+  'IMG_1339.JPG', 'IMG_1340.JPG', 'IMG_1344.JPG', 'IMG_1345.JPG', 'IMG_1346.JPG',
+  'IMG_1348.JPG', 'IMG_1349.JPG', 'IMG_1350.JPG', 'IMG_1353.JPG', 'IMG_1363.JPG',
+  'IMG_1371.JPG', 'IMG_1372.JPG', 'IMG_1377.JPG', 'IMG_1378.JPG', 'IMG_1381.JPG',
+  'IMG_1383.JPG', 'IMG_1384.JPG', 'IMG_1385.JPG', 'IMG_1386.JPG', 'IMG_1387.JPG',
+  'IMG_1388.JPG', 'IMG_1389.JPG', 'IMG_1390.JPG', 'IMG_1391.JPG', 'IMG_1392.JPG',
+  'IMG_1393.JPG', 'IMG_1394.JPG', 'IMG_1395.JPG', 'IMG_1396.JPG', 'IMG_1397.JPG',
+  'IMG_1398.JPG', 'IMG_1399.JPG', 'IMG_1400.JPG', 'IMG_1401.JPG', 'IMG_1402.JPG',
+  'IMG_1403.JPG', 'IMG_3340.JPG', 'IMG_3341.JPG', 'IMG_3342.JPG', 'IMG_3343.JPG', 'IMG_3344.JPG'
+];
+
+export default function HeroSection({
+  title,
+  subtitle,
+  imageUrl,
+  imageIndex,
+  children,
+  compact = false,
+  minHeight = '40vh'
+}: HeroSectionProps) {
   const [img, setImg] = useState<string | null>(imageUrl || null);
 
   useEffect(() => {
-    if (!imageUrl) {
+    if (imageUrl) {
+      setImg(imageUrl);
+    } else if (imageIndex !== undefined) {
+      const idx = Math.abs(imageIndex) % INSPO_IMAGES.length;
+      setImg(`/inspo/${INSPO_IMAGES[idx]}`);
+    } else {
       // Pick a random inspo image
       fetch('/inspo-manifest.json')
         .then((r) => r.json())
@@ -28,7 +56,7 @@ export default function HeroSection({ title, subtitle, imageUrl, children, compa
         })
         .catch(() => {});
     }
-  }, [imageUrl]);
+  }, [imageUrl, imageIndex]);
 
   if (compact) {
     return (
@@ -36,7 +64,7 @@ export default function HeroSection({ title, subtitle, imageUrl, children, compa
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="mb-10"
+        className="mb-12"
       >
         <h1 className="font-display text-4xl md:text-5xl font-light" style={{ color: 'var(--espresso)' }}>
           {title}
@@ -56,15 +84,15 @@ export default function HeroSection({ title, subtitle, imageUrl, children, compa
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
-      className="hero-section rounded-2xl mb-12"
-      style={{ minHeight: '40vh' }}
+      className="hero-section rounded-xl mb-12"
+      style={{ minHeight }}
     >
       {img && (
         <img
           src={img}
           alt=""
           className="image-elegant"
-          style={{ filter: 'brightness(0.85)' }}
+          style={{ filter: 'brightness(0.85)', borderRadius: 0 }}
         />
       )}
       <div className="hero-overlay" />

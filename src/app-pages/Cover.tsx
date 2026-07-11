@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 
 /* ── Seasonal Themes ── */
 const SEASONS = [
@@ -41,6 +42,11 @@ export default function Cover() {
       className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden"
       style={{ background: 'var(--cream)' }}
     >
+      <HeroSection
+        title={`Sacred Living`}
+        subtitle="Welcome to your journey"
+        imageIndex={27}
+      />
       {/* Center Content */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}

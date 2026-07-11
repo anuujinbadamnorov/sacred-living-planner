@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Apple,
   Droplets,

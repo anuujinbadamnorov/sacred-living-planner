@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Clapperboard,
   CalendarDays,
@@ -577,6 +578,11 @@ export default function ContentCreation() {
               const daySlots = weekly.filter((s) => s.day === day)
               return (
                 <div key={day} className="border border-warm-200 rounded-md overflow-hidden">
+      <HeroSection
+        title={`Content & Creation`}
+        subtitle="Express your truth through creation"
+        imageIndex={13}
+      />
                   <div className="bg-warm-50 px-4 py-2 font-inter text-sm font-semibold text-warm-700 uppercase tracking-wider">
                     {day}
                   </div>

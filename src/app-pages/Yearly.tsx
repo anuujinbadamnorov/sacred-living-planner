@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   format,
   startOfMonth,
@@ -129,6 +130,11 @@ function MiniMonth({
                   !inMonth && 'opacity-30'
                 )}
               >
+      <HeroSection
+        title={`Yearly Vision`}
+        subtitle="Your year of growth and grace"
+        imageIndex={4}
+      />
                 <span
                   className={cn(
                     'font-body text-[0.75rem] w-6 h-6 flex items-center justify-center rounded-full',
@@ -293,7 +299,7 @@ export default function Yearly() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Holiday List */}
           <motion.div
-            className="lg:col-span-3 rounded-xl p-6"
+            className="lg:col-span-3 rounded-xl p-8"
             style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -348,7 +354,7 @@ export default function Yearly() {
 
           {/* Year Stats */}
           <motion.div
-            className="lg:col-span-2 rounded-xl p-6"
+            className="lg:col-span-2 rounded-xl p-8"
             style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   DollarSign,
   TrendingUp,
@@ -139,6 +140,11 @@ function save<T>(key: string, v: T) { localStorage.setItem(key, JSON.stringify(v
 function StarRating({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
     <div className="flex gap-0.5">
+      <HeroSection
+        title={`Abundance`}
+        subtitle="Attract prosperity and wealth"
+        imageIndex={14}
+      />
       {[1, 2, 3, 4, 5].map((s) => (
         <button key={s} onClick={() => onChange(s)} className="p-0.5">
           <Star className={`w-4 h-4 ${s <= value ? 'text-amber-400 fill-amber-400' : 'text-warm-300'}`} />

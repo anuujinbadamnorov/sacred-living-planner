@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Home,
   Moon,
@@ -319,6 +320,11 @@ export default function HomeSanctuary() {
               const zoneTotal = zone.tasks.length
               return (
                 <div key={zone.id} className={`rounded-md border p-4 ${zone.color}`}>
+      <HeroSection
+        title={`Home Sanctuary`}
+        subtitle="Create sacred space in every corner"
+        imageIndex={10}
+      />
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-inter text-sm font-semibold text-warm-700">{zone.name}</h4>
                     <span className="text-xs font-inter text-warm-400">{zone.time}</span>

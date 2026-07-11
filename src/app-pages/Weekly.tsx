@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   format,
   parseISO,
@@ -308,6 +309,11 @@ export default function Weekly() {
 
   return (
     <div className="space-y-6 max-w-[1440px] mx-auto">
+      <HeroSection
+        title={`Weekly Spread`}
+        subtitle="Seven days of sacred alignment"
+        imageIndex={2}
+      />
       {/* ── Week Header ── */}
       <motion.div variants={containerStagger} initial="hidden" animate="show" className="space-y-6">
         <div className="flex items-center justify-between">

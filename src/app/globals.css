@@ -4,32 +4,32 @@
 
 :root {
   /* Sacred Living — warm cream & earthy tones */
-  --color-bg: #FAF7F2;
+  --color-bg: #FDFBF7;
   --color-surface: #FFFFFF;
-  --color-text: #2D2A26;
-  --color-text-muted: #8B8680;
-  --color-accent: #D4A574;
-  --color-accent-hover: #C49464;
-  --color-border: #E8E4DE;
+  --color-text: #3A3228;
+  --color-text-muted: #8A8278;
+  --color-accent: #B5A642;
+  --color-accent-hover: #A0903A;
+  --color-border: #E5E0D8;
   --color-success: #6B8E6B;
-  --color-warning: #D4A574;
+  --color-warning: #B5A642;
   --color-error: #C4706B;
   --color-calendar-weekend: #F5F0EB;
   --font-heading: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
 
-  --cream: #FAF7F2;
+  --cream: #FDFBF7;
   --cream-dark: #F5F0E8;
-  --espresso: #2C2420;
+  --espresso: #3A3228;
   --espresso-light: #5C4D42;
-  --espresso-muted: #8B7D70;
-  --border-light: #E5DDD0;
+  --espresso-muted: #8A8278;
+  --border-light: #E5E0D8;
   --border-medium: #D5CBB8;
   --rose-soft: #C9A8A0;
   --sage: #7A8B6A;
-  --gold: #C9A96E;
+  --gold: #B5A642;
   --cognac: #A67C52;
-  --terracotta: #C4704B;
+  --terracotta: #C4706B;
   --terracotta-light: #D4886A;
   --lake: #7B9EA8;
   --warm-50: #FDFBF7;
@@ -38,7 +38,7 @@
   --warm-300: #EDE6D8;
   --warm-400: #E5DDD0;
   --warm-500: #D5CBB8;
-  --warm-600: #8B7D70;
+  --warm-600: #8A8278;
   --warm-700: #5C4D42;
   --warm-800: #3D3228;
   --warm-900: #2C2420;
@@ -77,7 +77,7 @@
   --border-medium: #4D4438;
   --rose-soft: #C4958A;
   --sage: #7A8F6A;
-  --gold: #C4A46A;
+  --gold: #B5A642;
   --cognac: #A67C52;
   --terracotta: #B86B4A;
   --terracotta-light: #C97D5C;
@@ -120,7 +120,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  font-size: 18px;
+  font-size: 16px;
   background: var(--cream);
   color: var(--espresso);
   transition: background 0.4s ease, color 0.4s ease;
@@ -204,16 +204,16 @@ input::placeholder, textarea::placeholder {
   .sage-card {
     background: var(--cream);
     border: 1px solid var(--border-light);
-    border-radius: 1rem;
-    padding: 1.25rem;
+    border-radius: 12px;
+    padding: 2rem;
     transition: all 0.3s ease;
   }
 
   .crystal-card {
     background: rgba(255,255,255,0.4);
     border: 1px solid var(--border-light);
-    border-radius: 1rem;
-    padding: 1rem;
+    border-radius: 12px;
+    padding: 2rem;
     backdrop-filter: blur(8px);
     transition: all 0.3s ease;
   }
@@ -226,7 +226,7 @@ input::placeholder, textarea::placeholder {
     padding: 1.5rem;
     border-left: 3px solid var(--sage);
     background: rgba(122,139,101,0.05);
-    border-radius: 0 1rem 1rem 0;
+    border-radius: 0 12px 12px 0;
   }
 
   .intention-textarea {
@@ -280,9 +280,39 @@ input::placeholder, textarea::placeholder {
   .card-planner {
     background: var(--cream);
     border: 1px solid var(--border-light);
-    border-radius: 1rem;
+    border-radius: 12px;
     padding: 2rem;
-    transition: all 0.3s ease;
+    transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .planner-card {
+    background: var(--cream);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 2rem;
+    transition: all 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .planner-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--espresso);
+    color: var(--cream);
+    border: none;
+    border-radius: 0.5rem;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .planner-button:hover {
+    background: var(--espresso-light);
+    transform: translateY(-1px);
   }
 
   .planner-input {
@@ -320,9 +350,9 @@ input::placeholder, textarea::placeholder {
   }
 
   .image-elegant {
-    border-radius: 0.5rem;
+    border-radius: 12px;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 
   .image-elegant:hover {
@@ -336,6 +366,7 @@ input::placeholder, textarea::placeholder {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    border-radius: 12px;
   }
 
   .hero-section img {
@@ -349,7 +380,7 @@ input::placeholder, textarea::placeholder {
   .hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(250,247,242,0.92) 0%, rgba(250,247,242,0.6) 50%, rgba(250,247,242,0.85) 100%);
+    background: linear-gradient(135deg, rgba(253,251,247,0.92) 0%, rgba(253,251,247,0.6) 50%, rgba(253,251,247,0.85) 100%);
   }
 
   .hero-content {
@@ -360,19 +391,46 @@ input::placeholder, textarea::placeholder {
     padding: 2rem;
   }
 
+  .section-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border-light);
+    margin: 4rem 0;
+  }
+
   .section-padding {
-    padding: 3rem 1.5rem;
+    padding: 4rem 1.5rem;
   }
 
   @media (min-width: 768px) {
     .section-padding {
-      padding: 5rem 3rem;
+      padding: 6rem 3rem;
     }
   }
 
   @media (min-width: 1024px) {
     .section-padding {
-      padding: 6rem 4rem;
+      padding: 8rem 4rem;
+    }
+  }
+
+  /* Page content wrapper for generous spacing */
+  .page-content {
+    padding-top: 2rem;
+    padding-bottom: 4rem;
+  }
+
+  @media (min-width: 768px) {
+    .page-content {
+      padding-top: 3rem;
+      padding-bottom: 6rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .page-content {
+      padding-top: 4rem;
+      padding-bottom: 8rem;
     }
   }
 }

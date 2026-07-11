@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import HeroSection from '@/components/HeroSection'
 import {
   Palette,
   Type,
@@ -164,6 +165,11 @@ export default function Settings() {
 
   return (
     <div className="space-y-8 max-w-3xl">
+      <HeroSection
+        title={`Settings`}
+        subtitle="Personalize your sacred space"
+        imageIndex={19}
+      />
         {/* ====== HEADER ====== */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
