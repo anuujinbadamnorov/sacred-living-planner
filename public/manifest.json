@@ -1,20 +1,19 @@
 {
   "name": "Sacred Living Planner",
-  "short_name": "Sacred Living",
+  "short_name": "Sacred",
   "description": "Your sacred space for intention, growth, and daily alignment.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FAF7F2",
-  "theme_color": "#D4A574",
+  "theme_color": "#FAF7F2",
   "orientation": "portrait",
   "scope": "/",
   "icons": [
     {
-      "src": "/icon-192x192.svg",
-      "sizes": "192x192",
+      "src": "/icon.svg",
+      "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ],
-  "categories": ["lifestyle", "productivity", "health"]
+  ]
 }
