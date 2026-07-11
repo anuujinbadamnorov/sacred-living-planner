@@ -677,7 +677,7 @@ export default function Dashboard() {
               let checkDate = today
               while (streak < 365) {
                 const key = dateKey(checkDate)
-                const anyDone = allHabits.some((h: { dates?: Record<string, boolean> }) => h.dates?.[key])
+                const anyDone = allHabits.some((h: { history?: Record<string, boolean> }) => h.history?.[key])
                 if (!anyDone) break
                 streak++
                 checkDate = new Date(checkDate.getTime() - 86400000)

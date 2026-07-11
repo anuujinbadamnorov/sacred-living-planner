@@ -75,8 +75,10 @@ export function useLocalStorageMigration() {
                   user_id: user.id,
                   title: note.title || `Note from ${date}`,
                   content: note.content || note.text || '',
-                  category: 'general',
-                  is_pinned: false,
+                  folder: 'general',
+                  pinned: false,
+                  tags: [],
+                  archived: false,
                 });
               }
             }

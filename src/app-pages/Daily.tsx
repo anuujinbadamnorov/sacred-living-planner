@@ -332,7 +332,7 @@ export default function Daily() {
   /* ── Habit helpers ── */
   const toggleHabit = (habitId: string, date: string) => {
     const updated = habitsData.map((h) =>
-      h.id === habitId ? { ...h, dates: { ...h.dates, [date]: !h.dates[date] } } : h
+      h.id === habitId ? { ...h, history: { ...h.history, [date]: !h.history[date] } } : h
     )
     setHabitsData(updated)
     setHabits(updated)
@@ -853,7 +853,7 @@ export default function Daily() {
               ) : (
                 <div className="space-y-2">
                   {habitsData.slice(0, 7).map((habit) => {
-                    const isChecked = !!habit.dates[currentDateStr]
+                    const isChecked = !!habit.history[currentDateStr]
                     return (
                       <motion.div
                         key={habit.id}

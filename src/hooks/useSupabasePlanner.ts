@@ -62,7 +62,7 @@ export function useSupabasePlanner(selectedDate?: string) {
       if (compError) throw compError;
 
       const habitCompletions: Record<string, string[]> = {};
-      habitCompletions[date] = completions?.map((c) => c.habit_id) || [];
+      habitCompletions[date] = completions?.map((c: { habit_id: string }) => c.habit_id) || [];
 
       // Fetch daily entry for the selected date
       const { data: dailyEntry, error: entryError } = await supabase

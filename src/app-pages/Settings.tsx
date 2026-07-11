@@ -16,6 +16,10 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePlanner } from '@/hooks/usePlanner'
+import { useThemeStore } from '@/stores/theme'
+import { useTheme } from '@/components/theme/ThemeProvider'
+import { createClient } from '@/lib/supabase'
+import type { Theme } from '@/types'
 import Layout from '@/components/Layout'
 
 /* ------------------------------------------------------------------ */
@@ -61,12 +65,23 @@ function saveSettings(settings: AppSettings) {
 /* ------------------------------------------------------------------ */
 
 export default function Settings() {
-  const { theme, setTheme, THEMES: themesList } = usePlanner()
+  const { currentThemeId, setTheme: setThemeId } = useThemeStore()
+  const { theme: currentTheme } = useTheme()
+  const [themesList, setThemesList] = useState<Theme[]>([])
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [showResetModal, setShowResetModal] = useState(false)
   const [resetConfirm, setResetConfirm] = useState('')
   const [lastBackup, setLastBackup] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const fetchThemes = async () => {
+      const supabase = createClient()
+      const { data, error } = await supabase.from('themes').select('*').order('name')
+      if (!error && data) setThemesList(data as Theme[])
+    }
+    fetchThemes()
+  }, [])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -177,11 +192,14 @@ export default function Settings() {
 
           <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
             {themesList.map((t) => {
-              const isActive = theme === t.name
+              const isActive = currentThemeId === t.name
+              const accent = t.colors?.accent || '#c9a87c'
+              const accentHover = t.colors?.accentHover || '#b8996a'
+              const bg = t.colors?.bg || '#faf8f5'
               return (
                 <motion.button
                   key={t.name}
-                  onClick={() => setTheme(t.name)}
+                  onClick={() => setThemeId(t.name)}
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.98 }}
                   className={cn(
@@ -190,30 +208,30 @@ export default function Settings() {
                       ? 'border-warm-400 shadow-md'
                       : 'border-transparent hover:border-warm-200 hover:shadow-sm'
                   )}
-                  style={{ backgroundColor: t.primaryLight }}
+                  style={{ backgroundColor: bg }}
                 >
                   {/* Preview strip */}
                   <div
                     className="w-full h-8 rounded-md mb-2"
-                    style={{ background: `linear-gradient(135deg, ${t.primary}, ${t.primaryDark})` }}
+                    style={{ background: `linear-gradient(135deg, ${accent}, ${accentHover})` }}
                   />
                   {/* Mini page preview */}
                   <div className="w-full h-10 rounded bg-white/80 mb-2 p-1 space-y-1">
-                    <div className="w-3/4 h-1 rounded" style={{ backgroundColor: `${t.primary}40` }} />
-                    <div className="w-1/2 h-1 rounded" style={{ backgroundColor: `${t.primary}30` }} />
-                    <div className="w-2/3 h-1 rounded" style={{ backgroundColor: `${t.primary}20` }} />
+                    <div className="w-3/4 h-1 rounded" style={{ backgroundColor: `${accent}40` }} />
+                    <div className="w-1/2 h-1 rounded" style={{ backgroundColor: `${accent}30` }} />
+                    <div className="w-2/3 h-1 rounded" style={{ backgroundColor: `${accent}20` }} />
                   </div>
                   <p className={cn(
                     'text-xs font-inter font-medium text-center',
                     isActive ? 'text-warm-800' : 'text-warm-600'
                   )}>
-                    {t.label}
+                    {t.name}
                   </p>
                   {isActive && (
                     <motion.div
                       layoutId="theme-active-ring"
                       className="absolute inset-0 rounded-lg pointer-events-none"
-                      style={{ boxShadow: `0 0 0 2px ${t.primary}40` }}
+                      style={{ boxShadow: `0 0 0 2px ${accent}40` }}
                       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                     />
                   )}

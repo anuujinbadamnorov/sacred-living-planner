@@ -227,12 +227,12 @@ export default function Weekly() {
   /* ── Data: Weekly Habits ── */
   const [habitsList, setHabitsList] = useState(() => getHabits())
   const activeHabits = useMemo(() => {
-    return habitsList.length > 0 ? habitsList : DEFAULT_HABITS.map((h) => ({ ...h, dates: {} as Record<string, boolean> }))
+    return habitsList.length > 0 ? habitsList : DEFAULT_HABITS.map((h) => ({ ...h, history: {} as Record<string, boolean> }))
   }, [habitsList])
 
   const toggleWeeklyHabit = (habitId: string, dayKey: string) => {
     const updated = habitsList.map((h) =>
-      h.id === habitId ? { ...h, dates: { ...h.dates, [dayKey]: !h.dates[dayKey] } } : h
+      h.id === habitId ? { ...h, history: { ...h.history, [dayKey]: !h.history[dayKey] } } : h
     )
     setHabitsList(updated)
     setHabits(updated)
@@ -737,7 +737,7 @@ export default function Weekly() {
             {/* Habit rows */}
             <AnimatePresence>
               {activeHabits.map((habit, hIdx) => {
-                const streak = Object.values(habit.dates).filter(Boolean).length
+                const streak = Object.values(habit.history).filter(Boolean).length
                 return (
                   <motion.div
                     key={habit.id}
@@ -763,7 +763,7 @@ export default function Weekly() {
                     {/* Day cells */}
                     {weekDays.map((day, dIdx) => {
                       const dKey = dateKey(day)
-                      const isFilled = !!habit.dates[dKey]
+                      const isFilled = !!habit.history[dKey]
                       const isTodayCol = isToday(day)
                       return (
                         <div key={dIdx} className={`flex justify-center py-1 rounded-md ${isTodayCol ? 'bg-rose-50/50' : ''}`}>
@@ -811,7 +811,7 @@ export default function Weekly() {
                 <div className="text-[0.6875rem] font-inter font-medium text-warm-500">Completion</div>
                 {weekDays.map((day, dIdx) => {
                   const dKey = dateKey(day)
-                  const completed = activeHabits.filter((h) => h.dates[dKey]).length
+                  const completed = activeHabits.filter((h) => h.history[dKey]).length
                   const pct = Math.round((completed / activeHabits.length) * 100)
                   return (
                     <div key={dIdx} className="text-center">
