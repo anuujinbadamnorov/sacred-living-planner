@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, Calendar, CalendarRange, Clock,
   Sun, Flame, Heart, Leaf, Moon, Home, PawPrint, Briefcase,
-  Sparkles, Gem, Activity, Star, StickyNote, Settings,
+  Sparkles, Gem, Activity, Star, StickyNote, Settings, ImageIcon,
   Menu, X
 } from 'lucide-react'
 
@@ -181,6 +181,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
 
         {section('Reflection')}
         {navItem('/planner/reflection', <Star className="w-4 h-4 shrink-0" />, 'Reflection')}
+        {navItem('/planner/inspiration', <ImageIcon className="w-4 h-4 shrink-0" />, 'Inspiration')}
         {navItem('/planner/notes', <StickyNote className="w-4 h-4 shrink-0" />, 'Notes')}
         {navItem('/planner/settings', <Settings className="w-4 h-4 shrink-0" />, 'Settings')}
       </div>
