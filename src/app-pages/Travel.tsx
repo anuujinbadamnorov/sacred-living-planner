@@ -22,7 +22,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { format, differenceInDays, parseISO } from 'date-fns'
-import Layout from '@/components/Layout'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -251,7 +250,7 @@ export default function Travel() {
   }
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8">
         {/* ====== HEADER ====== */}
         <motion.div
@@ -467,7 +466,7 @@ export default function Travel() {
       <style>{`
         .label-text { display: block; font-family: 'Inter', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--warm-700); margin-bottom: 4px; }
       `}</style>
-    </Layout>
+    </>
   )
 }
 
@@ -506,7 +505,7 @@ function TripDetail({ trip, onBack, onDelete }: { trip: Trip; onBack: () => void
   const duration = differenceInDays(parseISO(trip.endDate), parseISO(trip.startDate)) + 1
 
   return (
-    <Layout>
+    <>
       <div className="space-y-6">
         {/* Trip header bar */}
         <motion.div
@@ -746,7 +745,7 @@ function TripDetail({ trip, onBack, onDelete }: { trip: Trip; onBack: () => void
           )}
         </AnimatePresence>
       </div>
-    </Layout>
+    </>
   )
 }
 

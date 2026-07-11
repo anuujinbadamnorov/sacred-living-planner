@@ -31,7 +31,6 @@ import {
   RotateCcw,
   MessageCircle,
 } from 'lucide-react'
-import Layout from '@/components/Layout'
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number]
 
@@ -280,7 +279,7 @@ export default function SacredRoutines() {
   )
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8 max-w-5xl mx-auto">
         {/* ═══════════════ Hero ═══════════════ */}
         <motion.div
@@ -886,6 +885,6 @@ export default function SacredRoutines() {
           </div>
         </motion.div>
       </div>
-    </Layout>
+    </>
   )
 }

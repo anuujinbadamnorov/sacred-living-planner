@@ -13,7 +13,6 @@ import {
 } from 'lucide-react'
 import { format, differenceInDays, parseISO, isValid } from 'date-fns'
 import { cn } from '@/lib/utils'
-import Layout from '@/components/Layout'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -240,7 +239,7 @@ export default function SpecialDates() {
   const months = Array.from({ length: 12 }, (_, i) => i)
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8">
         {/* ====== HEADER ====== */}
         <motion.div
@@ -683,7 +682,7 @@ export default function SpecialDates() {
         }
         .label-text { display: block; font-family: 'Inter', system-ui, sans-serif; font-size: 0.8125rem; font-weight: 500; color: var(--warm-700); margin-bottom: 4px; }
       `}</style>
-    </Layout>
+    </>
   )
 }
 

@@ -26,7 +26,6 @@ import {
   CalendarDays,
   Check,
 } from 'lucide-react'
-import Layout from '@/components/Layout'
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number]
 
@@ -362,7 +361,7 @@ export default function MoonCycle() {
   }, [cycleEntries])
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8 max-w-5xl mx-auto">
         {/* ═══════════ Hero ═══════════ */}
         <motion.div
@@ -1095,6 +1094,6 @@ export default function MoonCycle() {
           </div>
         </motion.div>
       </div>
-    </Layout>
+    </>
   )
 }

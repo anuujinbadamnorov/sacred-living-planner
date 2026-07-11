@@ -9,7 +9,6 @@ import {
   Compass,
   X,
 } from 'lucide-react'
-import Layout from '@/components/Layout'
 import { usePlanner } from '@/hooks/usePlanner'
 
 /* ------------------------------------------------------------------ */
@@ -147,7 +146,7 @@ export default function Reflection() {
   }
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8 pb-12 max-w-5xl mx-auto">
         {/* ====== Header ====== */}
         <motion.div
@@ -512,6 +511,6 @@ export default function Reflection() {
           </div>
         </motion.div>
       </div>
-    </Layout>
+    </>
   )
 }

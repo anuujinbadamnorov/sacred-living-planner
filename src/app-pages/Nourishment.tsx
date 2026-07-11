@@ -35,7 +35,6 @@ import {
   Flame,
 
 } from 'lucide-react'
-import Layout from '@/components/Layout'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -384,7 +383,7 @@ export default function Nourishment() {
   }
 
   return (
-    <Layout>
+    <>
       <div className="max-w-6xl mx-auto space-y-8">
         {/* ─── Hero ─── */}
         <motion.div
@@ -1103,7 +1102,7 @@ export default function Nourishment() {
           </div>
         )}
       </div>
-    </Layout>
+    </>
   )
 }
 

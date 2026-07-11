@@ -22,7 +22,6 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react'
-import Layout from '../components/Layout'
 
 /* ─── Types ─── */
 interface ZoneTask {
@@ -242,7 +241,7 @@ export default function HomeSanctuary() {
   const resetProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8 pb-12">
         {/* ═══════════════ HERO ═══════════════ */}
         <motion.section
@@ -562,6 +561,6 @@ export default function HomeSanctuary() {
           </div>
         </motion.section>
       </div>
-    </Layout>
+    </>
   )
 }

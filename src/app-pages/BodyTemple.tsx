@@ -25,7 +25,6 @@ import {
   X,
   Save,
 } from 'lucide-react'
-import Layout from '@/components/Layout'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -345,7 +344,7 @@ export default function BodyTemple() {
   const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' })
 
   return (
-    <Layout>
+    <>
       <div className="max-w-6xl mx-auto space-y-8">
         {/* ─── Hero ─── */}
         <motion.div
@@ -1040,7 +1039,7 @@ export default function BodyTemple() {
           </div>
         )}
       </div>
-    </Layout>
+    </>
   )
 }
 

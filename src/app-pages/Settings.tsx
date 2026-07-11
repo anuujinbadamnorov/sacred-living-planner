@@ -21,7 +21,6 @@ import { useThemeStore } from '@/stores/theme'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { createClient } from '@/lib/supabase'
 import type { Theme } from '@/types'
-import Layout from '@/components/Layout'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */

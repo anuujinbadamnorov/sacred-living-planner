@@ -22,7 +22,6 @@ import {
   Brain,
   Heart,
 } from 'lucide-react'
-import Layout from '../components/Layout'
 
 /* ─── Types ─── */
 interface ExerciseEntry {
@@ -241,7 +240,7 @@ export default function RocketRealm() {
   }, [])
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8 pb-12">
         {/* ═══════════════ HERO ═══════════════ */}
         <motion.section
@@ -739,6 +738,6 @@ export default function RocketRealm() {
           )}
         </motion.section>
       </div>
-    </Layout>
+    </>
   )
 }

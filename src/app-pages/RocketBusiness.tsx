@@ -15,7 +15,6 @@ import {
   AlertCircle,
   PiggyBank,
 } from 'lucide-react'
-import Layout from '../components/Layout'
 
 /* ─── Types ─── */
 interface IncomeEntry {
@@ -233,7 +232,7 @@ export default function RocketBusiness() {
   }, [])
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8 pb-12">
         {/* ═══════════════ HERO ═══════════════ */}
         <motion.section
@@ -820,6 +819,6 @@ export default function RocketBusiness() {
           )}
         </AnimatePresence>
       </div>
-    </Layout>
+    </>
   )
 }

@@ -14,7 +14,6 @@ import {
   Trophy,
   Target,
 } from 'lucide-react'
-import Layout from '@/components/Layout'
 import { usePlanner } from '@/hooks/usePlanner'
 
 /* ------------------------------------------------------------------ */
@@ -237,7 +236,7 @@ export default function Goals() {
 
   /* ---- Render ---- */
   return (
-    <Layout>
+    <>
       <div className="space-y-8 pb-12">
         {/* ====== Page Header ====== */}
         <motion.div
@@ -651,7 +650,7 @@ export default function Goals() {
           </div>
         </motion.div>
       </div>
-    </Layout>
+    </>
   )
 }
 

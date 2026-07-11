@@ -25,7 +25,6 @@ import {
   ListTodo,
   AlertCircle,
 } from 'lucide-react'
-import Layout from '@/components/Layout'
 import { usePlanner } from '@/hooks/usePlanner'
 import { dateKey } from '@/lib/dateUtils'
 import { cn } from '@/lib/utils'
@@ -239,7 +238,7 @@ export default function Monthly() {
   }
 
   return (
-    <Layout>
+    <>
       <div className="space-y-6">
         {/* ── Header & Controls ── */}
         <motion.div
@@ -776,7 +775,7 @@ export default function Monthly() {
           </motion.div>
         )}
       </AnimatePresence>
-    </Layout>
+    </>
   )
 }
 

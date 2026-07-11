@@ -10,7 +10,6 @@ import {
   Check,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import Layout from '@/components/Layout'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -359,7 +358,7 @@ export default function Cleaning() {
   const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1 // Mon=0, Sun=6
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8">
         {/* ====== SPRING CLEANING HEADER ====== */}
         <motion.div
@@ -721,7 +720,7 @@ export default function Cleaning() {
         }
         .btn-danger:hover { filter: brightness(0.9); }
       `}</style>
-    </Layout>
+    </>
   )
 }
 

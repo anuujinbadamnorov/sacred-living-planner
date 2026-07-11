@@ -18,7 +18,6 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
-import Layout from '../components/Layout'
 
 /* ─── Types ─── */
 interface ContentIdea {
@@ -187,7 +186,7 @@ export default function ContentCreation() {
   }, [])
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8 pb-12">
         {/* ═══════════════ HERO ═══════════════ */}
         <motion.section
@@ -617,6 +616,6 @@ export default function ContentCreation() {
           </div>
         </motion.section>
       </div>
-    </Layout>
+    </>
   )
 }

@@ -17,7 +17,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
-import Layout from '@/components/Layout'
 import { usePlanner } from '@/hooks/usePlanner'
 
 /* ------------------------------------------------------------------ */
@@ -243,7 +242,7 @@ export default function Budget() {
   const formatCurrency = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
 
   return (
-    <Layout>
+    <>
       <div className="space-y-6 pb-12">
         {/* ====== Month Navigation ====== */}
         <motion.div
@@ -729,7 +728,7 @@ export default function Budget() {
           </div>
         </motion.div>
       </div>
-    </Layout>
+    </>
   )
 }
 

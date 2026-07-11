@@ -80,10 +80,21 @@ export function useSupabaseDashboard(): DashboardStats {
           error: null,
         });
       } catch (err: any) {
+        const msg = err.message || '';
+        let friendlyError = 'Sync unavailable';
+        if (msg.includes('JWT') || msg.includes('auth') || msg.includes('token')) {
+          friendlyError = 'Session expired — please sign in again';
+        } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('Failed to fetch')) {
+          friendlyError = 'Offline — sync will resume when connected';
+        } else if (msg.includes('permission') || msg.includes('policy')) {
+          friendlyError = 'Permission denied — check your account';
+        } else if (msg.includes('relation') || msg.includes('does not exist')) {
+          friendlyError = 'Database table missing — contact support';
+        }
         setStats((s) => ({
           ...s,
           loading: false,
-          error: err.message || 'Failed to load dashboard data',
+          error: friendlyError,
         }));
       }
     };

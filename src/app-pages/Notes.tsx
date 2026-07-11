@@ -17,7 +17,6 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
-import Layout from '@/components/Layout'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -343,7 +342,7 @@ export default function Notes() {
   }
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8">
         {/* ====== HEADER ====== */}
         <motion.div
@@ -554,7 +553,7 @@ export default function Notes() {
           </div>
         )}
       </div>
-    </Layout>
+    </>
   )
 }
 
@@ -676,7 +675,7 @@ function NoteEditor({
   }
 
   return (
-    <Layout>
+    <>
       <div className="h-[calc(100dvh-3.5rem)] flex flex-col -mx-6 -mt-6 -mb-8">
         {/* Editor toolbar */}
         <div className="flex items-center gap-4 px-6 py-3 shrink-0" style={{ background: 'var(--cream-dark)', borderBottom: '1px solid var(--border-light)' }}>
@@ -777,7 +776,7 @@ function NoteEditor({
           </span>
         </div>
       </div>
-    </Layout>
+    </>
   )
 }
 

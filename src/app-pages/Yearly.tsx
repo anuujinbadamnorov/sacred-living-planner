@@ -14,7 +14,6 @@ import {
   getDay,
 } from 'date-fns'
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
-import Layout from '@/components/Layout'
 import { cn } from '@/lib/utils'
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number]
@@ -232,7 +231,7 @@ export default function Yearly() {
   const months = Array.from({ length: 12 }, (_, i) => i)
 
   return (
-    <Layout>
+    <>
       <div className="space-y-8">
         {/* ── Header ── */}
         <motion.div
@@ -407,6 +406,6 @@ export default function Yearly() {
           </motion.div>
         </div>
       </div>
-    </Layout>
+    </>
   )
 }
