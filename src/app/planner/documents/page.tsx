@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import { useAuth } from '@/components/AuthProvider';
 import type { Document } from '@/types';
+import ImageUpload from '@/components/ImageUpload';
 
 const categories = ['All', 'Income', 'Expense', 'Receipt', 'Contract', 'Other'];
 
@@ -20,6 +21,9 @@ export default function DocumentsPage() {
     amount: '',
     document_date: '',
     description: '',
+    file_url: '',
+    file_name: '',
+    file_type: '',
   });
   const supabase = createClient();
 
@@ -50,10 +54,13 @@ export default function DocumentsPage() {
       amount: newDoc.amount ? parseFloat(newDoc.amount) : null,
       document_date: newDoc.document_date || null,
       description: newDoc.description || null,
+      file_url: newDoc.file_url || null,
+      file_name: newDoc.file_name || null,
+      file_type: newDoc.file_type || null,
     });
 
     if (!error) {
-      setNewDoc({ title: '', category: 'expense', amount: '', document_date: '', description: '' });
+      setNewDoc({ title: '', category: 'expense', amount: '', document_date: '', description: '', file_url: '', file_name: '', file_type: '' });
       setShowAddForm(false);
       loadDocuments();
     }
@@ -190,6 +197,14 @@ export default function DocumentsPage() {
               className="planner-input w-full resize-none h-20"
             />
           </div>
+          <div>
+            <label className="text-xs block mb-1" style={{ color: 'var(--color-text-muted)' }}>Attachment</label>
+            <ImageUpload
+              onUpload={(url, fileName, fileType) => setNewDoc({ ...newDoc, file_url: url, file_name: fileName, file_type: fileType })}
+              onClear={() => setNewDoc({ ...newDoc, file_url: '', file_name: '', file_type: '' })}
+              existingUrl={newDoc.file_url}
+            />
+          </div>
           <button type="submit" className="planner-button">
             Save Document
           </button>
@@ -232,31 +247,50 @@ export default function DocumentsPage() {
       {/* Documents List */}
       <div className="space-y-3">
         {filteredDocs.map((doc) => (
-          <div key={doc.id} className="planner-card flex items-center justify-between group">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <span className="text-xl">{getCategoryIcon(doc.category)}</span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text)' }}>
-                  {doc.title}
-                </p>
-                <p className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>
-                  {doc.description || 'No description'}
-                  {doc.document_date && ` • ${new Date(doc.document_date).toLocaleDateString()}`}
-                </p>
-              </div>
+          <div key={doc.id} className="planner-card flex items-start gap-3 group">
+            {doc.file_url && doc.file_type?.startsWith('image') ? (
+              <img
+                src={doc.file_url}
+                alt=""
+                className="w-16 h-16 rounded-lg object-cover shrink-0"
+              />
+            ) : (
+              <span className="text-2xl shrink-0">{getCategoryIcon(doc.category)}</span>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate" style={{ color: 'var(--color-text)' }}>
+                {doc.title}
+              </p>
+              <p className="text-xs truncate" style={{ color: 'var(--color-text-muted)' }}>
+                {doc.description || 'No description'}
+                {doc.document_date && ` • ${new Date(doc.document_date).toLocaleDateString()}`}
+              </p>
+              {doc.file_url && (
+                <a
+                  href={doc.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs inline-flex items-center gap-1 mt-1 hover:underline"
+                  style={{ color: 'var(--color-accent)' }}
+                >
+                  View attachment
+                </a>
+              )}
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
               {doc.amount !== null && (
                 <span className="text-sm font-medium" style={{ color: doc.category === 'income' ? 'var(--color-success)' : 'var(--color-text)' }}>
                   ${doc.amount.toLocaleString()}
                 </span>
               )}
+              <button
+                onClick={() => deleteDocument(doc.id)}
+                className="text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ color: 'var(--color-error)', backgroundColor: 'var(--color-bg)' }}
+              >
+                Delete
+              </button>
             </div>
-            <button
-              onClick={() => deleteDocument(doc.id)}
-              className="text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity ml-2"
-              style={{ color: 'var(--color-error)', backgroundColor: 'var(--color-bg)' }}
-            >
-              Delete
-            </button>
           </div>
         ))}
         {filteredDocs.length === 0 && (
