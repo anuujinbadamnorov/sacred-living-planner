@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { format } from 'date-fns'
 import {
@@ -12,6 +12,8 @@ import {
 } from 'lucide-react'
 import Navbar from './Navbar'
 import Footer from './Footer'
+import SearchModal from './SearchModal'
+import { useThemeStore } from '@/stores/theme'
 
 function getPageTitle(pathname: string): string {
   if (pathname === '/' || pathname === '') return 'Sacred Living Planner'
@@ -50,10 +52,23 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
   const pathname = usePathname() || ''
   const [scrolled, setScrolled] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [theme, setTheme] = useState<'day' | 'night'>('day')
+  const [searchOpen, setSearchOpen] = useState(false)
+  const { isNightMode, setNightMode } = useThemeStore()
 
   const pageTitle = getPageTitle(pathname)
   const today = new Date()
+
+  // Ctrl/Cmd + K shortcut for search
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setSearchOpen((open) => !open)
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,16 +78,12 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const toggleTheme = () => {
-    const next = theme === 'day' ? 'night' : 'day'
-    setTheme(next)
-    document.documentElement.setAttribute('data-theme', next)
-  }
-
   const sidebarWidth = sidebarCollapsed ? 64 : 240
 
   return (
     <div className="min-h-[100dvh]" style={{ background: 'var(--cream)' }}>
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+
       <Navbar
         collapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed((c) => !c)}
@@ -115,19 +126,23 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
 
         <div className="flex items-center gap-3">
           <button
-            className="p-2 rounded-md transition-colors"
+            onClick={() => setSearchOpen(true)}
+            className="flex items-center gap-2 px-2 py-1.5 rounded-md transition-colors hover:bg-black/5"
             style={{ color: 'var(--espresso-muted)' }}
             aria-label="Search"
           >
             <Search className="w-4 h-4" />
+            <kbd className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded bg-white border font-mono" style={{ color: 'var(--espresso-muted)', borderColor: 'var(--border-light)' }}>
+              ⌘K
+            </kbd>
           </button>
           <button
-            onClick={toggleTheme}
-            className="p-2 rounded-md transition-colors"
+            onClick={() => setNightMode(!isNightMode)}
+            className="p-2 rounded-md transition-colors hover:bg-black/5"
             style={{ color: 'var(--espresso-muted)' }}
-            aria-label={theme === 'day' ? 'Switch to night mode' : 'Switch to day mode'}
+            aria-label={isNightMode ? 'Switch to day mode' : 'Switch to night mode'}
           >
-            {theme === 'day' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            {isNightMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center"
