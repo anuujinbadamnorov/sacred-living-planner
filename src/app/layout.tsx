@@ -1,48 +1,41 @@
-import type { Metadata, Viewport } from 'next';
-import { AuthProvider } from '@/components/AuthProvider';
-import { ThemeProvider } from '@/components/theme/ThemeProvider';
-import PWAProvider from '@/components/PWAProvider';
-import RealtimeSyncProvider from '@/components/RealtimeSyncProvider';
-import './globals.css';
+import type { Metadata, Viewport } from 'next'
+import { Cormorant_Garamond, Inter } from 'next/font/google'
+import './globals.css'
+
+const cormorant = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-cormorant',
+  display: 'swap',
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Sacred Living Planner',
   description: 'Your sacred space for intention, growth, and daily alignment.',
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'Sacred Living',
-  },
-};
+}
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  themeColor: '#FAF7F2',
-};
+  themeColor: '#F6F2EB',
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="apple-touch-icon" href="/icon-192x192.png" />
-      </head>
-      <body className="antialiased min-h-screen">
-        <AuthProvider>
-          <ThemeProvider>
-            <PWAProvider>
-              <RealtimeSyncProvider>{children}</RealtimeSyncProvider>
-            </PWAProvider>
-          </ThemeProvider>
-        </AuthProvider>
+    <html lang="en" className={`${cormorant.variable} ${inter.variable}`} suppressHydrationWarning>
+      <body className="antialiased min-h-screen bg-background text-foreground">
+        {children}
       </body>
     </html>
-  );
+  )
 }
