@@ -130,11 +130,6 @@ function MiniMonth({
                   !inMonth && 'opacity-30'
                 )}
               >
-      <HeroSection
-        title={`Yearly Vision`}
-        subtitle="Your year of growth and grace"
-        imageIndex={4}
-      />
                 <span
                   className={cn(
                     'font-body text-[0.75rem] w-6 h-6 flex items-center justify-center rounded-full',

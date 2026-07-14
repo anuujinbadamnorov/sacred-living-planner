@@ -435,7 +435,7 @@ export default function Daily() {
           className="relative rounded-2xl overflow-hidden h-48 md:h-64"
         >
           <img
-            src="/inspo/IMG_1314.JPG"
+            src="/inspo/IMG_1315.JPG"
             alt="Sacred morning routine"
             className="absolute inset-0 w-full h-full object-cover image-elegant"
           />
