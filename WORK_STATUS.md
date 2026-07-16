@@ -1,66 +1,81 @@
 # Sacred Living Planner — Work Status
 
-**Last Updated:** 2026-07-16 14:32 CDT
-**Current Phase:** ✅ D1 Fixes COMPLETE → Ready for D2
+**Last Updated:** 2026-07-16 14:50 CDT
+**Current Phase:** ✅ D2a — Route Restructure COMPLETE
 **Deploy Target:** https://sacred-living-planner.vercel.app
-**Next Checkpoint:** 15:02 CDT (30 min from now)
+**Next Checkpoint:** 15:20 CDT (30 min from now)
 
 ---
 
-## ✅ D1 Fixes Completed (14:15 → 14:32)
+## ✅ D2a: Route Restructure COMPLETE (14:42 → 14:50)
 
-### 1. Daily Schedule — 15-Min Increments (Fixed) ✅
-- **Before:** 12px slots, labels only on hour — too subtle, looked like hourly
-- **After:** 20px slots, labels on hour (bold) + half-hour (subtle `:30`)
-- 72 slots from 5 AM to 10 PM, 720px scrollable container
-- Hour slots: white bg + bold label | Half-hour: subtle bg + `:30` label | Quarter-hour: light line
+### What was done:
+- Moved all `app/planner/*` pages into `app/(dashboard)/planner/*` route group
+- `(dashboard)/layout.tsx` — simple pass-through wrapper
+- `(dashboard)/planner/layout.tsx` — uses `PlannerLayout` (Navbar + header + main)
+- All URLs remain the same (`/planner/*`)
+- `(auth)/login` and `(auth)/signup` already existed
+- Build passes, deployed successfully
 
-### 2. Daily Intention — Moved to Top ✅
-- Now the FIRST card in the right column (was at bottom below Mini Calendar)
-
-### 3. Removed Mini Calendar & This Week Cards ✅
-- These were redundant since the user navigates via sidebar
-- Right column now cleaner: Intention → Habits → Nourishment → Body Temple → Pelvic Floor
+### Current Route Structure:
+```
+src/app/
+├── (auth)/
+│   ├── login/page.tsx
+│   ├── signup/page.tsx
+│   └── layout.tsx
+├── (dashboard)/
+│   ├── layout.tsx
+│   └── planner/
+│       ├── layout.tsx (sidebar + header)
+│       ├── page.tsx (dashboard)
+│       ├── yearly/page.tsx
+│       ├── monthly/page.tsx
+│       ├── weekly/page.tsx
+│       ├── daily/page.tsx
+│       ├── reflection/page.tsx
+│       ├── ... (all other pages)
+│       └── settings/page.tsx
+├── api/
+├── page.tsx (landing/cover)
+└── layout.tsx (root)
+```
 
 ---
 
-## ⏳ Awaiting Final D1 Verification
-
-Please check the live site and confirm:
-- [ ] **Daily schedule** — 20px slots with hour + half-hour labels visible?
-- [ ] **Daily Intention** — at the TOP of right column?
-- [ ] **No Mini Calendar / This Week** — removed from right column?
-
----
-
-## 🎯 D2: Project Brief Restructure (Ready to Start)
-
-**Time:** Multi-session (estimated 3-4 sessions)
+## 🎯 D2b: Database Schema (Next Phase)
+**Time:** 15-20 min
 **Scope:**
-
-### Phase D2a: Route Restructure (Session 1)
-- Create `(auth)` route group: login, signup, auth layout (no sidebar)
-- Create `(dashboard)` route group: all planner pages with sidebar
-- Move existing pages into new structure
-
-### Phase D2b: Database Schema (Session 1-2)
-- Run full SQL schema from project brief in Supabase
+- Run full SQL schema from project brief in Supabase SQL Editor
 - Create all tables: daily_entries, health_metrics, habits, workouts, meals, rocket_photos, business_income, business_expenses, notes, user_settings
 - Set up RLS policies for each table
+- Enable row-level security
 
-### Phase D2c: Supabase Client Setup (Session 2)
+---
+
+## 🎯 D2c: Supabase Client Setup (Next Phase)
+**Time:** 10 min
+**Scope:**
 - Create `src/lib/supabase/client.ts` (browser client)
 - Create `src/lib/supabase/server.ts` (server client with cookies)
 - Create `src/lib/supabase/middleware.ts` (auth middleware)
-- Wire up auth flow
 
-### Phase D2d: Theme & Aesthetic (Session 2-3)
+---
+
+## 🎯 D2d: Theme & Aesthetic (Next Phase)
+**Time:** 15 min
+**Scope:**
 - Implement exact CSS variables from brief (`--background: #F6F2EB`, etc.)
 - Add Cormorant Garamond + Inter Google Fonts
 - Dark mode support
 - shadcn/ui components
 
-### Phase D2e: New Pages (Session 3-4)
+---
+
+## 🎯 D2e: New Pages (Next Phase)
+**Time:** 20 min
+**Scope:**
+- Create missing pages from brief: calendar/yearly, calendar/monthly, calendar/weekly, calendar/daily
 - Moon Cycle, Home Sanctuary, Rocket Realm, Rocket Business
 - Content Creation, Abundance, Health (Oura proxy)
 - Notes with whiteboard
@@ -70,10 +85,14 @@ Please check the live site and confirm:
 
 ## 📝 User Decision Needed
 
-**Ready to start D2 (Project Brief Restructure)?**
+**D2a is complete. Which D2 phase next?**
 
-Or do you want to:
-- Verify D1 fixes first?
-- Skip to a specific D2 phase?
-- Something else?
+| Phase | Time | What |
+|-------|------|------|
+| **D2b** | 15-20 min | Database schema (Supabase SQL) |
+| **D2c** | 10 min | Supabase client setup |
+| **D2d** | 15 min | Theme & fonts from brief |
+| **D2e** | 20 min | New pages from brief |
+
+Or should I do multiple phases in sequence? Recommend **D2b → D2c** first (backend), then **D2d → D2e** (frontend).
 
