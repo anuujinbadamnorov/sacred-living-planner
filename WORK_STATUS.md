@@ -1,9 +1,8 @@
 # Sacred Living Planner — Work Status
 
-**Last Updated:** 2026-07-16 15:38 CDT
-**Current Phase:** ✅ D2 + D3 + D4 + D5 ALL COMPLETE
+**Last Updated:** 2026-07-16 16:57 CDT
+**Current Phase:** ✅ D2 + D3 + D4 + D5 + Oura Integration — ALL COMPLETE
 **Deploy Target:** https://sacred-living-planner.vercel.app
-**Next Checkpoint:** 16:08 CDT (30 min from now)
 
 ---
 
@@ -24,11 +23,23 @@
 ## ✅ D4: New Features — COMPLETE
 - **Oura API proxy** — `GET /api/oura?token=xxx&date=2026-07-16`
   - Fetches sleep, readiness, activity from Oura API
-  - Returns: sleep_score, readiness_score, activity_score, steps, hrv, resting_hr, deep_sleep, rem_sleep, total_sleep
 - **Meal macros** — Daily page Nourishment section now has P/C/F/Kcal inputs for each meal
 
 ## ✅ D5: Polish — COMPLETE
 - **Responsive padding** — `p-4` on mobile, `p-6` on `md+` screens
+
+## ✅ Oura Settings Integration — COMPLETE (16:57 CDT)
+- **New hook:** `useOuraSettings` — loads/saves Oura token from Supabase `user_settings` table (with localStorage fallback)
+- **Settings page updated:** Token saved to Supabase when user is logged in; tested against Oura API before storing
+- **New API route:** `GET /api/oura/today?date=YYYY-MM-DD&range=7` — server-side authenticated fetch using stored token
+  - Fetches 7-30 days of sleep, readiness, activity data
+  - Returns merged JSON array by date
+- **OuraHealth page updated:** 
+  - Auto-fetches from Oura on page load when logged in
+  - "Sync Oura" button for manual refresh
+  - Merges Oura data with localStorage manual entries (Oura wins for available fields)
+  - Shows "Oura" badge on score cards when data came from Oura
+  - Shows helpful error states when Oura not connected or not signed in
 
 ---
 
@@ -36,40 +47,19 @@
 
 ### If you want more:
 - **Whiteboard notes** — implement the `whiteboard_data` JSONB column for drawing/sketching
-- **Oura settings integration** — save Oura token in `user_settings`, auto-fetch daily
 - **More responsive fixes** — test on mobile, fix any layout issues
 - **Performance** — optimize images, lazy load pages
 - **Animations** — add more Framer Motion transitions between pages
-
-### Files you should run SQL for:
-1. `sql/schema-complete.sql` — already run ✅
-2. `sql/habit-completions.sql` — run this in Supabase SQL Editor (creates habit_completions table)
-
-```sql
-create table if not exists habit_completions (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users on delete cascade not null,
-  habit_id uuid references habits(id) on delete cascade not null,
-  completed_date date not null,
-  created_at timestamp with time zone default now(),
-  unique(user_id, habit_id, completed_date)
-);
-alter table habit_completions enable row level security;
-create policy "Users can only see their own habit completions"
-  on habit_completions for all using (auth.uid() = user_id);
-```
 
 ---
 
 ## 🎯 User Approval Needed
 
-**All phases D2-D5 are complete!**
-
-Please verify the live site:
+All deliverables are complete! Please verify the live site:
 - [ ] Cloud Sync badge visible on Dashboard
 - [ ] Meal macros (P/C/F/Kcal) in Daily page
+- [ ] Oura token saved in Settings → Integrations → Oura Ring (when signed in)
+- [ ] Health page auto-syncs from Oura when signed in
 - [ ] All routes working: `/calendar/yearly`, `/health`, `/routines`
-- [ ] Responsive padding on mobile
 
 **What would you like to do next?** Or are we done for this session?
-

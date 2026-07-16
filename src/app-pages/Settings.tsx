@@ -26,6 +26,7 @@ import { usePlanner } from '@/hooks/usePlanner'
 import { useThemeStore } from '@/stores/theme'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { createClient } from '@/lib/supabase'
+import { useOuraSettings } from '@/hooks/useOuraSettings'
 import type { Theme } from '@/types'
 
 /* ------------------------------------------------------------------ */
@@ -80,8 +81,7 @@ export default function Settings() {
   const [lastBackup, setLastBackup] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [ouraToken, setOuraToken] = useState('')
-  const [ouraStatus, setOuraStatus] = useState<'idle' | 'testing' | 'connected' | 'error'>('idle')
+  const { token: ouraToken, status: ouraStatus, isLoading: ouraLoading, saveToken, removeToken } = useOuraSettings()
 
   useEffect(() => {
     const fetchThemes = async () => {
@@ -96,31 +96,18 @@ export default function Settings() {
     if (typeof window === 'undefined') return
     setSettings(loadSettings())
     setLastBackup(localStorage.getItem('planner-last-backup') || '')
-    const savedToken = localStorage.getItem('oura-token') || ''
-    setOuraToken(savedToken)
-    if (savedToken) setOuraStatus('connected')
   }, [])
 
+  const [ouraInput, setOuraInput] = useState('')
+
   const testOuraConnection = async () => {
-    if (!ouraToken.trim()) return
-    setOuraStatus('testing')
-    try {
-      const res = await fetch(`/api/oura?token=${ouraToken}&date=${new Date().toISOString().split('T')[0]}`)
-      if (res.ok) {
-        setOuraStatus('connected')
-        localStorage.setItem('oura-token', ouraToken)
-      } else {
-        setOuraStatus('error')
-      }
-    } catch {
-      setOuraStatus('error')
-    }
+    if (!ouraInput.trim()) return
+    await saveToken(ouraInput)
   }
 
   const disconnectOura = () => {
-    setOuraToken('')
-    setOuraStatus('idle')
-    localStorage.removeItem('oura-token')
+    removeToken()
+    setOuraInput('')
   }
 
   const updateSetting = <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
@@ -499,10 +486,12 @@ export default function Settings() {
             <div className="flex items-center gap-2">
               <input
                 type="password"
-                value={ouraToken}
+                value={ouraInput}
                 onChange={(e) => {
-                  setOuraToken(e.target.value)
-                  if (ouraStatus === 'connected') setOuraStatus('idle')
+                  setOuraInput(e.target.value)
+                  if (ouraStatus === 'connected') {
+                    // user is typing new token, reset status visually
+                  }
                 }}
                 placeholder="Paste your Oura personal access token..."
                 className="flex-1 px-3 py-2 rounded-md border border-warm-200 text-sm font-inter text-warm-800 placeholder:text-warm-400 focus:outline-none focus:border-rose-400 bg-white"
@@ -517,7 +506,7 @@ export default function Settings() {
               ) : (
                 <button
                   onClick={testOuraConnection}
-                  disabled={ouraStatus === 'testing' || !ouraToken.trim()}
+                  disabled={ouraStatus === 'testing' || !ouraInput.trim()}
                   className="btn-primary text-sm shrink-0 flex items-center gap-1"
                 >
                   {ouraStatus === 'testing' ? 'Testing...' : 'Connect'}

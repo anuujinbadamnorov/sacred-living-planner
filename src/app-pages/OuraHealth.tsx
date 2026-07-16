@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { format, subDays } from 'date-fns'
 import HeroSection from '@/components/HeroSection'
+import { useAuth } from '@/components/AuthProvider'
 import {
   Moon,
   Zap,
@@ -13,6 +14,8 @@ import {
   Clock,
   Edit3,
   Check,
+  RefreshCw,
+  Link as LinkIcon,
 } from 'lucide-react'
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number]
@@ -29,6 +32,20 @@ interface DailyHealth {
   deepSleep: number
   remSleep: number
   totalSleep: number
+  source?: 'oura' | 'manual'
+}
+
+interface OuraApiEntry {
+  date: string
+  sleep_score: number | null
+  readiness_score: number | null
+  activity_score: number | null
+  steps: number | null
+  hrv: number | null
+  resting_hr: number | null
+  deep_sleep: number | null
+  rem_sleep: number | null
+  total_sleep: number | null
 }
 
 /* ── Storage ── */
@@ -51,6 +68,7 @@ function loadData(): DailyHealth[] {
       deepSleep: 60 + Math.floor(Math.random() * 50),
       remSleep: 80 + Math.floor(Math.random() * 60),
       totalSleep: 360 + Math.floor(Math.random() * 180),
+      source: 'manual',
     })
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(seeded))
@@ -60,6 +78,31 @@ function loadData(): DailyHealth[] {
 function saveData(data: DailyHealth[]) {
   if (typeof window === 'undefined') return
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+}
+
+/* ── Merge Oura data into localStorage ── */
+function mergeOuraData(existing: DailyHealth[], ouraEntries: OuraApiEntry[]): DailyHealth[] {
+  const map = new Map(existing.map((d) => [d.date, { ...d }]))
+
+  for (const entry of ouraEntries) {
+    const d = entry.date
+    const existingEntry = map.get(d)
+    const merged: DailyHealth = {
+      date: d,
+      sleep: entry.sleep_score ?? existingEntry?.sleep ?? 0,
+      readiness: entry.readiness_score ?? existingEntry?.readiness ?? 0,
+      steps: entry.steps ?? existingEntry?.steps ?? 0,
+      hrv: entry.hrv ?? existingEntry?.hrv ?? 0,
+      restingHR: entry.resting_hr ?? existingEntry?.restingHR ?? 0,
+      deepSleep: entry.deep_sleep ?? existingEntry?.deepSleep ?? 0,
+      remSleep: entry.rem_sleep ?? existingEntry?.remSleep ?? 0,
+      totalSleep: entry.total_sleep ?? existingEntry?.totalSleep ?? 0,
+      source: 'oura',
+    }
+    map.set(d, merged)
+  }
+
+  return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date))
 }
 
 /* ── Score Color ── */
@@ -82,12 +125,14 @@ function ScoreCard({
   icon: Icon,
   delay,
   onClick,
+  source,
 }: {
   title: string
   score: number
   icon: React.ElementType
   delay: number
   onClick: () => void
+  source?: 'oura' | 'manual'
 }) {
   const color = scoreColor(score)
   return (
@@ -105,6 +150,9 @@ function ScoreCard({
           <Icon className="w-4.5 h-4.5" style={{ color }} />
         </div>
         <span className="font-body text-sm font-medium" style={{ color: 'var(--espresso-light)' }}>{title}</span>
+        {source === 'oura' && (
+          <span className="ml-auto text-[0.6rem] font-body uppercase tracking-wide px-1.5 py-0.5 rounded" style={{ background: '#7A8B6518', color: '#7A8B65' }}>Oura</span>
+        )}
       </div>
       <div className="relative flex flex-col items-center">
         <motion.span
@@ -143,11 +191,6 @@ function MiniBarChart({
 
   return (
     <div className="space-y-3">
-      <HeroSection
-        title={`Health Tracking`}
-        subtitle="Data-driven insights for your wellbeing"
-        imageIndex={15}
-      />
       <div className="flex items-center justify-between">
         <span className="font-body text-xs font-medium" style={{ color: 'var(--espresso-light)' }}>{label}</span>
         <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>Avg: {avg}</span>
@@ -291,13 +334,54 @@ function EditModal({
 /* ═══════════════════════════════════ */
 
 export default function OuraHealth() {
+  const { user } = useAuth()
   const [data, setData] = useState<DailyHealth[]>([])
   const [editOpen, setEditOpen] = useState(false)
+  const [syncLoading, setSyncLoading] = useState(false)
+  const [syncError, setSyncError] = useState<string | null>(null)
   const todayStr = format(new Date(), 'yyyy-MM-dd')
 
   useEffect(() => {
     setData(loadData())
   }, [])
+
+  // Auto-fetch from Oura on mount if user is logged in
+  useEffect(() => {
+    if (!user) return
+    syncFromOura()
+  }, [user])
+
+  const syncFromOura = async () => {
+    setSyncLoading(true)
+    setSyncError(null)
+    try {
+      const res = await fetch(`/api/oura/today?date=${todayStr}&range=30`)
+      if (!res.ok) {
+        const err = await res.json()
+        if (res.status === 404) {
+          setSyncError('Oura not connected. Add your token in Settings.')
+        } else if (res.status === 401) {
+          setSyncError('Please sign in to sync Oura data.')
+        } else {
+          setSyncError(err.error || 'Failed to fetch Oura data.')
+        }
+        setSyncLoading(false)
+        return
+      }
+      const { data: ouraData } = await res.json()
+      if (ouraData && ouraData.length > 0) {
+        setData((prev) => {
+          const merged = mergeOuraData(prev, ouraData as OuraApiEntry[])
+          saveData(merged)
+          return merged
+        })
+      }
+    } catch (err) {
+      setSyncError('Network error. Please try again.')
+    } finally {
+      setSyncLoading(false)
+    }
+  }
 
   const todayData = useMemo(() => {
     return data.find((d) => d.date === todayStr) || data[data.length - 1]
@@ -312,8 +396,9 @@ export default function OuraHealth() {
     setData((prev) => {
       const idx = prev.findIndex((d) => d.date === updated.date)
       const next = [...prev]
-      if (idx >= 0) next[idx] = updated
-      else next.push(updated)
+      const saved: DailyHealth = { ...updated, source: 'manual' }
+      if (idx >= 0) next[idx] = saved
+      else next.push(saved)
       saveData(next)
       return next
     })
@@ -335,146 +420,180 @@ export default function OuraHealth() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
-        {/* ═══ Header ═══ */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: EASE }}
-          className="relative rounded-2xl overflow-hidden h-48 md:h-56"
-        >
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, var(--cream-dark), var(--border-light), var(--cream-dark))' }} />
-          <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
-            <h1 className="font-display text-3xl md:text-4xl font-semibold" style={{ color: 'var(--espresso)' }}>
-              Health Tracking
-            </h1>
-            <p className="font-body text-sm mt-1" style={{ color: 'var(--espresso-muted)' }}>
-              {format(new Date(), 'EEEE, MMMM do')}
-            </p>
+      {/* ═══ Header ═══ */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: EASE }}
+        className="relative rounded-2xl overflow-hidden h-48 md:h-56"
+      >
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, var(--cream-dark), var(--border-light), var(--cream-dark))' }} />
+        <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="font-display text-3xl md:text-4xl font-semibold" style={{ color: 'var(--espresso)' }}>
+                Health Tracking
+              </h1>
+              <p className="font-body text-sm mt-1" style={{ color: 'var(--espresso-muted)' }}>
+                {format(new Date(), 'EEEE, MMMM do')}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {user && (
+                <button
+                  onClick={syncFromOura}
+                  disabled={syncLoading}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-body text-sm font-medium transition-all"
+                  style={{ background: 'var(--sage)', color: 'white' }}
+                >
+                  <RefreshCw className={`w-4 h-4 ${syncLoading ? 'animate-spin' : ''}`} />
+                  {syncLoading ? 'Syncing...' : 'Sync Oura'}
+                </button>
+              )}
+            </div>
           </div>
-        </motion.div>
-
-        {/* ═══ Score Cards ═══ */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ScoreCard
-            title="Sleep Score"
-            score={todayData?.sleep ?? 78}
-            icon={Moon}
-            delay={0.1}
-            onClick={() => setEditOpen(true)}
-          />
-          <ScoreCard
-            title="Readiness"
-            score={todayData?.readiness ?? 82}
-            icon={Zap}
-            delay={0.2}
-            onClick={() => setEditOpen(true)}
-          />
-          <ScoreCard
-            title="Steps"
-            score={Math.min(Math.round((todayData?.steps ?? 8432) / 100), 100)}
-            icon={Footprints}
-            delay={0.3}
-            onClick={() => setEditOpen(true)}
-          />
         </div>
+      </motion.div>
 
-        {/* ═══ Trend Summary ═══ */}
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            { label: 'Sleep', trend: sleepTrend, icon: Moon },
-            { label: 'Readiness', trend: readinessTrend, icon: Zap },
-            { label: 'Steps', trend: stepsTrend, icon: Footprints },
-          ].map((item, i) => (
-            <motion.div
-              key={item.label}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + i * 0.1 }}
-              className="flex items-center gap-2 p-3 rounded-lg"
-              style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
-            >
-              <item.icon className="w-4 h-4" style={{ color: 'var(--espresso-muted)' }} />
-              <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>{item.label}</span>
-              <span className="flex items-center gap-1 ml-auto">
-                {item.trend >= 0 ? (
-                  <TrendingUp className="w-3.5 h-3.5" style={{ color: 'var(--sage)' }} />
-                ) : (
-                  <TrendingDown className="w-3.5 h-3.5" style={{ color: 'var(--rose-soft)' }} />
-                )}
-                <span className="font-body text-xs font-medium" style={{ color: item.trend >= 0 ? 'var(--sage)' : 'var(--rose-soft)' }}>
-                  {item.trend >= 0 ? '+' : ''}{item.trend}
-                </span>
+      {/* Sync status */}
+      {syncError && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 p-3 rounded-lg"
+          style={{ background: '#C9A0A010', border: '1px solid #C9A0A040' }}
+        >
+          <LinkIcon className="w-4 h-4" style={{ color: '#C9A0A0' }} />
+          <span className="font-body text-sm" style={{ color: '#C9A0A0' }}>{syncError}</span>
+          <a href="/planner/settings" className="font-body text-sm font-medium underline ml-auto" style={{ color: 'var(--sage)' }}>Open Settings →</a>
+        </motion.div>
+      )}
+
+      {/* ═══ Score Cards ═══ */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <ScoreCard
+          title="Sleep Score"
+          score={todayData?.sleep ?? 78}
+          icon={Moon}
+          delay={0.1}
+          onClick={() => setEditOpen(true)}
+          source={todayData?.source}
+        />
+        <ScoreCard
+          title="Readiness"
+          score={todayData?.readiness ?? 82}
+          icon={Zap}
+          delay={0.2}
+          onClick={() => setEditOpen(true)}
+          source={todayData?.source}
+        />
+        <ScoreCard
+          title="Steps"
+          score={Math.min(Math.round((todayData?.steps ?? 8432) / 100), 100)}
+          icon={Footprints}
+          delay={0.3}
+          onClick={() => setEditOpen(true)}
+          source={todayData?.source}
+        />
+      </div>
+
+      {/* ═══ Trend Summary ═══ */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: 'Sleep', trend: sleepTrend, icon: Moon },
+          { label: 'Readiness', trend: readinessTrend, icon: Zap },
+          { label: 'Steps', trend: stepsTrend, icon: Footprints },
+        ].map((item, i) => (
+          <motion.div
+            key={item.label}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 + i * 0.1 }}
+            className="flex items-center gap-2 p-3 rounded-lg"
+            style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
+          >
+            <item.icon className="w-4 h-4" style={{ color: 'var(--espresso-muted)' }} />
+            <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>{item.label}</span>
+            <span className="flex items-center gap-1 ml-auto">
+              {item.trend >= 0 ? (
+                <TrendingUp className="w-3.5 h-3.5" style={{ color: 'var(--sage)' }} />
+              ) : (
+                <TrendingDown className="w-3.5 h-3.5" style={{ color: 'var(--rose-soft)' }} />
+              )}
+              <span className="font-body text-xs font-medium" style={{ color: item.trend >= 0 ? 'var(--sage)' : 'var(--rose-soft)' }}>
+                {item.trend >= 0 ? '+' : ''}{item.trend}
               </span>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* ═══ Weekly Trends ═══ */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: EASE, delay: 0.4 }}
-          className="rounded-xl p-8"
-          style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" style={{ color: 'var(--sage)' }} />
-              <h3 className="font-display text-lg" style={{ color: 'var(--espresso)' }}>Weekly Trends</h3>
-            </div>
-            <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>Last 7 days</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <MiniBarChart data={weeklySleep} color="#C9A96E" label="Sleep Score" />
-            <MiniBarChart data={weeklyReadiness} color="#7A8B65" label="Readiness Score" />
-            <MiniBarChart data={weeklySteps} color="#C9A0A0" label="Steps (/100)" />
-          </div>
-        </motion.div>
-
-        {/* ═══ Monthly Sparklines ═══ */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: EASE, delay: 0.5 }}
-          className="rounded-xl p-8"
-          style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Activity className="w-5 h-5" style={{ color: 'var(--lake)' }} />
-              <h3 className="font-display text-lg" style={{ color: 'var(--espresso)' }}>Monthly Trends</h3>
-            </div>
-            <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>Last 30 days</span>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Sparkline data={monthlySleep} color="#C9A96E" label="Sleep Score (30d)" />
-            <Sparkline data={monthlySteps} color="#7A8B65" label="Steps /100 (30d)" />
-          </div>
-        </motion.div>
-
-        {/* ═══ Metrics ═══ */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: EASE, delay: 0.55 }}
-          className="rounded-xl p-8"
-          style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
-        >
-          <div className="flex items-center gap-2 mb-5">
-            <Heart className="w-5 h-5" style={{ color: 'var(--rose-soft)' }} />
-            <h3 className="font-display text-lg" style={{ color: 'var(--espresso)' }}>Today&apos;s Metrics</h3>
-            <span className="ml-auto font-body text-xs cursor-pointer flex items-center gap-1" style={{ color: 'var(--sage)' }} onClick={() => setEditOpen(true)}>
-              <Edit3 className="w-3.5 h-3.5" /> Edit
             </span>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* ═══ Weekly Trends ═══ */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: EASE, delay: 0.4 }}
+        className="rounded-xl p-8"
+        style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" style={{ color: 'var(--sage)' }} />
+            <h3 className="font-display text-lg" style={{ color: 'var(--espresso)' }}>Weekly Trends</h3>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            <MetricPill icon={Heart} label="HRV" value={todayData?.hrv ?? 65} unit="ms" color="#C9A0A0" />
-            <MetricPill icon={Activity} label="Resting HR" value={todayData?.restingHR ?? 52} unit="bpm" color="#C9A96E" />
-            <MetricPill icon={Moon} label="Deep Sleep" value={todayData?.deepSleep ?? 90} unit="min" color="#7A8B65" />
-            <MetricPill icon={Zap} label="REM Sleep" value={todayData?.remSleep ?? 120} unit="min" color="#7B9EA8" />
-            <MetricPill icon={Clock} label="Total Sleep" value={todayData?.totalSleep ?? 480} unit="min" color="#A67C52" />
+          <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>Last 7 days</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <MiniBarChart data={weeklySleep} color="#C9A96E" label="Sleep Score" />
+          <MiniBarChart data={weeklyReadiness} color="#7A8B65" label="Readiness Score" />
+          <MiniBarChart data={weeklySteps} color="#C9A0A0" label="Steps (/100)" />
+        </div>
+      </motion.div>
+
+      {/* ═══ Monthly Sparklines ═══ */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: EASE, delay: 0.5 }}
+        className="rounded-xl p-8"
+        style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <Activity className="w-5 h-5" style={{ color: 'var(--lake)' }} />
+            <h3 className="font-display text-lg" style={{ color: 'var(--espresso)' }}>Monthly Trends</h3>
           </div>
-        </motion.div>
+          <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>Last 30 days</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Sparkline data={monthlySleep} color="#C9A96E" label="Sleep Score (30d)" />
+          <Sparkline data={monthlySteps} color="#7A8B65" label="Steps /100 (30d)" />
+        </div>
+      </motion.div>
+
+      {/* ═══ Metrics ═══ */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: EASE, delay: 0.55 }}
+        className="rounded-xl p-8"
+        style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
+      >
+        <div className="flex items-center gap-2 mb-5">
+          <Heart className="w-5 h-5" style={{ color: 'var(--rose-soft)' }} />
+          <h3 className="font-display text-lg" style={{ color: 'var(--espresso)' }}>Today&apos;s Metrics</h3>
+          <span className="ml-auto font-body text-xs cursor-pointer flex items-center gap-1" style={{ color: 'var(--sage)' }} onClick={() => setEditOpen(true)}>
+            <Edit3 className="w-3.5 h-3.5" /> Edit
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <MetricPill icon={Heart} label="HRV" value={todayData?.hrv ?? 65} unit="ms" color="#C9A0A0" />
+          <MetricPill icon={Activity} label="Resting HR" value={todayData?.restingHR ?? 52} unit="bpm" color="#C9A96E" />
+          <MetricPill icon={Moon} label="Deep Sleep" value={todayData?.deepSleep ?? 90} unit="min" color="#7A8B65" />
+          <MetricPill icon={Zap} label="REM Sleep" value={todayData?.remSleep ?? 120} unit="min" color="#7B9EA8" />
+          <MetricPill icon={Clock} label="Total Sleep" value={todayData?.totalSleep ?? 480} unit="min" color="#A67C52" />
+        </div>
+      </motion.div>
 
       {/* ═══ Edit Modal ═══ */}
       <EditModal open={editOpen} onClose={() => setEditOpen(false)} todayData={todayData} onSave={handleSave} />
