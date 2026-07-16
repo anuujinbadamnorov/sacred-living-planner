@@ -232,24 +232,64 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-        <HeroSection
-          imageIndex={0}
-          title={greeting}
-          subtitle={`${format(today, 'EEEE, MMMM do')} · ${moon.emoji} ${moon.name} — ${moon.illumination}% illuminated`}
+      {/* ── Elegant Hero (matching reference aesthetic) ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: EASE }}
+        className="mb-12 text-center py-12 md:py-16"
+      >
+        <p 
+          className="text-sm uppercase tracking-[0.2em] mb-4" 
+          style={{ color: '#8B7D70' }}
         >
-          <div className="spiritual-quote max-w-2xl mx-auto">
-            {affirmation}
-          </div>
-        </HeroSection>
-
-        {/* ── Cloud Sync Status ── */}
-        {user && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45, duration: 0.5 }}
-            className="sage-card"
+          Welcome to Your Year
+        </p>
+        <h1 
+          className="font-display text-6xl md:text-7xl font-light mb-2" 
+          style={{ 
+            color: '#2C2420',
+            fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
+            letterSpacing: '0.02em',
+          }}
+        >
+          {format(today, 'yyyy')}
+        </h1>
+        <p 
+          className="text-xl md:text-2xl font-light mb-6" 
+          style={{ 
+            color: '#5C4D42',
+            fontFamily: "'Cormorant Garamond', serif",
+          }}
+        >
+          A Year of Intention
+        </p>
+        <p 
+          className="text-sm max-w-lg mx-auto leading-relaxed" 
+          style={{ color: '#8B7D70' }}
+        >
+          Your complete personal operating system for mind, body, spirit, and abundance.
+        </p>
+        
+        {/* Quote */}
+        <div className="mt-8 pt-8 border-t" style={{ borderColor: 'rgba(0,0,0,0.08)' }}>
+          <p 
+            className="text-sm italic max-w-md mx-auto" 
+            style={{ color: '#6B5E52' }}
           >
+            "{affirmation}"
+          </p>
+        </div>
+      </motion.div>
+
+      {/* ── Cloud Sync Status ── */}
+      {user && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.5 }}
+          className="sage-card"
+        >
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-sm font-semibold uppercase tracking-wider" style={{ color: 'var(--sage-700)' }}>
                 ☁️ Cloud Sync

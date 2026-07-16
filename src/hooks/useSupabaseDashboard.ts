@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/components/AuthProvider';
 
 interface DashboardStats {
@@ -35,12 +35,12 @@ export function useSupabaseDashboard(): DashboardStats {
       const today = new Date().toISOString().split('T')[0];
 
       try {
-        // Count habits
+        // Count habits (not archived)
         const { count: habitsCount, error: habitsError } = await supabase
           .from('habits')
           .select('*', { count: 'exact', head: true })
           .eq('user_id', user.id)
-          .eq('is_active', true);
+          .eq('archived', false);
 
         if (habitsError) throw habitsError;
 
@@ -58,7 +58,7 @@ export function useSupabaseDashboard(): DashboardStats {
           .from('daily_entries')
           .select('id')
           .eq('user_id', user.id)
-          .eq('date', today)
+          .eq('entry_date', today)
           .maybeSingle();
 
         if (entryError) throw entryError;

@@ -108,18 +108,52 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         transition: 'width 0.3s ease',
       }}
     >
-      {/* Logo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '20px 16px', flexShrink: 0 }}>
+      {/* Elegant Branding */}
+      <div style={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        gap: '12px', 
+        padding: '24px 16px 20px', 
+        flexShrink: 0,
+        borderBottom: '1px solid rgba(0,0,0,0.06)',
+      }}>
         <div style={{
-          width: 32, height: 32, borderRadius: 8,
-          backgroundColor: '#C4704B', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+          width: 36, 
+          height: 36, 
+          borderRadius: '50%',
+          backgroundColor: '#C4704B', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          flexShrink: 0,
+          boxShadow: '0 2px 8px rgba(196, 112, 75, 0.25)',
         }}>
           <Star className="w-4 h-4 text-white" />
         </div>
         {!collapsed && (
-          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '18px', color: '#2C2420', whiteSpace: 'nowrap' }}>
-            Sacred Living
-          </span>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ 
+              fontFamily: "'Cormorant Garamond', 'Playfair Display', serif", 
+              fontSize: '20px', 
+              fontWeight: 600,
+              color: '#2C2420', 
+              whiteSpace: 'nowrap',
+              letterSpacing: '0.02em',
+              lineHeight: 1.2,
+            }}>
+              Sacred Living
+            </span>
+            <span style={{
+              fontSize: '10px',
+              color: '#8B7D70',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              fontWeight: 500,
+              marginTop: '2px',
+            }}>
+              A Year of Intention
+            </span>
+          </div>
         )}
       </div>
 
@@ -127,7 +161,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
       <button
         onClick={onToggle}
         style={{
-          margin: '0 12px 8px 12px',
+          margin: '8px 12px',
           padding: '6px',
           borderRadius: 8,
           alignSelf: 'flex-end',
