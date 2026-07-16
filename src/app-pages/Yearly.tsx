@@ -103,7 +103,7 @@ function MiniMonth({
         <p className="font-body text-xs text-white/70 text-center mb-3">{year}</p>
 
         {/* Day headers */}
-        <div className="grid grid-cols-7 gap-0 mb-1">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0, marginBottom: '4px' }}>
           {weekDays.map((d) => (
             <div
               key={d}
@@ -115,7 +115,7 @@ function MiniMonth({
         </div>
 
         {/* Date grid */}
-        <div className="grid grid-cols-7 gap-0">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 0 }}>
           {days.map((day, idx) => {
             const inMonth = isSameMonth(day, monthDate)
             const dayIsToday = isToday(day)
@@ -277,7 +277,7 @@ export default function Yearly() {
         </motion.div>
 
         {/* ── 12-Month Grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
           {months.map((month, i) => (
             <motion.div
               key={month}

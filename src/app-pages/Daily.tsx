@@ -534,9 +534,9 @@ export default function Daily() {
         </motion.div>
 
         {/* ── 3-Column Layout ── */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px 300px', gap: '24px' }}>
           {/* ═══════════ LEFT COLUMN: Schedule & Tasks ═══════════ */}
-          <motion.div variants={fadeUp} className="xl:col-span-5 space-y-6">
+          <motion.div variants={fadeUp} className="space-y-6">
             {/* Time-Blocking Schedule */}
             <div className="card-planner overflow-hidden">
               <h3 className="flex items-center gap-2 mb-4">
@@ -760,7 +760,7 @@ export default function Daily() {
           </motion.div>
 
           {/* ═══════════ MIDDLE COLUMN: Notes & Journal ═══════════ */}
-          <motion.div variants={fadeUp} className="xl:col-span-4 space-y-6">
+          <motion.div variants={fadeUp} className="space-y-6">
             {/* Notes */}
             <div className="card-planner">
               <h3 className="flex items-center gap-2 mb-3">
@@ -890,7 +890,7 @@ export default function Daily() {
           </motion.div>
 
           {/* ═══════════ RIGHT COLUMN: Habits & Reflection ═══════════ */}
-          <motion.div variants={fadeUp} className="xl:col-span-3 space-y-6">
+          <motion.div variants={fadeUp} className="space-y-6">
             {/* Daily Habits */}
             <div className="card-planner">
               <h3 className="flex items-center gap-2 mb-4">

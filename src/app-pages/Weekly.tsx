@@ -364,7 +364,7 @@ export default function Weekly() {
         {/* ── 7-Day Overview ── */}
         <motion.div variants={fadeUp} className="card-planner overflow-x-auto">
           <div className="min-w-[700px]">
-            <div className="grid grid-cols-7 gap-2">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
               {weekDays.map((day, idx) => {
                 const dKey = dateKey(day)
                 const dayIsToday = isToday(day)

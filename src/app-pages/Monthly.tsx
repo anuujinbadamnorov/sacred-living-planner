@@ -302,9 +302,9 @@ export default function Monthly() {
         </motion.div>
 
         {/* ── Calendar + Sidebar ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
-          {/* Calendar Grid (70%) */}
-          <div className="lg:col-span-7">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '24px' }}>
+          {/* Calendar Grid */}
+          <div>
             <AnimatePresence mode="wait">
               <motion.div
                 key={format(displayDate, 'yyyy-MM')}
@@ -314,7 +314,7 @@ export default function Monthly() {
                 transition={{ duration: 0.2, ease: EASE }}
               >
                 {/* Day headers */}
-                <div className="grid grid-cols-7 mb-0">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 0 }}>
                   {DAY_ABBREVS.map((d) => (
                     <div
                       key={d}
@@ -328,7 +328,7 @@ export default function Monthly() {
                 {/* Week rows */}
                 <div className="border border-warm-200 rounded-md overflow-hidden">
                   {weeks.map((week, weekIdx) => (
-                    <div key={weekIdx} className="grid grid-cols-7 relative group/week">
+                    <div key={weekIdx} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', position: 'relative' }} className="group/week">
                       {/* Week number hover button */}
                       <button
                         onClick={() => handleWeekClick(week)}
@@ -426,7 +426,7 @@ export default function Monthly() {
           </div>
 
           {/* Sidebar (30%) */}
-          <div className="lg:col-span-3 space-y-4">
+          <div className="space-y-4">
             {/* Selected Day Info */}
             <motion.div
               className="card-planner"

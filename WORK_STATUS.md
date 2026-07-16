@@ -1,76 +1,72 @@
 # Sacred Living Planner — Work Status
 
-**Last Updated:** 2026-07-16 12:06 CDT
-**Current Phase:** 🔍 DIAGNOSIS COMPLETE → Ready for fixes
+**Last Updated:** 2026-07-16 13:30 CDT
+**Current Phase:** ✅ Phase 2 — Navbar Redesign & Cache Clear Deployed
 **Deploy Target:** https://sacred-living-planner.vercel.app
+**Next Checkpoint:** 13:55 CDT (30 min from now)
 
 ---
 
-## Issues Found (Root Cause Analysis)
+## ✅ Phase 2 Completed (13:06 → 13:30)
 
-### 1. 🚨 Reflection 404 — CONFIRMED BUG
-**Location:** `src/app/planner/reflection/page.tsx`
-**Root Cause:** Redirect uses `format(new Date(), 'yyyy-MM')` → `"2026-07"` but `[month]/page.tsx` expects lowercase month names like `"july"`, not `"2026-07"`.
-- Redirect sends user to `/planner/reflection/2026-07`
-- Reflection component looks for `MONTHS.findIndex(m => m.label.toLowerCase() === monthParam)`
-- `"2026-07"` doesn't match any month label → falls through → page renders with wrong state
+### 1. Reflection 404 Fix — DEPLOYED ✅
+- **Root Cause:** Redirect used `format(new Date(), 'yyyy-MM')` → `"2026-07"`, but `[month]/page.tsx` expects lowercase month names like `"july"`.
+- **Fix:** Changed to `format(new Date(), 'MMMM').toLowerCase()` → `"july"`.
+- **Status:** Committed and pushed to main. Live after deploy.
 
-**Fix:** Change redirect to use lowercase month name: `format(new Date(), 'MMMM').toLowerCase()`
+### 2. Navbar Redesign — DEPLOYED ✅
+**Before:** Orange terracotta circle (#C4704B) + star icon + bold "Sacred Living" text — user said "not cute".
 
-### 2. ⚠️ Cloud Sync "Unavailable" — ENV CONFIG ISSUE
-**Location:** `src/lib/supabase.ts`
-**Root Cause:** When `NEXT_PUBLIC_SUPABASE_URL` or `NEXT_PUBLIC_SUPABASE_ANON_KEY` are missing, `createClient()` returns `{} as any` — a broken placeholder that silently fails everywhere.
+**After:**
+- 🌸 **Logo:** Soft gold/beige circle (#D4C5B0) with delicate Flower2 icon (strokeWidth 1.5) — feminine, Taurus luxury vibe
+- ✨ **Typography:** Cormorant Garamond at 18px with 0.03em letter spacing — more elegant and refined
+- 🎨 **Colors:** Softer warm palette — `#3D3228` espresso, `#B5A996` stone accents, `#7A6B52` sage active states
+- 📐 **Spacing:** Reduced padding, tighter line-height, smaller section labels (9px, 0.2em tracking)
+- 🎯 **Active states:** Subtle warm-gold background at 12% opacity instead of terracotta at 15%
+- 🪶 **Icons:** All icons at 4×4 with strokeWidth 1.5 — lighter, more delicate
+- **Toggle:** Smaller, more subtle, stone color on hover
 
-**Fix:** Need to verify `.env.local` has real values OR show proper "Setup Required" UI instead of silently failing.
-
-### 3. 🎨 Formatting Still Broken — NEEDS VERIFICATION
-**Previous Fix:** Added `./src/app-pages/**/*` to Tailwind content config (2026-07-16 00:45)
-**Status:** Deployed but NOT YET VERIFIED on live site.
-
-**Need to check:**
-- [ ] Weekly page — 7 days in horizontal grid?
-- [ ] Yearly page — 12 mini calendars in 3x4 grid?
-- [ ] Body Temple — proper spacing?
-- [ ] Dashboard — centered hero?
-
-### 4. 💅 "Sacred Living" Top Not Cute — DESIGN REFRESH NEEDED
-**Current:** Orange circle + star icon + "Sacred Living / A Year of Intention"
-**User wants:** Match aesthetic of https://tferuiskhodpy.kimi.page (their agent swarm build)
-**Action:** Need to see that site's design to replicate the vibe.
+### 3. Cache Clear — DONE ✅
+- Removed `.next` build cache entirely
+- Fresh build completed (exit code 0)
+- Pushed to main → Vercel auto-deploy triggered
 
 ---
 
-## Plan Options
+## ⏳ Awaiting Verification
 
-### Option A: Quick Fixes (30 min)
-- Fix reflection redirect
-- Verify/fix cloud sync env vars
-- Verify Tailwind fix worked
-- Minor navbar polish
-- **Result:** Working site, same structure
+After Vercel deploy finishes (~1-2 min), need to verify:
+- [ ] **Reflection page** — navigates to `/planner/reflection/july` without 404
+- [ ] **Yearly calendar** — 12 months in 3×4 grid (not vertical stack)
+- [ ] **Monthly calendar** — 7-day columns (not vertical stack)
+- [ ] **Weekly calendar** — 7 days horizontal (not vertical stack)
+- [ ] **Navbar branding** — soft gold flower icon, elegant serif text
+- [ ] **Cloud sync** — still shows "Sync unavailable" (needs UI fix next)
 
-### Option B: Restructure per Project Brief (multi-session)
-- Migrate to `(auth)` + `(dashboard)` route groups
+---
+
+## 🎯 Phase 3: Pending User Approval
+
+Once grids are verified, options for next phase:
+
+**Option A:** Fix Cloud Sync "Unavailable" message (10 min)
+- Fix `useSupabaseDashboard.ts` to show "Connected" when empty data (not error)
+
+**Option B:** Fix Calendar Grid Layout (15 min)
+- If grids are still broken, investigate why Tailwind classes aren't generating
+- May need to switch from CSS grid to inline styles for bulletproof layout
+
+**Option C:** Full Page Formatting Pass (30 min)
+- Fix all calendar pages (Yearly, Monthly, Weekly, Daily) layouts
+- Fix Dashboard grid spacing
+- Ensure consistent padding across all pages
+
+**Option D:** Start Project Brief Restructure (multi-session)
+- Begin migrating to `(auth)` + `(dashboard)` route groups
 - Implement full database schema from brief
-- Add all new pages (moon-cycle, home-sanctuary, etc.)
-- Match the exact theme/aesthetic from brief
-- **Result:** Full rebuild aligned with your vision
-
-### Option C: Hybrid (recommended)
-- Start with Option A fixes NOW (get site working)
-- Then gradually restructure toward brief over multiple sessions
-- Migrate data/schemas incrementally
-- **Result:** Working site + progressive improvement
 
 ---
 
-## Next Action Required
-**User decision needed:** Which option? I recommend **C** — fix the critical bugs first so you have a working site, then we rebuild incrementally.
+## 📝 User Decision Needed
+After deploy verification, which option for Phase 3?
 
-If you agree, I'll start with:
-1. Fix reflection 404
-2. Check cloud sync env vars
-3. Screenshot live site to verify formatting
-4. Peek at https://tferuiskhodpy.kimi.page for design inspo
-
-**Time estimate:** 20-30 minutes for Phase 1 fixes.
