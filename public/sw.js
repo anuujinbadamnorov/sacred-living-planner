@@ -1,73 +1,27 @@
-const CACHE_NAME = 'sacred-living-v1';
-const STATIC_ASSETS = [
-  '/',
-  '/planner',
-  '/planner/daily',
-  '/planner/weekly',
-  '/planner/monthly',
-  '/planner/settings',
-  '/planner/notes',
-  '/planner/documents',
-  '/manifest.json',
-];
+// Self-destructing service worker — clears all caches and unregisters itself
+// This replaces any stale cached service worker from previous builds
 
-// Install: cache static assets
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    }).catch(() => {
-      // Some assets may fail, that's okay
-    })
-  );
+self.addEventListener('install', () => {
   self.skipWaiting();
 });
 
-// Activate: clean old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames
-          .filter((name) => name !== CACHE_NAME)
-          .map((name) => caches.delete(name))
+        cacheNames.map((cacheName) => caches.delete(cacheName))
       );
+    }).then(() => {
+      return self.registration.unregister();
+    }).then(() => {
+      return self.clients.matchAll({ type: 'window' });
+    }).then((clients) => {
+      clients.forEach((client) => client.navigate(client.url));
     })
   );
-  self.clients.claim();
 });
 
-// Fetch: network first, fallback to cache
+// Intercept all fetches and pass through to network (no caching)
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-
-  // Skip non-GET requests and API calls
-  if (request.method !== 'GET' || request.url.includes('supabase')) {
-    return;
-  }
-
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        // Cache successful responses
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, clone);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Fallback to cache
-        return caches.match(request).then((cached) => {
-          if (cached) return cached;
-          // Fallback to offline page for navigation requests
-          if (request.mode === 'navigate') {
-            return caches.match('/');
-          }
-          return new Response('Offline', { status: 503 });
-        });
-      })
-  );
+  event.respondWith(fetch(event.request));
 });
