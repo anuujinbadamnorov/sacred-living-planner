@@ -33,6 +33,7 @@ import {
   Calendar as CalendarIcon,
 } from 'lucide-react'
 import { usePlanner } from '@/hooks/usePlanner'
+import { useDailyEntry } from '@/hooks/useDailyEntry'
 import { dateKey, getWeekDays } from '@/lib/dateUtils'
 import HeroSection from '@/components/HeroSection'
 
@@ -144,6 +145,7 @@ export default function Daily() {
   const { date: dateParam } = useParams<{ date: string }>()
   const router = useRouter()
   const { getStorageItem, setStorageItem, getHabits, setHabits } = usePlanner()
+  const hydratedDateRef = useRef<string | null>(null)
 
   /* ── Resolve current date ── */
   const currentDate: Date = useMemo(() => {
@@ -154,6 +156,7 @@ export default function Daily() {
 
   const currentDateStr = dateKey(currentDate)
   const weekDays = getWeekDays(currentDate)
+  const { entry, isLoading: entryLoading, saveEntry } = useDailyEntry(currentDateStr)
 
   /* ── Handlers ── */
   const goToDate = useCallback(
@@ -247,19 +250,46 @@ export default function Daily() {
     return () => clearInterval(interval)
   }, [])
 
-  /* ── Sync when date changes ── */
+  /* ── Hydrate from Supabase (or localStorage fallback) ── */
   useEffect(() => {
-    setFocus(getStorageItem<string>(`planner-focus-${currentDateStr}`, ''))
-    setPriorities(getStorageItem<string[]>(`planner-priorities-${currentDateStr}`, ['', '', '']))
-    setTasks(getStorageItem<TaskItem[]>(`planner-tasks-${currentDateStr}`, []))
-    setEvents(getStorageItem<TimeEvent[]>(`planner-events-${currentDateStr}`, []))
-    setNotes(getStorageItem<string>(`planner-notes-${currentDateStr}`, ''))
-    const grat = getStorageItem<string[]>(`planner-gratitude-${currentDateStr}`, ['', '', ''])
-    setGratitude(grat.map((text, i) => ({ id: `g${i}`, text })))
-    setMood(getStorageItem<Mood>(`planner-mood-${currentDateStr}`, null))
-    setWaterCount(getStorageItem<number>(`planner-water-${currentDateStr}`, 0))
+    if (entryLoading) return
+    if (hydratedDateRef.current === currentDateStr) return
+    hydratedDateRef.current = currentDateStr
+
+    if (entry) {
+      setFocus(entry.focus || '')
+      setPriorities((entry.priorities as string[]) || ['', '', ''])
+      setTasks((entry.tasks as TaskItem[]) || [])
+      setEvents((entry.events as TimeEvent[]) || [])
+      setNotes(entry.notes || '')
+      const gratTexts = (entry.gratitude as string[]) || ['', '', '']
+      setGratitude(gratTexts.map((text, i) => ({ id: `g${i}`, text })))
+      setMood((entry.mood as Mood) || null)
+      setWaterCount(entry.water_intake || 0)
+    }
     setHabitsData(getHabits())
-  }, [currentDateStr, getStorageItem, getHabits])
+  }, [currentDateStr, entry, entryLoading, getHabits])
+
+  /* ── Debounced save to Supabase ── */
+  useEffect(() => {
+    if (entryLoading) return
+    if (hydratedDateRef.current !== currentDateStr) return
+
+    const timeout = setTimeout(() => {
+      saveEntry({
+        focus,
+        priorities,
+        tasks,
+        events,
+        notes,
+        gratitude,
+        mood,
+        waterCount,
+      })
+    }, 2000)
+
+    return () => clearTimeout(timeout)
+  }, [focus, priorities, tasks, events, notes, gratitude, mood, waterCount, currentDateStr, entryLoading, saveEntry])
 
   /* ── Mini calendar days ── */
   const miniCalDays = useMemo(() => {

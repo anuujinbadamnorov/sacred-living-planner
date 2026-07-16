@@ -201,7 +201,7 @@ export interface Database {
           sleep_hours: number | null;
           sleep_quality: number | null;
           focus: string | null;
-          gratitude: string | null;
+          gratitude: Json | null;
           intention: string | null;
           schedule: Json;
           morning_notes: string | null;
@@ -218,6 +218,10 @@ export interface Database {
           dinner: string | null;
           snacks: string | null;
           oura_data: Json | null;
+          tasks: Json | null;
+          priorities: Json | null;
+          notes: string | null;
+          events: Json | null;
           created_at: string;
           updated_at: string;
         };
@@ -230,7 +234,7 @@ export interface Database {
           sleep_hours?: number | null;
           sleep_quality?: number | null;
           focus?: string | null;
-          gratitude?: string | null;
+          gratitude?: Json | null;
           intention?: string | null;
           schedule?: Json;
           morning_notes?: string | null;
@@ -247,6 +251,10 @@ export interface Database {
           dinner?: string | null;
           snacks?: string | null;
           oura_data?: Json | null;
+          tasks?: Json | null;
+          priorities?: Json | null;
+          notes?: string | null;
+          events?: Json | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -259,7 +267,7 @@ export interface Database {
           sleep_hours?: number | null;
           sleep_quality?: number | null;
           focus?: string | null;
-          gratitude?: string | null;
+          gratitude?: Json | null;
           intention?: string | null;
           schedule?: Json;
           morning_notes?: string | null;
@@ -276,6 +284,10 @@ export interface Database {
           dinner?: string | null;
           snacks?: string | null;
           oura_data?: Json | null;
+          tasks?: Json | null;
+          priorities?: Json | null;
+          notes?: string | null;
+          events?: Json | null;
           created_at?: string;
           updated_at?: string;
         };

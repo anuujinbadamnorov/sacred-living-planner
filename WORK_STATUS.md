@@ -1,102 +1,79 @@
 # Sacred Living Planner — Work Status
 
-**Last Updated:** 2026-07-14  
-**Current Phase:** Bug Fixes & Formatting Polish  
-**Deploy Target:** https://sacred-living-planner.vercel.app
+**Last Updated:** 2026-07-15 22:18 CDT
+**Current Phase:** Tasks A+B+C Complete — Deploy & Polish
+**Deploy Target:** https://sacred-living-planner.vercel.app (needs git push)
 
 ---
 
-## Issues Reported (2026-07-14)
+## Current Issues (User Reported 2026-07-15)
 
 | # | Issue | Severity | Status |
 |---|-------|----------|--------|
-| 1 | **Reflection tab → 404 error** | 🔴 Critical | 🔧 In Progress |
-| 2 | **Yearly page broken** — stray HeroSection inside calendar grid, breaks entire page | 🔴 Critical | 🔧 In Progress |
-| 3 | **"Sacred Living" top/header not cute** — plain text logo, needs elegance | 🟡 High | ⏳ Pending |
-| 4 | **Formatting bad on all pages** — spacing, grids, card layouts | 🟡 High | ⏳ Pending |
-| 5 | **Cloud sync unavailable** — Dashboard shows "Sync unavailable" | 🟡 High | ⏳ Pending |
+| 1 | Reflection tab → 404 error | 🔴 Critical | 🔄 Investigating |
+| 2 | Formatting bad on all pages | 🟡 High | 🔄 Needs design pass |
+| 3 | "Sacred Living" header not cute | 🟡 High | 🔄 Needs redesign |
+| 4 | "Cloud sync isn't available" message | 🟡 High | 🔄 Likely fixed with migration |
+| 5 | Needs to match https://tferuiskhodpy.kimi.page/ aesthetic | 🟡 High | 🔄 Not started |
 
 ---
 
-## Root Causes Found
+## What We Accomplished Today (Tasks A+B+C)
 
-### 1. Reflection 404
-- `/planner/reflection/page.tsx` redirects to `/planner/reflection/2026-07` (using `date-fns` format `yyyy-MM`)
-- But `Reflection.tsx` component expects month **names** like `june`, `july` — not `2026-07`
-- The `[month]` dynamic route exists, so the 404 may be from a build/deployment issue or the redirect not firing
-- **Fix:** Change redirect to use lowercase month name (e.g., `july`)
+### Task A: Dashboard Layout ✅
+- Created `/planner/layout.tsx` — single Next.js layout wrapping all `/planner/*` routes
+- Stripped `<PlannerLayout>` wrappers from 27 planner pages
+- Build: 41 pages, 0 errors ✅
 
-### 2. Yearly Page Broken
-- In `Yearly.tsx`, inside `MiniMonth` component, there's a stray `<HeroSection>` rendered inside every calendar day cell (inside the `.map()` loop)
-- This causes the HeroSection to render 35+ times, overlaying giant text over every day
-- **Fix:** Remove the stray `<HeroSection>` from inside the day loop
+### Task B: Supabase Schema ✅
+- Migration applied in Supabase Studio: added `tasks`, `priorities`, `events`, `notes`, `gratitude` columns
+- 3 RPC functions deployed: `save_daily_entry_field`, `get_or_create_daily_entry`, `upsert_daily_entry`
+- Updated TypeScript types in `database.types.ts` + `types/index.ts`
 
-### 3. "Sacred Living" Header
-- Sidebar shows plain text "Sacred Living" in Cormorant Garamond with a star icon
-- User wants something more like the reference site (tferuiskhodpy.kimi.page) — elegant, centered, with nice imagery
-- **Fix:** Redesign the sidebar header with a more polished logo area, or add a proper hero banner to pages
-
-### 4. Formatting Issues
-- Pages use `max-w-6xl mx-auto` but some grids collapse to single column on certain viewports
-- Card spacing inconsistent across pages (some use `card-planner`, some don't)
-- Sacred Routines, Body Temple, Medicine & Ritual pages list items without proper card containers
-- **Fix:** Standardize card usage, ensure grids have proper responsive breakpoints
-
-### 5. Cloud Sync
-- `useSupabaseDashboard` catches errors and shows "Sync unavailable"
-- Could be: auth session expired, tables don't exist in Supabase, or network issues
-- **Fix:** Check Supabase connection, verify tables, add better diagnostics
+### Task C: Daily Planner Supabase Sync ✅
+- Created `useDailyEntry` hook for cloud read/write
+- Wired into `Daily.tsx`: hydration from Supabase + 2s debounced auto-save
+- All 8 syncable fields: focus, priorities, tasks, events, notes, gratitude, mood, waterCount
+- Build: TypeScript clean ✅
 
 ---
 
-## Build Status
-- **Last build:** 37 pages, 0 errors, 45s (2026-07-11 15:03 CDT)
-- **Git:** 8 commits since baseline
-- **Known issues:** See above
+## Current State — What's Working vs Broken
+
+**✅ Working:**
+- `/login` and `/signup` auth pages
+- Middleware redirects unauthenticated users
+- Supabase auth + profile creation on signup
+- Daily planner page loads with localStorage fallback
+- Database schema + migration applied in Supabase
+
+**❌ Broken / Needs Work:**
+- Reflection tab 404 (`/planner/reflection` has no index page, only `/planner/reflection/[month]`)
+- No cloud sync confirmation (user sees "not available" — need to verify RPC works)
+- Formatting doesn't match the agent-swarm design aesthetic
+- "Sacred Living" header/branding needs redesign
+- Old planner pages still have manual `PlannerLayout` wrappers (stripped but may have residue)
+- Vercel deployment is behind — latest code not pushed to GitHub
 
 ---
 
-## Next Steps (Proposed)
-
-### Phase A: Critical Bug Fixes (This Session)
-1. ✅ Fix Reflection redirect (use month name, not yyyy-MM)
-2. ✅ Remove stray HeroSection from Yearly MiniMonth
-3. ✅ Build & verify locally
-4. ✅ Deploy to Vercel
-
-### Phase B: Formatting & Polish (Next Session — requires approval)
-1. Redesign "Sacred Living" sidebar header/logo
-2. Standardize card layouts across all pages
-3. Fix grid responsiveness on Monthly/Weekly pages
-4. Add proper card containers to Sacred Routines, Body Temple, Medicine & Ritual
-5. Build & deploy
-
-### Phase C: Cloud Sync (Next Session — requires approval)
-1. Check Supabase auth status
-2. Verify tables exist and have data
-3. Fix connection issues or provide better user-facing messages
-4. Build & deploy
+## Reference Design
+- Target aesthetic: https://tferuiskhodpy.kimi.page/
+- Key traits: Clean serif typography, warm cream palette, elegant spacing, horizontal sidebar
 
 ---
 
-## Session Log
+## Next Steps (User Approval Required)
 
-| Time | Action | Result |
-|------|--------|--------|
-| 10:05 | Analyzed all screenshots and code | Identified 5 issues with root causes |
-| 10:10 | Created WORK_STATUS.md | Tracking live |
-| 11:05 | Fixed Reflection redirect | Now uses lowercase month name (e.g., `july`) |
-| 11:05 | Fixed Yearly page | Removed stray HeroSection from calendar day loop |
-| 11:08 | Build test | ✅ 39 pages, 0 errors |
-| 11:10 | Git push | ✅ Pushed to GitHub (auto-deploy to Vercel triggered) |
+**Option 1: Quick Fixes First (15 min)**
+- Fix reflection 404
+- Push to GitHub → Vercel auto-deploy
+- Verify cloud sync works
+- Then move to design polish
 
----
+**Option 2: Design Polish First (30+ min)**
+- Redesign header/branding to match reference
+- Audit all page formatting
+- Fix spacing, fonts, colors
 
-## Current Status: PHASE A COMPLETE
-
-**Critical bugs fixed:**
-1. ✅ Reflection 404 — redirect now uses month names (`/planner/reflection/july`)
-2. ✅ Yearly page — removed stray HeroSection that was breaking the calendar grid
-
-**Build:** Clean (0 errors, 39 pages)
-**Deploy:** Pushed to GitHub, Vercel auto-deploy should be live at https://sacred-living-planner.vercel.app
+**What do you want me to do first?**

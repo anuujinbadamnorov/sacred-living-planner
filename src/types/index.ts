@@ -87,7 +87,7 @@ export interface DailyEntry {
   sleep_hours: number | null;
   sleep_quality: number | null;
   focus: string | null;
-  gratitude: string | null;
+  gratitude: string[] | null;
   intention: string | null;
   schedule: Record<string, string>;
   morning_notes: string | null;
@@ -104,6 +104,10 @@ export interface DailyEntry {
   dinner: string | null;
   snacks: string | null;
   oura_data: Record<string, unknown> | null;
+  tasks: Array<{ id: string; text: string; completed: boolean; priority?: string }> | null;
+  priorities: string[] | null;
+  notes: string | null;
+  events: Array<{ id: string; title: string; hour: number; minute: number }> | null;
   created_at: string;
   updated_at: string;
 }
