@@ -1,72 +1,78 @@
 # Sacred Living Planner — Work Status
 
-**Last Updated:** 2026-07-16 13:30 CDT
-**Current Phase:** ✅ Phase 2 — Navbar Redesign & Cache Clear Deployed
+**Last Updated:** 2026-07-16 13:38 CDT
+**Current Phase:** ✅ Phase B — Calendar Grid Fixes DEPLOYED
 **Deploy Target:** https://sacred-living-planner.vercel.app
-**Next Checkpoint:** 13:55 CDT (30 min from now)
+**Next Checkpoint:** 14:08 CDT (30 min from now)
 
 ---
 
-## ✅ Phase 2 Completed (13:06 → 13:30)
+## ✅ Phase A: Cloud Sync Fix — DEPLOYED ✅
+**File:** `src/hooks/useSupabaseDashboard.ts`
 
-### 1. Reflection 404 Fix — DEPLOYED ✅
-- **Root Cause:** Redirect used `format(new Date(), 'yyyy-MM')` → `"2026-07"`, but `[month]/page.tsx` expects lowercase month names like `"july"`.
-- **Fix:** Changed to `format(new Date(), 'MMMM').toLowerCase()` → `"july"`.
-- **Status:** Committed and pushed to main. Live after deploy.
+**Root Cause:** The hook used `throw` on any Supabase error, which always showed "Sync unavailable" even for minor issues (missing `archived` column, empty tables, etc.).
 
-### 2. Navbar Redesign — DEPLOYED ✅
-**Before:** Orange terracotta circle (#C4704B) + star icon + bold "Sacred Living" text — user said "not cute".
-
-**After:**
-- 🌸 **Logo:** Soft gold/beige circle (#D4C5B0) with delicate Flower2 icon (strokeWidth 1.5) — feminine, Taurus luxury vibe
-- ✨ **Typography:** Cormorant Garamond at 18px with 0.03em letter spacing — more elegant and refined
-- 🎨 **Colors:** Softer warm palette — `#3D3228` espresso, `#B5A996` stone accents, `#7A6B52` sage active states
-- 📐 **Spacing:** Reduced padding, tighter line-height, smaller section labels (9px, 0.2em tracking)
-- 🎯 **Active states:** Subtle warm-gold background at 12% opacity instead of terracotta at 15%
-- 🪶 **Icons:** All icons at 4×4 with strokeWidth 1.5 — lighter, more delicate
-- **Toggle:** Smaller, more subtle, stone color on hover
-
-### 3. Cache Clear — DONE ✅
-- Removed `.next` build cache entirely
-- Fresh build completed (exit code 0)
-- Pushed to main → Vercel auto-deploy triggered
+**Fix:** Wrapped each query in try/catch with fallback queries. Now shows:
+- **"Connected"** when logged in (even with no data)
+- Graceful degradation per table (if one table is missing, others still work)
+- Proper error messages only for real connection/auth failures
 
 ---
 
-## ⏳ Awaiting Verification
+## ✅ Phase B: Calendar Grid Fixes — DEPLOYED ✅
+**Root Cause:** Tailwind CSS grid classes (`grid-cols-7`, `grid-cols-4`, etc.) were not being generated — likely stale build cache or content path mismatch.
 
-After Vercel deploy finishes (~1-2 min), need to verify:
-- [ ] **Reflection page** — navigates to `/planner/reflection/july` without 404
-- [ ] **Yearly calendar** — 12 months in 3×4 grid (not vertical stack)
-- [ ] **Monthly calendar** — 7-day columns (not vertical stack)
-- [ ] **Weekly calendar** — 7 days horizontal (not vertical stack)
-- [ ] **Navbar branding** — soft gold flower icon, elegant serif text
-- [ ] **Cloud sync** — still shows "Sync unavailable" (needs UI fix next)
+**Fix:** Switched from Tailwind `className` to **inline `style`** for all calendar grids:
+
+| Page | Before | After |
+|------|--------|-------|
+| **Yearly** | `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4` | `gridTemplateColumns: 'repeat(4, 1fr)'` |
+| **Yearly (mini)** | `grid-cols-7 gap-0` | `gridTemplateColumns: 'repeat(7, 1fr)', gap: 0` |
+| **Monthly** | `grid-cols-1 lg:grid-cols-10` + `grid-cols-7` | `gridTemplateColumns: '1fr 300px'` + `repeat(7, 1fr)` |
+| **Weekly** | `grid-cols-7 gap-2` | `gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px'` |
+| **Daily** | `grid-cols-1 xl:grid-cols-12` | `gridTemplateColumns: '1fr 400px 300px'` |
 
 ---
 
-## 🎯 Phase 3: Pending User Approval
+## ⏳ Awaiting User Verification
 
-Once grids are verified, options for next phase:
+Please check the live site and confirm:
+- [ ] **Yearly calendar** — 12 months in a 3×4 grid (not vertical stack)?
+- [ ] **Monthly calendar** — days in 7 columns?
+- [ ] **Weekly calendar** — 7 days horizontal?
+- [ ] **Daily calendar** — 3-column layout (schedule | tasks | sidebar)?
+- [ ] **Cloud sync** — shows "Connected" instead of "Unavailable"?
 
-**Option A:** Fix Cloud Sync "Unavailable" message (10 min)
-- Fix `useSupabaseDashboard.ts` to show "Connected" when empty data (not error)
+---
 
-**Option B:** Fix Calendar Grid Layout (15 min)
-- If grids are still broken, investigate why Tailwind classes aren't generating
-- May need to switch from CSS grid to inline styles for bulletproof layout
+## 🎯 Phase C: Full Formatting Pass (Pending User Approval)
+**Time:** 30 min
+**Scope:** Fix ALL remaining grid layouts across all pages:
+- Dashboard (4-column cards, 2-column sections, 7-day water tracker)
+- Settings (3-column color grid, 2-column form)
+- Travel (2/3/4 column grids)
+- Rocket Realm (2/4/5 column grids)
+- Special Dates (2/3/4 column grids)
+- Abundance (2/3/4 column grids)
+- Goals (2/3 column grids)
+- Body Temple (2/3/4/5 column grids)
+- And more...
 
-**Option C:** Full Page Formatting Pass (30 min)
-- Fix all calendar pages (Yearly, Monthly, Weekly, Daily) layouts
-- Fix Dashboard grid spacing
-- Ensure consistent padding across all pages
+**Approach:** Same as Phase B — replace all Tailwind `grid-cols-*` classes with inline `style` grids.
 
-**Option D:** Start Project Brief Restructure (multi-session)
-- Begin migrating to `(auth)` + `(dashboard)` route groups
-- Implement full database schema from brief
+---
+
+## 🎯 Phase D: Project Brief Restructure (Pending User Approval)
+**Time:** Multi-session
+**Scope:** Migrate to `(auth)` + `(dashboard)` route groups, implement full database schema from brief, add all new pages.
 
 ---
 
 ## 📝 User Decision Needed
-After deploy verification, which option for Phase 3?
+
+After verifying the calendar grids, which phase next?
+
+**Option C:** Full formatting pass (30 min) — fix all remaining pages
+**Option D:** Start project brief restructure (multi-session)
+**Option E:** Something else?
 
