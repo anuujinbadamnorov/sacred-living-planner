@@ -242,7 +242,7 @@ export default function Daily() {
     const now = new Date()
     const h = now.getHours()
     const m = now.getMinutes()
-    return ((h - 5) * 60 + m) * (12 / 15) // 12px per 15-min slot
+    return ((h - 5) * 60 + m) * (20 / 15) // 20px per 15-min slot
   })
 
   useEffect(() => {
@@ -251,7 +251,7 @@ export default function Daily() {
       const h = now.getHours()
       const m = now.getMinutes()
       if (h >= 5 && h <= 22) {
-        setCurrentTimePos(((h - 5) * 60 + m) * (12 / 15))
+        setCurrentTimePos(((h - 5) * 60 + m) * (20 / 15))
       }
     }, 60000)
     return () => clearInterval(interval)
@@ -297,15 +297,6 @@ export default function Daily() {
 
     return () => clearTimeout(timeout)
   }, [focus, priorities, tasks, events, notes, gratitude, mood, waterCount, currentDateStr, entryLoading, saveEntry])
-
-  /* ── Mini calendar days ── */
-  const miniCalDays = useMemo(() => {
-    const monthStart = startOfMonth(currentDate)
-    const monthEnd = endOfMonth(currentDate)
-    const calStart = startOfWeek(monthStart, { weekStartsOn: 0 })
-    const calEnd = endOfWeek(monthEnd, { weekStartsOn: 0 })
-    return eachDayOfInterval({ start: calStart, end: calEnd })
-  }, [currentDate])
 
   /* ── Task helpers ── */
   const addTask = () => {
@@ -553,9 +544,9 @@ export default function Daily() {
                 Schedule
               </h3>
 
-              <div className="relative overflow-y-auto" style={{ height: '600px' }}>
+              <div className="relative overflow-y-auto" style={{ height: '720px' }}>
                 {/* Current time indicator */}
-                {currentTimePos >= 0 && currentTimePos <= 72 * 12 && (
+                {currentTimePos >= 0 && currentTimePos <= 72 * 20 && (
                   <div
                     className="absolute left-0 right-0 z-20 flex items-center pointer-events-none"
                     style={{ top: `${currentTimePos}px` }}
@@ -571,21 +562,30 @@ export default function Daily() {
                     <div
                       key={`${slot.hour}-${slot.minute}`}
                       className="flex"
-                      style={{ height: '12px' }}
+                      style={{ height: '20px' }}
                     >
-                      {/* Time label - only on the hour */}
-                      <div className="w-[60px] shrink-0 pr-2 text-right flex items-center justify-end">
+                      {/* Time label - on hour and half-hour */}
+                      <div className="w-[70px] shrink-0 pr-2 text-right flex items-center justify-end">
                         {slot.minute === 0 && (
-                          <span className="font-mono text-xs text-warm-500">
+                          <span className="font-mono text-xs font-semibold text-warm-600">
                             {slot.label}
+                          </span>
+                        )}
+                        {slot.minute === 30 && (
+                          <span className="font-mono text-[10px] text-warm-400">
+                            :30
                           </span>
                         )}
                       </div>
 
                       {/* Slot */}
                       <div
-                        className={`flex-1 relative border-b border-warm-100 cursor-pointer transition-colors hover:bg-rose-50 ${
-                          slot.minute === 0 ? 'bg-white' : idx % 2 === 0 ? 'bg-warm-50/50' : 'bg-white'
+                        className={`flex-1 relative border-b cursor-pointer transition-colors hover:bg-rose-50/60 ${
+                          slot.minute === 0
+                            ? 'border-warm-200 bg-white'
+                            : slot.minute === 30
+                              ? 'border-warm-150 bg-warm-50/30'
+                              : 'border-warm-100/50 bg-white'
                         }`}
                         onClick={() => {
                           setAddingEventHour(slot.hour)
@@ -901,8 +901,22 @@ export default function Daily() {
             </div>
           </motion.div>
 
-          {/* ═══════════ RIGHT COLUMN: Habits & Reflection ═══════════ */}
+          {/* ═══════════ RIGHT COLUMN: Intention, Habits & More ═══════════ */}
           <motion.div variants={fadeUp} className="space-y-6">
+            {/* Daily Intention — moved to top */}
+            <div className="card-planner">
+              <h4 className="text-sm mb-2">Daily Intention</h4>
+              <textarea
+                value={focus}
+                onChange={(e) => {
+                  setFocus(e.target.value)
+                  saveFocus(e.target.value)
+                }}
+                placeholder="Set your intention..."
+                className="w-full min-h-[60px] p-2 font-caveat text-base text-warm-700 bg-transparent outline-none resize-none border border-warm-100 rounded-md focus:border-rose-300 transition-colors"
+              />
+            </div>
+
             {/* Daily Habits */}
             <div className="card-planner">
               <h3 className="flex items-center gap-2 mb-4">
@@ -1021,86 +1035,6 @@ export default function Daily() {
                   <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-rose-400 focus:ring-rose-300" />
                   <span className="text-sm font-inter text-warm-700">Deep Breathing (5 min)</span>
                 </div>
-              </div>
-            </div>
-
-            {/* Mini Calendar */}
-            <div className="card-planner">
-              <h3 className="mb-4">{format(currentDate, 'MMMM yyyy')}</h3>
-              <div className="grid grid-cols-7 gap-1">
-                {WEEK_DAYS.map((d) => (
-                  <div key={d} className="text-center text-[0.6875rem] font-inter font-semibold text-warm-500 uppercase tracking-wider py-1">
-                    {d[0]}
-                  </div>
-                ))}
-                {miniCalDays.map((day) => {
-                  const isCurrentMonth = getMonth(day) === getMonth(currentDate)
-                  const dayIsToday = isToday(day)
-                  const isSelected = isSameDay(day, currentDate)
-                  return (
-                    <Link
-                      key={day.toISOString()}
-                      href={`/planner/daily/${dateKey(day)}`}
-                      className={`aspect-square flex items-center justify-center rounded-md text-xs font-inter transition-all duration-150 ${
-                        !isCurrentMonth
-                          ? 'text-warm-300'
-                          : dayIsToday
-                            ? 'bg-rose-500 text-white font-semibold'
-                            : isSelected
-                              ? 'bg-rose-100 text-rose-700 font-medium ring-1 ring-rose-500'
-                              : 'text-warm-700 hover:bg-warm-100'
-                      }`}
-                    >
-                      {getDate(day)}
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Daily Intention */}
-            <div className="card-planner">
-              <h4 className="text-sm mb-2">Daily Intention</h4>
-              <textarea
-                value={focus}
-                onChange={(e) => {
-                  setFocus(e.target.value)
-                  saveFocus(e.target.value)
-                }}
-                placeholder="Set your intention..."
-                className="w-full min-h-[60px] p-2 font-caveat text-base text-warm-700 bg-transparent outline-none resize-none border border-warm-100 rounded-md focus:border-rose-300 transition-colors"
-              />
-            </div>
-
-            {/* Quick Week Navigation */}
-            <div className="card-planner">
-              <h4 className="text-sm mb-3">This Week</h4>
-              <div className="flex justify-between gap-1">
-                {weekDays.map((day) => {
-                  const dKey = dateKey(day)
-                  const isActiveDay = isSameDay(day, currentDate)
-                  const dayIsToday = isToday(day)
-                  return (
-                    <Link
-                      key={dKey}
-                      href={`/planner/daily/${dKey}`}
-                      className={`flex flex-col items-center py-2 px-1 rounded-md min-w-[44px] transition-all duration-150 ${
-                        isActiveDay
-                          ? 'bg-rose-500 text-white'
-                          : dayIsToday
-                            ? 'bg-rose-100 text-rose-700'
-                            : 'hover:bg-warm-100 text-warm-600'
-                      }`}
-                    >
-                      <span className="text-[0.625rem] font-inter font-medium uppercase">
-                        {WEEK_DAYS[getDay(day)]}
-                      </span>
-                      <span className={`text-sm font-inter font-medium ${isActiveDay ? 'text-white' : ''}`}>
-                        {getDate(day)}
-                      </span>
-                    </Link>
-                  )
-                })}
               </div>
             </div>
           </motion.div>

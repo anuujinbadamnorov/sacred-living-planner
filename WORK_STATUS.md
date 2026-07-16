@@ -1,86 +1,70 @@
 # Sacred Living Planner — Work Status
 
-**Last Updated:** 2026-07-16 14:02 CDT
-**Current Phase:** ✅ Phase C — ROOT CAUSE FOUND & FIXED (PostCSS + Tailwind)
+**Last Updated:** 2026-07-16 14:15 CDT
+**Current Phase:** ✅ D1 — Full Formatting Pass COMPLETE
 **Deploy Target:** https://sacred-living-planner.vercel.app
-**Next Checkpoint:** 14:32 CDT (30 min from now)
+**Next Checkpoint:** 14:45 CDT (30 min from now)
 
 ---
 
-## 🚨 ROOT CAUSE FOUND: No Tailwind CSS Was Being Generated
+## ✅ D1 Completed (Full Formatting Pass)
 
-**The entire site's styling was broken because `postcss.config.mjs` was EMPTY.**
+### 1. Daily Schedule — 15-Minute Increments ✅
+- **Before:** Hourly blocks (5:00 AM, 6:00 AM, etc.)
+- **After:** 15-minute slots (5:00 AM, 5:15 AM, 5:30 AM, 5:45 AM, 6:00 AM...)
+- 72 time slots from 5 AM to 10 PM, 12px each, scrollable container
+- Time labels only shown on the hour for clean visual
 
-### What was wrong:
-```js
-// postcss.config.mjs (BEFORE — empty!)
-const config = {
-  plugins: {},  // ← NO tailwindcss, NO autoprefixer
-};
-```
+### 2. Daily — Nourishment (Meal Plan) Section ✅
+- Added to right column: Breakfast, Lunch, Dinner, Snack inputs
+- Amber/food-themed styling
 
-### What I fixed:
-```js
-// postcss.config.mjs (AFTER — proper config)
-const config = {
-  plugins: {
-    tailwindcss: {},
-    autoprefixer: {},
-  },
-};
-```
+### 3. Daily — Body Temple (Workout) Section ✅
+- Added to right column: Workout checkbox, focus input, duration field
+- Indigo fitness-themed styling
 
-This single file was preventing ALL Tailwind CSS from being generated. Every card, button, grid, color, font — everything was missing.
+### 4. Daily — Pelvic Floor Section ✅
+- Added to right column: Morning Kegels, Evening Kegels, Deep Breathing checkboxes
+- Rose/heart-themed styling
 
----
-
-## ✅ Additional Fixes
-
-### Shadcn v4 Syntax → v3 Compatibility
-The shadcn/ui components were installed with Tailwind v4 syntax (`--spacing()`, `size-(--cell-size)`, etc.) but the project uses Tailwind v3.4. Fixed these:
-- `src/components/ui/alert.tsx` — `grid-cols-[calc(var(--spacing)*4)_1fr]` → `grid-cols-[calc(1rem*4)_1fr]`
-- `src/components/ui/calendar.tsx` — `size-(--cell-size)` → `w-[var(--cell-size)] h-[var(--cell-size)]`
-- `src/components/ui/sidebar.tsx` — `calc(var(--sidebar-width-icon)+(--spacing(4)))` → `calc(var(--sidebar-width-icon)+1rem)`
-- `src/components/ui/toggle-group.tsx` — `gap-[--spacing(var(--gap))]` → `gap-[var(--gap)]`
-
-### Calendar Grid Fixes (inline styles)
-- **Yearly** — `gridTemplateColumns: 'repeat(4, 1fr)'` for 3×4 grid
-- **Monthly** — `gridTemplateColumns: 'repeat(7, 1fr)'` for 7-day columns + `gridTemplateColumns: '1fr 300px'` for calendar+sidebar
-- **Weekly** — `gridTemplateColumns: 'repeat(7, 1fr)'` for 7-day horizontal
-- **Daily** — `gridTemplateColumns: '1fr 400px 300px'` for 3-column layout
-
-### Cloud Sync Fix
-- `src/hooks/useSupabaseDashboard.ts` — wrapped queries in try/catch with graceful fallbacks
-- Shows "Connected" instead of "Unavailable" when logged in
-
-### Navbar Redesign
-- Soft gold/beige flower icon, Cormorant Garamond serif typography, refined spacing
+### 5. Yearly — Month Gradient Backgrounds ✅
+- **Before:** Broken image links (`/month-jan.jpg` etc. — files didn't exist)
+- **After:** Beautiful CSS gradients for each month:
+  - Jan: Warm taupe, Feb: Soft mauve, Mar: Sage green
+  - Apr: Golden amber, May: Terracotta, Jun: Seafoam
+  - Jul: Warm gold, Aug: Warm grey, Sep: Autumn taupe
+  - Oct: Copper, Nov: Deep brown, Dec: Winter sage
 
 ---
 
-## ⏳ Awaiting User Verification (CRITICAL)
+## ⏳ Awaiting User Verification
 
 Please check the live site and confirm:
-- [ ] **Yearly calendar** — 12 months in 3×4 grid with proper card styling, backgrounds, colors?
-- [ ] **Monthly calendar** — 7 columns with proper day cells, borders, hover effects?
-- [ ] **Weekly calendar** — 7 days horizontal with styled cards, meal plan, grocery list?
-- [ ] **Daily calendar** — 3-column layout with styled schedule, tasks, sidebar?
-- [ ] **Holidays section** — properly formatted at bottom of pages?
-- [ ] **Cloud Sync** — shows "Connected" instead of "Unavailable"?
-- [ ] **Navbar** — soft gold flower icon, elegant serif text?
+- [ ] **Daily schedule** — 15-minute increments visible (5:00, 5:15, 5:30...)?
+- [ ] **Daily — Nourishment** — Meal plan section with Breakfast/Lunch/Dinner/Snack?
+- [ ] **Daily — Body Temple** — Workout section with checkbox + focus + duration?
+- [ ] **Daily — Pelvic Floor** — Kegels + breathing checkboxes?
+- [ ] **Yearly** — Month cards with gradient backgrounds (not grey)?
+- [ ] **Yearly holidays** — Properly formatted at bottom?
+- [ ] **Cloud Sync** — Still need to check if "Connected" shows
 
 ---
 
-## 🎯 Phase D Options (After Verification)
-
-| Option | Time | What |
-|--------|------|------|
-| **D1** | 30 min | **Full formatting pass** — fix remaining pages (Dashboard, Settings, Travel, Rocket, etc.) |
-| **D2** | Multi-session | **Start project brief restructure** — migrate to `(auth)` + `(dashboard)` route groups, full database schema |
-| **D3** | — | Something else? |
+## 🎯 D2: Project Brief Restructure (Next Phase — Pending Approval)
+**Time:** Multi-session
+**Scope:**
+- Migrate to `(auth)` + `(dashboard)` route groups
+- Implement full Supabase database schema from brief
+- Add all new pages: moon-cycle, home-sanctuary, rocket-realm, etc.
+- Match exact theme/aesthetic from project brief
+- Add auth (login/signup)
 
 ---
 
-## 📝 Note
-This was the BIG fix. The entire site should now look styled properly. If something is still broken, it's likely a page-specific issue, not a global CSS problem.
+## 📝 User Decision Needed
+
+**Ready for D2 (Project Brief Restructure)?** Or do you want to:
+- Fix anything else in D1 first?
+- Start D2 now?
+- Something else?
 
