@@ -15,6 +15,11 @@ import {
   Moon,
   Clock,
   Home,
+  Activity,
+  KeyRound,
+  Unlink,
+  Check,
+  Zap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePlanner } from '@/hooks/usePlanner'
@@ -75,6 +80,9 @@ export default function Settings() {
   const [lastBackup, setLastBackup] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [ouraToken, setOuraToken] = useState('')
+  const [ouraStatus, setOuraStatus] = useState<'idle' | 'testing' | 'connected' | 'error'>('idle')
+
   useEffect(() => {
     const fetchThemes = async () => {
       const supabase = createClient()
@@ -88,7 +96,32 @@ export default function Settings() {
     if (typeof window === 'undefined') return
     setSettings(loadSettings())
     setLastBackup(localStorage.getItem('planner-last-backup') || '')
+    const savedToken = localStorage.getItem('oura-token') || ''
+    setOuraToken(savedToken)
+    if (savedToken) setOuraStatus('connected')
   }, [])
+
+  const testOuraConnection = async () => {
+    if (!ouraToken.trim()) return
+    setOuraStatus('testing')
+    try {
+      const res = await fetch(`/api/oura?token=${ouraToken}&date=${new Date().toISOString().split('T')[0]}`)
+      if (res.ok) {
+        setOuraStatus('connected')
+        localStorage.setItem('oura-token', ouraToken)
+      } else {
+        setOuraStatus('error')
+      }
+    } catch {
+      setOuraStatus('error')
+    }
+  }
+
+  const disconnectOura = () => {
+    setOuraToken('')
+    setOuraStatus('idle')
+    localStorage.removeItem('oura-token')
+  }
 
   const updateSetting = <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
@@ -424,6 +457,80 @@ export default function Settings() {
           </div>
         </motion.div>
 
+        {/* ====== INTEGRATIONS ====== */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.28 }}
+          className="card-planner"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <Activity className="w-5 h-5 text-rose-500" />
+            <h2 className="font-playfair text-xl font-medium text-warm-800">Integrations</h2>
+          </div>
+
+          {/* Oura Ring */}
+          <div className="space-y-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap className="w-4 h-4 text-warm-500" />
+                  <h3 className="font-inter text-sm font-semibold text-warm-700">Oura Ring</h3>
+                  {ouraStatus === 'connected' && (
+                    <span className="flex items-center gap-1 text-xs font-body text-sage">
+                      <Check className="w-3 h-3" /> Connected
+                    </span>
+                  )}
+                </div>
+                <p className="text-warm-500 font-inter text-xs">
+                  Connect your Oura Ring to automatically sync sleep, readiness, and activity data.
+                </p>
+                <a
+                  href="https://cloud.ouraring.com/personal-access-tokens"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-rose-600 font-inter font-medium hover:underline mt-1"
+                >
+                  Get your token <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="password"
+                value={ouraToken}
+                onChange={(e) => {
+                  setOuraToken(e.target.value)
+                  if (ouraStatus === 'connected') setOuraStatus('idle')
+                }}
+                placeholder="Paste your Oura personal access token..."
+                className="flex-1 px-3 py-2 rounded-md border border-warm-200 text-sm font-inter text-warm-800 placeholder:text-warm-400 focus:outline-none focus:border-rose-400 bg-white"
+              />
+              {ouraStatus === 'connected' ? (
+                <button
+                  onClick={disconnectOura}
+                  className="btn-secondary text-sm shrink-0 flex items-center gap-1"
+                >
+                  <Unlink className="w-3.5 h-3.5" /> Disconnect
+                </button>
+              ) : (
+                <button
+                  onClick={testOuraConnection}
+                  disabled={ouraStatus === 'testing' || !ouraToken.trim()}
+                  className="btn-primary text-sm shrink-0 flex items-center gap-1"
+                >
+                  {ouraStatus === 'testing' ? 'Testing...' : 'Connect'}
+                </button>
+              )}
+            </div>
+
+            {ouraStatus === 'error' && (
+              <p className="text-xs text-error font-inter">Connection failed. Please check your token and try again.</p>
+            )}
+          </div>
+        </motion.div>
+
         {/* ====== DATA MANAGEMENT ====== */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
@@ -631,6 +738,14 @@ export default function Settings() {
       </AnimatePresence>
 
       <style>{`
+        .btn-primary {
+          display: inline-flex; align-items: center; justify-content: center;
+          background: var(--sage); color: white;
+          border: none; border-radius: 6px;
+          font-family: 'Inter', system-ui, sans-serif; font-weight: 500; font-size: 0.875rem;
+          padding: 8px 16px; transition: all 0.2s ease; cursor: pointer;
+        }
+        .btn-primary:hover { filter: brightness(0.95); }
         .btn-secondary {
           display: inline-flex; align-items: center; justify-content: center;
           background: var(--warm-100); color: var(--warm-800);

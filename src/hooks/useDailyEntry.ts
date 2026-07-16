@@ -40,7 +40,7 @@ export interface DailyEntryState {
 export function useDailyEntry(dateStr: string) {
   const { user } = useAuth();
   const supabase = useMemo(() => createClient(), []);
-  const [entry, setEntry] = useState<Partial<DailyEntry> | null>(null);
+  const [entry, setEntry] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Load from Supabase on mount / date change
@@ -60,7 +60,7 @@ export function useDailyEntry(dateStr: string) {
       .eq('user_id', user.id)
       .eq('entry_date', dateStr)
       .single()
-      .then(({ data, error }: { data: Partial<DailyEntry> | null; error: { code: string; message: string } | null }) => {
+      .then(({ data, error }: { data: Record<string, unknown> | null; error: { code: string; message: string } | null }) => {
         if (cancelled) return;
         if (error && error.code !== 'PGRST116') {
           console.warn('Failed to load daily entry:', error.message);

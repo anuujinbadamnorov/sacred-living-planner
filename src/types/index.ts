@@ -1,3 +1,43 @@
+export interface Profile {
+  id: string
+  full_name: string | null
+  avatar_url: string | null
+  subscription_tier: string | null
+  subscription_status: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ThemeColors {
+  bg: string
+  surface: string
+  text: string
+  textMuted: string
+  accent: string
+  accentHover: string
+  border: string
+  success: string
+  warning: string
+  error: string
+  calendarWeekend: string
+}
+
+export interface Theme {
+  id: string
+  name: string
+  description: string
+  is_premium: boolean
+  is_custom: boolean
+  user_id: string | null
+  colors: ThemeColors
+  font_heading: string
+  font_body: string
+  background_image_url: string | null
+  background_opacity: number
+  created_at: string
+  updated_at: string
+}
+
 export interface DailyEntry {
   id: string
   user_id: string
@@ -35,6 +75,7 @@ export interface Habit {
   color: string
   icon: string
   active: boolean
+  frequency: string
   created_at: string
 }
 
@@ -92,6 +133,29 @@ export interface BusinessExpense {
   description: string
   receipt_url: string
   tax_deductible: boolean
+  created_at: string
+}
+
+export interface Document {
+  id: string
+  user_id: string
+  title: string
+  category: 'income' | 'expense' | 'receipt' | 'contract' | 'other'
+  amount: number | null
+  document_date: string | null
+  description: string | null
+  file_url: string | null
+  file_name: string | null
+  file_type: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface HabitCompletion {
+  id: string
+  user_id: string
+  habit_id: string
+  completed_date: string
   created_at: string
 }
 

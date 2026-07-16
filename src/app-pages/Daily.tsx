@@ -33,6 +33,7 @@ import {
   Calendar as CalendarIcon,
   Utensils,
   Dumbbell,
+  Sunrise,
 } from 'lucide-react'
 import { usePlanner } from '@/hooks/usePlanner'
 import { useDailyEntry } from '@/hooks/useDailyEntry'
@@ -87,6 +88,32 @@ const TIME_SLOTS = Array.from({ length: 72 }, (_, i) => {
 })
 
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+/* Daily routine from user attachments */
+const DAILY_ROUTINE_EVENTS = [
+  { title: 'Wake \u0026 Hydrate', hour: 5, minute: 30, category: 'ritual' },
+  { title: 'Sacred Movement', hour: 6, minute: 0, category: 'workout' },
+  { title: 'Nourishing Breakfast', hour: 7, minute: 30, category: 'meal' },
+  { title: 'Morning Ritual', hour: 8, minute: 30, category: 'ritual' },
+  { title: 'Midday Pause', hour: 12, minute: 0, category: 'ritual' },
+  { title: 'Evening Meal', hour: 18, minute: 0, category: 'meal' },
+  { title: 'Wind Down', hour: 20, minute: 0, category: 'ritual' },
+  { title: 'Sleep Prep', hour: 21, minute: 30, category: 'ritual' },
+]
+
+const DAILY_ROUTINE_COLORS: Record<string, { bg: string; border: string }> = {
+  ritual: { bg: 'rgba(201,160,160,0.12)', border: '#C9A0A0' },
+  workout: { bg: 'rgba(122,139,106,0.12)', border: '#7A8B6A' },
+  meal: { bg: 'rgba(181,166,66,0.12)', border: '#B5A642' },
+}
+
+function getEventStyle(eventTitle: string): { backgroundColor: string; borderLeft: string } {
+  const routineInfo = DAILY_ROUTINE_EVENTS.find((r) => r.title === eventTitle)
+  const colors = routineInfo ? DAILY_ROUTINE_COLORS[routineInfo.category] : null
+  return colors
+    ? { backgroundColor: colors.bg, borderLeft: `2px solid ${colors.border}` }
+    : { backgroundColor: 'rgba(232, 93, 120, 0.15)', borderLeft: '2px solid #e85d78' }
+}
 
 /* ─────────────────────── helpers ─────────────────────── */
 
@@ -264,15 +291,15 @@ export default function Daily() {
     hydratedDateRef.current = currentDateStr
 
     if (entry) {
-      setFocus(entry.focus || '')
+      setFocus((entry.focus as string) || '')
       setPriorities((entry.priorities as string[]) || ['', '', ''])
       setTasks((entry.tasks as TaskItem[]) || [])
       setEvents((entry.events as TimeEvent[]) || [])
-      setNotes(entry.notes || '')
+      setNotes((entry.notes as string) || '')
       const gratTexts = (entry.gratitude as string[]) || ['', '', '']
       setGratitude(gratTexts.map((text, i) => ({ id: `g${i}`, text })))
       setMood((entry.mood as Mood) || null)
-      setWaterCount(entry.water_intake || 0)
+      setWaterCount((entry.water_intake as number) || 0)
     }
     setHabitsData(getHabits())
   }, [currentDateStr, entry, entryLoading, getHabits])
@@ -539,10 +566,33 @@ export default function Daily() {
           <motion.div variants={fadeUp} className="space-y-6">
             {/* Time-Blocking Schedule */}
             <div className="card-planner overflow-hidden">
-              <h3 className="flex items-center gap-2 mb-4">
-                <CalendarIcon className="w-5 h-5 text-rose-500" />
-                Schedule
-              </h3>
+              <div className="flex items-center justify-between mb-4 p-6 pb-0">
+                <h3 className="flex items-center gap-2">
+                  <CalendarIcon className="w-5 h-5 text-rose-500" />
+                  Schedule
+                </h3>
+                <button
+                  onClick={() => {
+                    const existingTitles = new Set(events.map((e) => e.title))
+                    const newEvents = DAILY_ROUTINE_EVENTS
+                      .filter((r) => !existingTitles.has(r.title))
+                      .map((r) => ({
+                        id: generateId(),
+                        title: r.title,
+                        hour: r.hour,
+                        minute: r.minute,
+                      }))
+                    if (newEvents.length > 0) {
+                      const updated = [...events, ...newEvents]
+                      setEvents(updated)
+                      setStorageItem(`planner-events-${currentDateStr}`, updated)
+                    }
+                  }}
+                  className="text-xs font-inter font-medium text-rose-600 hover:text-rose-700 transition-colors flex items-center gap-1"
+                >
+                  <Sunrise className="w-3.5 h-3.5" /> Load Routine
+                </button>
+              </div>
 
               <div className="relative overflow-y-auto" style={{ height: '720px' }}>
                 {/* Current time indicator */}
@@ -598,10 +648,7 @@ export default function Daily() {
                             <div
                               key={event.id}
                               className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-sm flex items-center px-2 justify-between group"
-                              style={{
-                                backgroundColor: 'rgba(232, 93, 120, 0.15)',
-                                borderLeft: '2px solid #e85d78',
-                              }}
+                              style={getEventStyle(event.title)}
                             >
                               <span className="font-inter text-[0.75rem] font-medium text-warm-800 truncate">
                                 {event.title}
