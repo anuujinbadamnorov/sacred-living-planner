@@ -31,6 +31,8 @@ import {
   PenLine,
   Target,
   Calendar as CalendarIcon,
+  Utensils,
+  Dumbbell,
 } from 'lucide-react'
 import { usePlanner } from '@/hooks/usePlanner'
 import { useDailyEntry } from '@/hooks/useDailyEntry'
@@ -78,7 +80,11 @@ const QUOTES = [
   'Dream big. Start small. Act now.',
 ]
 
-const HOURS = Array.from({ length: 18 }, (_, i) => i + 5) // 5 AM to 10 PM
+const TIME_SLOTS = Array.from({ length: 72 }, (_, i) => {
+  const hour = Math.floor(i / 4) + 5
+  const minute = (i % 4) * 15
+  return { hour, minute, label: `${hour <= 12 ? hour : hour - 12}:${minute.toString().padStart(2, '0')} ${hour < 12 ? 'AM' : 'PM'}` }
+})
 
 const WEEK_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -195,6 +201,7 @@ export default function Daily() {
     getStorageItem<TimeEvent[]>(`planner-events-${currentDateStr}`, [])
   )
   const [addingEventHour, setAddingEventHour] = useState<number | null>(null)
+  const [addingEventMinute, setAddingEventMinute] = useState<number>(0)
   const [addingEventText, setAddingEventText] = useState('')
 
   /* ── Data: Notes ── */
@@ -235,7 +242,7 @@ export default function Daily() {
     const now = new Date()
     const h = now.getHours()
     const m = now.getMinutes()
-    return ((h - 5) * 60 + m) * (48 / 30) // 48px per 30-min slot
+    return ((h - 5) * 60 + m) * (12 / 15) // 12px per 15-min slot
   })
 
   useEffect(() => {
@@ -244,7 +251,7 @@ export default function Daily() {
       const h = now.getHours()
       const m = now.getMinutes()
       if (h >= 5 && h <= 22) {
-        setCurrentTimePos(((h - 5) * 60 + m) * (48 / 30))
+        setCurrentTimePos(((h - 5) * 60 + m) * (12 / 15))
       }
     }, 60000)
     return () => clearInterval(interval)
@@ -336,22 +343,24 @@ export default function Daily() {
   const taskProgress = tasks.length > 0 ? Math.round((tasks.filter((t) => t.completed).length / tasks.length) * 100) : 0
 
   /* ── Event helpers ── */
-  const addEvent = (hour: number) => {
+  const addEvent = (hour: number, minute: number = 0) => {
     if (!addingEventText.trim()) {
       setAddingEventHour(null)
+      setAddingEventMinute(0)
       return
     }
     const newEvent: TimeEvent = {
       id: generateId(),
       title: addingEventText.trim(),
       hour,
-      minute: 0,
+      minute,
     }
     const updated = [...events, newEvent]
     setEvents(updated)
     setStorageItem(`planner-events-${currentDateStr}`, updated)
     setAddingEventText('')
     setAddingEventHour(null)
+    setAddingEventMinute(0)
   }
 
   const deleteEvent = (id: string) => {
@@ -544,9 +553,9 @@ export default function Daily() {
                 Schedule
               </h3>
 
-              <div className="relative" style={{ height: `${HOURS.length * 48}px` }}>
+              <div className="relative overflow-y-auto" style={{ height: '600px' }}>
                 {/* Current time indicator */}
-                {currentTimePos >= 0 && currentTimePos <= HOURS.length * 48 && (
+                {currentTimePos >= 0 && currentTimePos <= 72 * 12 && (
                   <div
                     className="absolute left-0 right-0 z-20 flex items-center pointer-events-none"
                     style={{ top: `${currentTimePos}px` }}
@@ -557,43 +566,46 @@ export default function Daily() {
                 )}
 
                 {/* Time slots */}
-                <div className="absolute inset-0">
-                  {HOURS.map((hour, idx) => (
+                <div>
+                  {TIME_SLOTS.map((slot, idx) => (
                     <div
-                      key={hour}
+                      key={`${slot.hour}-${slot.minute}`}
                       className="flex"
-                      style={{ height: '48px' }}
+                      style={{ height: '12px' }}
                     >
-                      {/* Time label */}
+                      {/* Time label - only on the hour */}
                       <div className="w-[60px] shrink-0 pr-2 text-right flex items-center justify-end">
-                        <span className="font-mono text-xs text-warm-500">
-                          {hour <= 12 ? `${hour}:00 AM` : `${hour - 12}:00 PM`}
-                        </span>
+                        {slot.minute === 0 && (
+                          <span className="font-mono text-xs text-warm-500">
+                            {slot.label}
+                          </span>
+                        )}
                       </div>
 
                       {/* Slot */}
                       <div
                         className={`flex-1 relative border-b border-warm-100 cursor-pointer transition-colors hover:bg-rose-50 ${
-                          idx % 2 === 0 ? 'bg-white' : 'bg-warm-50'
+                          slot.minute === 0 ? 'bg-white' : idx % 2 === 0 ? 'bg-warm-50/50' : 'bg-white'
                         }`}
                         onClick={() => {
-                          setAddingEventHour(hour)
+                          setAddingEventHour(slot.hour)
+                          setAddingEventMinute(slot.minute)
                           setAddingEventText('')
                         }}
                       >
-                        {/* Events in this hour */}
+                        {/* Events in this slot */}
                         {events
-                          .filter((e) => e.hour === hour)
+                          .filter((e) => e.hour === slot.hour && (e.minute || 0) === slot.minute)
                           .map((event) => (
                             <div
                               key={event.id}
-                              className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-md flex items-center px-2 justify-between group"
+                              className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-sm flex items-center px-2 justify-between group"
                               style={{
                                 backgroundColor: 'rgba(232, 93, 120, 0.15)',
-                                borderLeft: '3px solid #e85d78',
+                                borderLeft: '2px solid #e85d78',
                               }}
                             >
-                              <span className="font-inter text-[0.8125rem] font-medium text-warm-800 truncate">
+                              <span className="font-inter text-[0.75rem] font-medium text-warm-800 truncate">
                                 {event.title}
                               </span>
                               <button
@@ -609,9 +621,9 @@ export default function Daily() {
                           ))}
 
                         {/* Inline add event */}
-                        {addingEventHour === hour && (
+                        {addingEventHour === slot.hour && addingEventMinute === slot.minute && (
                           <div
-                            className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-md bg-white border border-rose-300 flex items-center px-2 z-10 shadow-sm"
+                            className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-sm bg-white border border-rose-300 flex items-center px-2 z-10 shadow-sm"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <input
@@ -620,12 +632,12 @@ export default function Daily() {
                               value={addingEventText}
                               onChange={(e) => setAddingEventText(e.target.value)}
                               onKeyDown={(e) => {
-                                if (e.key === 'Enter') addEvent(hour)
-                                if (e.key === 'Escape') setAddingEventHour(null)
+                                if (e.key === 'Enter') addEvent(slot.hour, slot.minute)
+                                if (e.key === 'Escape') { setAddingEventHour(null); setAddingEventMinute(0) }
                               }}
-                              onBlur={() => addEvent(hour)}
-                              placeholder="Event name..."
-                              className="w-full text-sm font-inter outline-none bg-transparent text-warm-800 placeholder:text-warm-400"
+                              onBlur={() => addEvent(slot.hour, slot.minute)}
+                              placeholder="Event..."
+                              className="w-full text-xs font-inter outline-none bg-transparent text-warm-800 placeholder:text-warm-400"
                             />
                           </div>
                         )}
@@ -945,6 +957,71 @@ export default function Daily() {
                   )}
                 </div>
               )}
+            </div>
+
+            {/* Meal Plan */}
+            <div className="card-planner">
+              <h3 className="flex items-center gap-2 mb-4">
+                <Utensils className="w-5 h-5 text-amber-600" />
+                Nourishment
+              </h3>
+              <div className="space-y-2">
+                {['Breakfast', 'Lunch', 'Dinner', 'Snack'].map((meal) => (
+                  <div key={meal} className="flex items-center gap-2">
+                    <span className="text-xs font-inter font-medium text-warm-500 w-16">{meal}</span>
+                    <input
+                      type="text"
+                      placeholder={`${meal}...`}
+                      className="flex-1 text-sm font-inter outline-none bg-transparent border-b border-warm-200 focus:border-amber-400 transition-colors py-1 text-warm-700 placeholder:text-warm-300"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Workout */}
+            <div className="card-planner">
+              <h3 className="flex items-center gap-2 mb-4">
+                <Dumbbell className="w-5 h-5 text-indigo-500" />
+                Body Temple
+              </h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-indigo-500 focus:ring-indigo-400" />
+                  <span className="text-sm font-inter text-warm-700">Today's Workout</span>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Workout focus..."
+                  className="w-full text-sm font-inter outline-none bg-transparent border border-warm-200 rounded-md px-2 py-1.5 focus:border-indigo-300 transition-colors text-warm-700 placeholder:text-warm-300"
+                />
+                <div className="flex items-center gap-2 text-xs text-warm-500 font-inter">
+                  <span>Duration:</span>
+                  <input type="text" placeholder="30 min" className="w-16 text-sm border-b border-warm-200 outline-none focus:border-indigo-300 bg-transparent" />
+                </div>
+              </div>
+            </div>
+
+            {/* Pelvic Floor Exercise */}
+            <div className="card-planner">
+              <h3 className="flex items-center gap-2 mb-4">
+                <Heart className="w-5 h-5 text-rose-400" />
+                Pelvic Floor
+              </h3>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-rose-400 focus:ring-rose-300" />
+                  <span className="text-sm font-inter text-warm-700">Morning Kegels (3 sets of 10)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-rose-400 focus:ring-rose-300" />
+                  <span className="text-sm font-inter text-warm-700">Evening Kegels (3 sets of 10)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-rose-400 focus:ring-rose-300" />
+                  <span className="text-sm font-inter text-warm-700">Deep Breathing (5 min)</span>
+                </div>
+              </div>
             </div>
 
             {/* Mini Calendar */}

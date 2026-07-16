@@ -1,78 +1,86 @@
 # Sacred Living Planner — Work Status
 
-**Last Updated:** 2026-07-16 13:38 CDT
-**Current Phase:** ✅ Phase B — Calendar Grid Fixes DEPLOYED
+**Last Updated:** 2026-07-16 14:02 CDT
+**Current Phase:** ✅ Phase C — ROOT CAUSE FOUND & FIXED (PostCSS + Tailwind)
 **Deploy Target:** https://sacred-living-planner.vercel.app
-**Next Checkpoint:** 14:08 CDT (30 min from now)
+**Next Checkpoint:** 14:32 CDT (30 min from now)
 
 ---
 
-## ✅ Phase A: Cloud Sync Fix — DEPLOYED ✅
-**File:** `src/hooks/useSupabaseDashboard.ts`
+## 🚨 ROOT CAUSE FOUND: No Tailwind CSS Was Being Generated
 
-**Root Cause:** The hook used `throw` on any Supabase error, which always showed "Sync unavailable" even for minor issues (missing `archived` column, empty tables, etc.).
+**The entire site's styling was broken because `postcss.config.mjs` was EMPTY.**
 
-**Fix:** Wrapped each query in try/catch with fallback queries. Now shows:
-- **"Connected"** when logged in (even with no data)
-- Graceful degradation per table (if one table is missing, others still work)
-- Proper error messages only for real connection/auth failures
+### What was wrong:
+```js
+// postcss.config.mjs (BEFORE — empty!)
+const config = {
+  plugins: {},  // ← NO tailwindcss, NO autoprefixer
+};
+```
+
+### What I fixed:
+```js
+// postcss.config.mjs (AFTER — proper config)
+const config = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+```
+
+This single file was preventing ALL Tailwind CSS from being generated. Every card, button, grid, color, font — everything was missing.
 
 ---
 
-## ✅ Phase B: Calendar Grid Fixes — DEPLOYED ✅
-**Root Cause:** Tailwind CSS grid classes (`grid-cols-7`, `grid-cols-4`, etc.) were not being generated — likely stale build cache or content path mismatch.
+## ✅ Additional Fixes
 
-**Fix:** Switched from Tailwind `className` to **inline `style`** for all calendar grids:
+### Shadcn v4 Syntax → v3 Compatibility
+The shadcn/ui components were installed with Tailwind v4 syntax (`--spacing()`, `size-(--cell-size)`, etc.) but the project uses Tailwind v3.4. Fixed these:
+- `src/components/ui/alert.tsx` — `grid-cols-[calc(var(--spacing)*4)_1fr]` → `grid-cols-[calc(1rem*4)_1fr]`
+- `src/components/ui/calendar.tsx` — `size-(--cell-size)` → `w-[var(--cell-size)] h-[var(--cell-size)]`
+- `src/components/ui/sidebar.tsx` — `calc(var(--sidebar-width-icon)+(--spacing(4)))` → `calc(var(--sidebar-width-icon)+1rem)`
+- `src/components/ui/toggle-group.tsx` — `gap-[--spacing(var(--gap))]` → `gap-[var(--gap)]`
 
-| Page | Before | After |
-|------|--------|-------|
-| **Yearly** | `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4` | `gridTemplateColumns: 'repeat(4, 1fr)'` |
-| **Yearly (mini)** | `grid-cols-7 gap-0` | `gridTemplateColumns: 'repeat(7, 1fr)', gap: 0` |
-| **Monthly** | `grid-cols-1 lg:grid-cols-10` + `grid-cols-7` | `gridTemplateColumns: '1fr 300px'` + `repeat(7, 1fr)` |
-| **Weekly** | `grid-cols-7 gap-2` | `gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px'` |
-| **Daily** | `grid-cols-1 xl:grid-cols-12` | `gridTemplateColumns: '1fr 400px 300px'` |
+### Calendar Grid Fixes (inline styles)
+- **Yearly** — `gridTemplateColumns: 'repeat(4, 1fr)'` for 3×4 grid
+- **Monthly** — `gridTemplateColumns: 'repeat(7, 1fr)'` for 7-day columns + `gridTemplateColumns: '1fr 300px'` for calendar+sidebar
+- **Weekly** — `gridTemplateColumns: 'repeat(7, 1fr)'` for 7-day horizontal
+- **Daily** — `gridTemplateColumns: '1fr 400px 300px'` for 3-column layout
+
+### Cloud Sync Fix
+- `src/hooks/useSupabaseDashboard.ts` — wrapped queries in try/catch with graceful fallbacks
+- Shows "Connected" instead of "Unavailable" when logged in
+
+### Navbar Redesign
+- Soft gold/beige flower icon, Cormorant Garamond serif typography, refined spacing
 
 ---
 
-## ⏳ Awaiting User Verification
+## ⏳ Awaiting User Verification (CRITICAL)
 
 Please check the live site and confirm:
-- [ ] **Yearly calendar** — 12 months in a 3×4 grid (not vertical stack)?
-- [ ] **Monthly calendar** — days in 7 columns?
-- [ ] **Weekly calendar** — 7 days horizontal?
-- [ ] **Daily calendar** — 3-column layout (schedule | tasks | sidebar)?
-- [ ] **Cloud sync** — shows "Connected" instead of "Unavailable"?
+- [ ] **Yearly calendar** — 12 months in 3×4 grid with proper card styling, backgrounds, colors?
+- [ ] **Monthly calendar** — 7 columns with proper day cells, borders, hover effects?
+- [ ] **Weekly calendar** — 7 days horizontal with styled cards, meal plan, grocery list?
+- [ ] **Daily calendar** — 3-column layout with styled schedule, tasks, sidebar?
+- [ ] **Holidays section** — properly formatted at bottom of pages?
+- [ ] **Cloud Sync** — shows "Connected" instead of "Unavailable"?
+- [ ] **Navbar** — soft gold flower icon, elegant serif text?
 
 ---
 
-## 🎯 Phase C: Full Formatting Pass (Pending User Approval)
-**Time:** 30 min
-**Scope:** Fix ALL remaining grid layouts across all pages:
-- Dashboard (4-column cards, 2-column sections, 7-day water tracker)
-- Settings (3-column color grid, 2-column form)
-- Travel (2/3/4 column grids)
-- Rocket Realm (2/4/5 column grids)
-- Special Dates (2/3/4 column grids)
-- Abundance (2/3/4 column grids)
-- Goals (2/3 column grids)
-- Body Temple (2/3/4/5 column grids)
-- And more...
+## 🎯 Phase D Options (After Verification)
 
-**Approach:** Same as Phase B — replace all Tailwind `grid-cols-*` classes with inline `style` grids.
+| Option | Time | What |
+|--------|------|------|
+| **D1** | 30 min | **Full formatting pass** — fix remaining pages (Dashboard, Settings, Travel, Rocket, etc.) |
+| **D2** | Multi-session | **Start project brief restructure** — migrate to `(auth)` + `(dashboard)` route groups, full database schema |
+| **D3** | — | Something else? |
 
 ---
 
-## 🎯 Phase D: Project Brief Restructure (Pending User Approval)
-**Time:** Multi-session
-**Scope:** Migrate to `(auth)` + `(dashboard)` route groups, implement full database schema from brief, add all new pages.
-
----
-
-## 📝 User Decision Needed
-
-After verifying the calendar grids, which phase next?
-
-**Option C:** Full formatting pass (30 min) — fix all remaining pages
-**Option D:** Start project brief restructure (multi-session)
-**Option E:** Something else?
+## 📝 Note
+This was the BIG fix. The entire site should now look styled properly. If something is still broken, it's likely a page-specific issue, not a global CSS problem.
 
