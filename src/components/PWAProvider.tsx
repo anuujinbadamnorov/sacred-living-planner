@@ -10,16 +10,24 @@ export default function PWAProvider({ children }: { children: React.ReactNode })
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Register service worker
+    // NOTE: Service worker disabled to prevent stale build caching issues.
+    // Re-enable with proper Next.js PWA strategy when ready.
+    // if ('serviceWorker' in navigator) {
+    //   navigator.serviceWorker
+    //     .register('/sw.js')
+    //     .then((reg) => {
+    //       console.log('SW registered:', reg.scope);
+    //     })
+    //     .catch((err) => {
+    //       console.log('SW registration failed:', err);
+    //     });
+    // }
+
+    // Unregister any existing service worker from previous builds
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((reg) => {
-          console.log('SW registered:', reg.scope);
-        })
-        .catch((err) => {
-          console.log('SW registration failed:', err);
-        });
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((reg) => reg.unregister())
+      })
     }
 
     // Listen for install prompt
