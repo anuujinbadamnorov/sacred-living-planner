@@ -1,7 +1,19 @@
 -- ==========================================
 -- Sacred Living Planner — Full Database Schema
--- Run this in Supabase SQL Editor (in order)
+-- Safe to re-run (drops existing policies first)
 -- ==========================================
+
+-- Drop existing policies first (safe re-run)
+drop policy if exists "Users can only see their own daily entries" on daily_entries;
+drop policy if exists "Users can only see their own health metrics" on health_metrics;
+drop policy if exists "Users can only see their own habits" on habits;
+drop policy if exists "Users can only see their own workouts" on workouts;
+drop policy if exists "Users can only see their own meals" on meals;
+drop policy if exists "Users can only see their own rocket photos" on rocket_photos;
+drop policy if exists "Users can only see their own business income" on business_income;
+drop policy if exists "Users can only see their own business expenses" on business_expenses;
+drop policy if exists "Users can only see their own notes" on notes;
+drop policy if exists "Users can only see their own settings" on user_settings;
 
 -- Enable RLS on all tables
 alter table if exists daily_entries enable row level security;
@@ -73,7 +85,7 @@ create table if not exists workouts (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   date date not null,
-  day_type text, -- 'Heavy Glutes', 'Pilates', etc.
+  day_type text,
   exercises jsonb default '[]',
   completed boolean default false,
   duration int,
@@ -88,7 +100,7 @@ create table if not exists meals (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   date date not null,
-  meal_type text, -- breakfast, lunch, dinner, snack
+  meal_type text,
   name text,
   protein int,
   carbs int,
@@ -116,7 +128,7 @@ create table if not exists business_income (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   date date not null,
-  source text, -- 'triedbyagirl', 'Rocket', 'Other'
+  source text,
   amount decimal(10,2),
   description text,
   receipt_url text,
@@ -130,7 +142,7 @@ create table if not exists business_expenses (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users on delete cascade not null,
   date date not null,
-  category text, -- 'Equipment', 'Food', 'Grooming', 'Vet', 'Toys', 'Training', 'Other'
+  category text,
   amount decimal(10,2),
   description text,
   receipt_url text,
@@ -146,7 +158,7 @@ create table if not exists notes (
   user_id uuid references auth.users on delete cascade not null,
   title text,
   content text,
-  type text default 'text', -- 'text', 'checklist', 'whiteboard'
+  type text default 'text',
   whiteboard_data jsonb,
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now()

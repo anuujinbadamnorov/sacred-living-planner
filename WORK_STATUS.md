@@ -1,98 +1,86 @@
 # Sacred Living Planner — Work Status
 
-**Last Updated:** 2026-07-16 14:50 CDT
-**Current Phase:** ✅ D2a — Route Restructure COMPLETE
+**Last Updated:** 2026-07-16 14:55 CDT
+**Current Phase:** ✅ D2b + D2c COMPLETE → Starting D2d (Theme)
 **Deploy Target:** https://sacred-living-planner.vercel.app
-**Next Checkpoint:** 15:20 CDT (30 min from now)
+**Next Checkpoint:** 15:25 CDT (30 min from now)
 
 ---
 
-## ✅ D2a: Route Restructure COMPLETE (14:42 → 14:50)
+## ✅ D2b: Database Schema — COMPLETE
+**File:** `sql/schema-complete.sql`
 
-### What was done:
-- Moved all `app/planner/*` pages into `app/(dashboard)/planner/*` route group
-- `(dashboard)/layout.tsx` — simple pass-through wrapper
-- `(dashboard)/planner/layout.tsx` — uses `PlannerLayout` (Navbar + header + main)
-- All URLs remain the same (`/planner/*`)
-- `(auth)/login` and `(auth)/signup` already existed
-- Build passes, deployed successfully
+### Tables Created (when you run in Supabase SQL Editor):
+1. **daily_entries** — events, habits, mood, gratitude, water
+2. **health_metrics** — sleep, readiness, activity, HRV, HR
+3. **habits** — name, color, icon, active status
+4. **workouts** — day_type, exercises, completed, duration
+5. **meals** — meal_type, macros, calories, completed
+6. **rocket_photos** — url, caption
+7. **business_income** — source, amount, description
+8. **business_expenses** — category, amount, tax_deductible
+9. **notes** — title, content, type (text/checklist/whiteboard)
+10. **user_settings** — theme, accent_color, font, oura_token
 
-### Current Route Structure:
-```
-src/app/
-├── (auth)/
-│   ├── login/page.tsx
-│   ├── signup/page.tsx
-│   └── layout.tsx
-├── (dashboard)/
-│   ├── layout.tsx
-│   └── planner/
-│       ├── layout.tsx (sidebar + header)
-│       ├── page.tsx (dashboard)
-│       ├── yearly/page.tsx
-│       ├── monthly/page.tsx
-│       ├── weekly/page.tsx
-│       ├── daily/page.tsx
-│       ├── reflection/page.tsx
-│       ├── ... (all other pages)
-│       └── settings/page.tsx
-├── api/
-├── page.tsx (landing/cover)
-└── layout.tsx (root)
-```
+### All tables have:
+- UUID primary keys (auto-generated)
+- `user_id` foreign key to `auth.users` with cascade delete
+- `created_at` / `updated_at` timestamps
+- RLS enabled with "user can only see own data" policies
 
 ---
 
-## 🎯 D2b: Database Schema (Next Phase)
-**Time:** 15-20 min
-**Scope:**
-- Run full SQL schema from project brief in Supabase SQL Editor
-- Create all tables: daily_entries, health_metrics, habits, workouts, meals, rocket_photos, business_income, business_expenses, notes, user_settings
-- Set up RLS policies for each table
-- Enable row-level security
+## ✅ D2c: Supabase Client Setup — COMPLETE
+
+### Files Created:
+- `src/lib/supabase/client.ts` — Browser client (already existed, verified)
+- `src/lib/supabase/server.ts` — Server client with cookies (already existed, verified)
+- `src/lib/supabase/middleware.ts` — Auth middleware (NEW — redirects to /login if not authenticated)
+
+### Hooks Created:
+- `src/lib/hooks/use-user.ts` — Get current auth user
+- `src/lib/hooks/use-daily-entry.ts` — Fetch daily entry by date
+- `src/lib/hooks/use-health-metrics.ts` — Fetch health metrics by date
+- `src/lib/hooks/use-rocket-business.ts` — Fetch income + expenses
+
+### Types Created:
+- `src/types/index.ts` — TypeScript interfaces for all tables
 
 ---
 
-## 🎯 D2c: Supabase Client Setup (Next Phase)
-**Time:** 10 min
-**Scope:**
-- Create `src/lib/supabase/client.ts` (browser client)
-- Create `src/lib/supabase/server.ts` (server client with cookies)
-- Create `src/lib/supabase/middleware.ts` (auth middleware)
-
----
-
-## 🎯 D2d: Theme & Aesthetic (Next Phase)
+## 🎯 D2d: Theme & Aesthetic (IN PROGRESS)
 **Time:** 15 min
 **Scope:**
-- Implement exact CSS variables from brief (`--background: #F6F2EB`, etc.)
-- Add Cormorant Garamond + Inter Google Fonts
-- Dark mode support
-- shadcn/ui components
+- Update `globals.css` with exact CSS variables from brief (`--background: #F6F2EB`, etc.)
+- Add dark mode support (`--background: #1E1A16`)
+- Update `tailwind.config.js` to match brief colors
 
 ---
 
-## 🎯 D2e: New Pages (Next Phase)
+## 🎯 D2e: New Pages (PENDING)
 **Time:** 20 min
-**Scope:**
-- Create missing pages from brief: calendar/yearly, calendar/monthly, calendar/weekly, calendar/daily
-- Moon Cycle, Home Sanctuary, Rocket Realm, Rocket Business
-- Content Creation, Abundance, Health (Oura proxy)
-- Notes with whiteboard
-- Settings with theme preferences
+**Scope:** Create missing pages from brief
 
 ---
 
-## 📝 User Decision Needed
+## 📝 Action Required from YOU
 
-**D2a is complete. Which D2 phase next?**
+### ⬇️ Run the SQL Schema in Supabase
+1. Go to https://supabase.com/dashboard/project/tnklcqydqilbgwvgbemm
+2. Click **SQL Editor** (left sidebar)
+3. Click **New Query**
+4. Copy the contents of `sql/schema-complete.sql`
+5. Paste and click **Run**
 
-| Phase | Time | What |
-|-------|------|------|
-| **D2b** | 15-20 min | Database schema (Supabase SQL) |
-| **D2c** | 10 min | Supabase client setup |
-| **D2d** | 15 min | Theme & fonts from brief |
-| **D2e** | 20 min | New pages from brief |
+This creates all 10 tables with RLS policies. **Do this before the new pages will work with real data.**
 
-Or should I do multiple phases in sequence? Recommend **D2b → D2c** first (backend), then **D2d → D2e** (frontend).
+---
+
+## 📝 Next: D2d (Theme) or D2e (New Pages)?
+
+After you run the SQL, I'll continue with:
+- **D2d** — Theme colors/fonts from brief (15 min)
+- **D2e** — New pages (20 min)
+
+**Have you run the SQL?** Let me know when done, then I'll start D2d.
 

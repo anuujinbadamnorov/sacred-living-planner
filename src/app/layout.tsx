@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
+import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -34,7 +35,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable}`} suppressHydrationWarning>
       <body className="antialiased min-h-screen bg-background text-foreground">
-        {children}
+        <ThemeProvider defaultTheme="day" storageKey="sacred-theme">
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -43,75 +43,98 @@
   --warm-800: #3D3228;
   --warm-900: #2C2420;
 
-  /* shadcn theme variables */
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+  /* shadcn theme variables — matches project brief exactly */
+  --background: 38 30% 95%;
+  --foreground: 30 8% 23%;
   --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
+  --card-foreground: 30 8% 23%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
+  --popover-foreground: 30 8% 23%;
+  --primary: 93 15% 47%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 35 18% 90%;
+  --secondary-foreground: 30 8% 23%;
+  --muted: 36 20% 93%;
+  --muted-foreground: 36 6% 53%;
+  --accent: 36 50% 62%;
+  --accent-foreground: 30 8% 23%;
+  --destructive: 348 76% 63%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 35 18% 90%;
+  --input: 36 20% 93%;
+  --ring: 93 15% 47%;
   --radius: 0.5rem;
 }
 
 [data-theme="night"] {
-  /* Warm night — cognac & charcoal, NOT cold blue-gray */
-  --cream: #1A1612;
-  --cream-dark: #251F1A;
-  --espresso: #EDE6D8;
-  --espresso-light: #B8AFA3;
-  --espresso-muted: #8A7F72;
-  --border-light: #3A3328;
+  /* Dark mode — matches project brief exactly */
+  --cream: #1E1A16;
+  --cream-dark: #2A2622;
+  --espresso: #F6F2EB;
+  --espresso-light: #D5CCBF;
+  --espresso-muted: #A8A59E;
+  --border-light: #3A3632;
   --border-medium: #4D4438;
-  --rose-soft: #C4958A;
-  --sage: #7A8F6A;
-  --gold: #B5A642;
-  --cognac: #A67C52;
-  --terracotta: #B86B4A;
-  --terracotta-light: #C97D5C;
+  --rose-soft: #E85D78;
+  --sage: #7A8B65;
+  --gold: #D4A76A;
+  --cognac: #B5A642;
+  --terracotta: #E85D78;
+  --terracotta-light: #F07088;
   --lake: #6B8F9A;
-  --warm-50: #1A1612;
-  --warm-100: #1E1A14;
-  --warm-200: #251F1A;
-  --warm-300: #2E2820;
-  --warm-400: #3A3328;
-  --warm-500: #4D4438;
-  --warm-600: #7A7062;
-  --warm-700: #B8AFA3;
-  --warm-800: #D5CCBF;
-  --warm-900: #EDE6D8;
+  --warm-50: #1E1A16;
+  --warm-100: #2A2622;
+  --warm-200: #3A3632;
+  --warm-300: #4D4438;
+  --warm-400: #6B6860;
+  --warm-500: #8A877E;
+  --warm-600: #A8A59E;
+  --warm-700: #D5CCBF;
+  --warm-800: #EDE6D8;
+  --warm-900: #F6F2EB;
 
-  --background: 30 18% 9%;
-  --foreground: 35 30% 90%;
-  --card: 30 18% 11%;
-  --card-foreground: 35 30% 90%;
-  --popover: 30 18% 11%;
-  --popover-foreground: 35 30% 90%;
-  --primary: 25 50% 55%;
-  --primary-foreground: 30 18% 9%;
-  --secondary: 30 12% 18%;
-  --secondary-foreground: 35 30% 90%;
-  --muted: 30 12% 18%;
-  --muted-foreground: 30 10% 55%;
-  --accent: 35 45% 45%;
-  --accent-foreground: 30 18% 9%;
-  --destructive: 8 55% 45%;
-  --destructive-foreground: 35 30% 90%;
-  --border: 30 12% 22%;
-  --input: 30 12% 22%;
-  --ring: 25 50% 55%;
+  --background: 30 12% 10%;
+  --foreground: 38 30% 95%;
+  --card: 30 10% 15%;
+  --card-foreground: 38 30% 95%;
+  --popover: 30 10% 15%;
+  --popover-foreground: 38 30% 95%;
+  --primary: 93 15% 47%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 30 8% 20%;
+  --secondary-foreground: 38 30% 95%;
+  --muted: 30 10% 15%;
+  --muted-foreground: 36 6% 63%;
+  --accent: 36 50% 62%;
+  --accent-foreground: 38 30% 95%;
+  --destructive: 348 76% 63%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 30 8% 20%;
+  --input: 30 8% 20%;
+  --ring: 93 15% 47%;
+}
+
+/* Also support class-based dark mode (shadcn default) */
+.dark {
+  --background: 30 12% 10%;
+  --foreground: 38 30% 95%;
+  --card: 30 10% 15%;
+  --card-foreground: 38 30% 95%;
+  --popover: 30 10% 15%;
+  --popover-foreground: 38 30% 95%;
+  --primary: 93 15% 47%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 30 8% 20%;
+  --secondary-foreground: 38 30% 95%;
+  --muted: 30 10% 15%;
+  --muted-foreground: 36 6% 63%;
+  --accent: 36 50% 62%;
+  --accent-foreground: 38 30% 95%;
+  --destructive: 348 76% 63%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 30 8% 20%;
+  --input: 30 8% 20%;
+  --ring: 93 15% 47%;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
