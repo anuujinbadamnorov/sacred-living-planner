@@ -7,7 +7,7 @@ import {
   LayoutDashboard, CalendarDays, Calendar, CalendarRange, Clock,
   Sun, Flame, Heart, Leaf, Moon, Home, PawPrint, Briefcase,
   Sparkles, Gem, Activity, Star, StickyNote, Settings, ImageIcon,
-  Menu, X
+  Menu, X, Flower2
 } from 'lucide-react'
 
 interface NavbarProps {
@@ -45,28 +45,29 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
           display: 'flex',
           alignItems: 'center',
           gap: '12px',
-          padding: '10px 12px',
-          borderRadius: '12px',
-          fontSize: '14px',
+          padding: '9px 14px',
+          borderRadius: '10px',
+          fontSize: '13px',
           width: '100%',
           textDecoration: 'none',
-          backgroundColor: active ? 'rgba(196, 112, 75, 0.15)' : 'transparent',
-          color: active ? '#B85C3A' : '#5C4D42',
+          backgroundColor: active ? 'rgba(180, 157, 120, 0.12)' : 'transparent',
+          color: active ? '#7A6B52' : '#6B5E4F',
           fontWeight: active ? 500 : 400,
-          transition: 'all 0.2s ease',
-          minHeight: '40px',
+          transition: 'all 0.25s ease',
+          minHeight: '38px',
           flexShrink: 0,
+          letterSpacing: '0.01em',
         }}
         onMouseEnter={(e) => {
           if (!active) {
-            e.currentTarget.style.backgroundColor = 'rgba(0,0,0,0.04)'
-            e.currentTarget.style.color = '#2C2420'
+            e.currentTarget.style.backgroundColor = 'rgba(180, 157, 120, 0.06)'
+            e.currentTarget.style.color = '#4A4035'
           }
         }}
         onMouseLeave={(e) => {
           if (!active) {
             e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#5C4D42'
+            e.currentTarget.style.color = '#6B5E4F'
           }
         }}
       >
@@ -79,14 +80,15 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
   const section = (title: string) =>
     !collapsed && (
       <p style={{
-        padding: '16px 12px 4px 12px',
-        fontSize: '11px',
-        fontWeight: 600,
-        letterSpacing: '0.15em',
+        padding: '18px 14px 6px 14px',
+        fontSize: '9px',
+        fontWeight: 500,
+        letterSpacing: '0.2em',
         textTransform: 'uppercase',
-        color: '#8B7D70',
+        color: '#B5A996',
         margin: 0,
         flexShrink: 0,
+        fontFamily: "'Inter', system-ui, sans-serif",
       }}>
         {title}
       </p>
@@ -101,55 +103,56 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid #E5DDD0',
+        borderRight: '1px solid rgba(180, 157, 120, 0.15)',
         zIndex: 50,
         width: collapsed ? 64 : 240,
-        backgroundColor: '#F5F0E8',
-        transition: 'width 0.3s ease',
+        backgroundColor: '#FDFAF5',
+        transition: 'width 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
       }}
     >
       {/* Elegant Branding */}
       <div style={{ 
         display: 'flex', 
         alignItems: 'center', 
-        gap: '12px', 
-        padding: '24px 16px 20px', 
+        gap: '10px', 
+        padding: '22px 16px 18px', 
         flexShrink: 0,
-        borderBottom: '1px solid rgba(0,0,0,0.06)',
+        borderBottom: '1px solid rgba(180, 157, 120, 0.1)',
       }}>
         <div style={{
-          width: 36, 
-          height: 36, 
+          width: 32, 
+          height: 32, 
           borderRadius: '50%',
-          backgroundColor: '#C4704B', 
+          backgroundColor: '#D4C5B0', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'center', 
           flexShrink: 0,
-          boxShadow: '0 2px 8px rgba(196, 112, 75, 0.25)',
+          boxShadow: '0 1px 4px rgba(180, 157, 120, 0.2)',
         }}>
-          <Star className="w-4 h-4 text-white" />
+          <Flower2 className="w-4 h-4" style={{ color: '#FDFAF5' }} strokeWidth={1.5} />
         </div>
         {!collapsed && (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ 
               fontFamily: "'Cormorant Garamond', 'Playfair Display', serif", 
-              fontSize: '20px', 
-              fontWeight: 600,
-              color: '#2C2420', 
+              fontSize: '18px', 
+              fontWeight: 500,
+              color: '#3D3228', 
               whiteSpace: 'nowrap',
-              letterSpacing: '0.02em',
+              letterSpacing: '0.03em',
               lineHeight: 1.2,
             }}>
               Sacred Living
             </span>
             <span style={{
-              fontSize: '10px',
-              color: '#8B7D70',
-              letterSpacing: '0.12em',
+              fontSize: '9px',
+              color: '#B5A996',
+              letterSpacing: '0.18em',
               textTransform: 'uppercase',
-              fontWeight: 500,
+              fontWeight: 400,
               marginTop: '2px',
+              fontFamily: "'Inter', system-ui, sans-serif",
             }}>
               A Year of Intention
             </span>
@@ -161,19 +164,22 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
       <button
         onClick={onToggle}
         style={{
-          margin: '8px 12px',
-          padding: '6px',
+          margin: '6px 10px',
+          padding: '5px',
           borderRadius: 8,
           alignSelf: 'flex-end',
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
-          color: '#5C4D42',
+          color: '#B5A996',
           flexShrink: 0,
+          transition: 'color 0.2s ease',
         }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = '#7A6B52' }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = '#B5A996' }}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
-        {collapsed ? <Menu className="w-4 h-4" /> : <X className="w-4 h-4" />}
+        {collapsed ? <Menu className="w-3.5 h-3.5" strokeWidth={1.5} /> : <X className="w-3.5 h-3.5" strokeWidth={1.5} />}
       </button>
 
       {/* Scrollable nav */}
@@ -183,41 +189,41 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         padding: '0 8px 16px 8px',
         display: 'flex',
         flexDirection: 'column',
-        gap: '4px',
+        gap: '3px',
       }}>
         {section('My Sacred Space')}
-        {navItem('/planner', <LayoutDashboard className="w-5 h-5 shrink-0" />, 'Dashboard')}
-        {navItem('/planner/yearly', <CalendarDays className="w-5 h-5 shrink-0" />, 'Yearly')}
-        {navItem('/planner/monthly', <Calendar className="w-5 h-5 shrink-0" />, 'Monthly')}
-        {navItem('/planner/weekly', <CalendarRange className="w-5 h-5 shrink-0" />, 'Weekly')}
-        {navItem('/planner/daily', <Clock className="w-5 h-5 shrink-0" />, 'Daily')}
+        {navItem('/planner', <LayoutDashboard className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Dashboard')}
+        {navItem('/planner/yearly', <CalendarDays className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Yearly')}
+        {navItem('/planner/monthly', <Calendar className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Monthly')}
+        {navItem('/planner/weekly', <CalendarRange className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Weekly')}
+        {navItem('/planner/daily', <Clock className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Daily')}
 
         {section('Body & Ritual')}
-        {navItem('/planner/sacred-routines', <Sun className="w-5 h-5 shrink-0" />, 'Sacred Routines')}
-        {navItem('/planner/body-temple', <Flame className="w-5 h-5 shrink-0" />, 'Body Temple')}
-        {navItem('/planner/medicine-ritual', <Heart className="w-5 h-5 shrink-0" />, 'Medicine & Ritual')}
+        {navItem('/planner/sacred-routines', <Sun className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Sacred Routines')}
+        {navItem('/planner/body-temple', <Flame className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Body Temple')}
+        {navItem('/planner/medicine-ritual', <Heart className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Medicine & Ritual')}
 
         {section('Nourishment')}
-        {navItem('/planner/nourishment', <Leaf className="w-5 h-5 shrink-0" />, 'Nourishment')}
-        {navItem('/planner/moon-cycle', <Moon className="w-5 h-5 shrink-0" />, 'Moon & Cycle')}
+        {navItem('/planner/nourishment', <Leaf className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Nourishment')}
+        {navItem('/planner/moon-cycle', <Moon className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Moon & Cycle')}
 
         {section('Home & Life')}
-        {navItem('/planner/home-sanctuary', <Home className="w-5 h-5 shrink-0" />, 'Home Sanctuary')}
-        {navItem('/planner/rocket-realm', <PawPrint className="w-5 h-5 shrink-0" />, "Rocket's Realm")}
-        {navItem('/planner/rocket-business', <Briefcase className="w-5 h-5 shrink-0" />, "Rocket's Business")}
+        {navItem('/planner/home-sanctuary', <Home className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Home Sanctuary')}
+        {navItem('/planner/rocket-realm', <PawPrint className="w-4 h-4 shrink-0" strokeWidth={1.5} />, "Rocket's Realm")}
+        {navItem('/planner/rocket-business', <Briefcase className="w-4 h-4 shrink-0" strokeWidth={1.5} />, "Rocket's Business")}
 
         {section('Abundance')}
-        {navItem('/planner/content-creation', <Sparkles className="w-5 h-5 shrink-0" />, 'Content & Creation')}
-        {navItem('/planner/money', <Gem className="w-5 h-5 shrink-0" />, 'Abundance')}
+        {navItem('/planner/content-creation', <Sparkles className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Content & Creation')}
+        {navItem('/planner/money', <Gem className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Abundance')}
 
         {section('Health')}
-        {navItem('/planner/oura', <Activity className="w-5 h-5 shrink-0" />, 'Health Tracking')}
+        {navItem('/planner/oura', <Activity className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Health Tracking')}
 
         {section('Reflection')}
-        {navItem('/planner/reflection', <Star className="w-5 h-5 shrink-0" />, 'Reflection')}
-        {navItem('/planner/inspiration', <ImageIcon className="w-5 h-5 shrink-0" />, 'Inspiration')}
-        {navItem('/planner/notes', <StickyNote className="w-5 h-5 shrink-0" />, 'Notes')}
-        {navItem('/planner/settings', <Settings className="w-5 h-5 shrink-0" />, 'Settings')}
+        {navItem('/planner/reflection', <Star className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Reflection')}
+        {navItem('/planner/inspiration', <ImageIcon className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Inspiration')}
+        {navItem('/planner/notes', <StickyNote className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Notes')}
+        {navItem('/planner/settings', <Settings className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Settings')}
       </div>
     </nav>
   )
