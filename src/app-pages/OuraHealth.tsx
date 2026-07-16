@@ -339,9 +339,11 @@ export default function OuraHealth() {
   const [editOpen, setEditOpen] = useState(false)
   const [syncLoading, setSyncLoading] = useState(false)
   const [syncError, setSyncError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
   const todayStr = format(new Date(), 'yyyy-MM-dd')
 
   useEffect(() => {
+    setMounted(true)
     setData(loadData())
   }, [])
 
@@ -439,7 +441,7 @@ export default function OuraHealth() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {user && (
+              {mounted && user && (
                 <button
                   onClick={syncFromOura}
                   disabled={syncLoading}
