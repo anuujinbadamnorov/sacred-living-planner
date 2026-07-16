@@ -1,89 +1,59 @@
 # Sacred Living Planner — Work Status
 
-**Last Updated:** 2026-07-16 15:04 CDT
-**Current Phase:** ✅ D2 COMPLETE (b + c + d + e all done)
+**Last Updated:** 2026-07-16 15:25 CDT
+**Current Phase:** 🔄 D3 — Supabase Data Connection (Partial)
 **Deploy Target:** https://sacred-living-planner.vercel.app
-**Next Checkpoint:** 15:34 CDT (30 min from now)
+**Next Checkpoint:** 15:55 CDT (30 min from now)
 
 ---
 
-## ✅ D2 FULLY COMPLETE
+## ✅ D3: Supabase Data Connection — Partial
 
-### ✅ D2b: Database Schema — DONE
-- All 10 tables created in Supabase with RLS policies
-- Tables: daily_entries, health_metrics, habits, workouts, meals, rocket_photos, business_income, business_expenses, notes, user_settings
+### What was done:
+1. **Cloud Sync badge** — now ALWAYS visible on Dashboard
+   - Shows "Connected — data syncing" when logged in
+   - Shows "Sign in to sync across devices" + link when not logged in
+   - Green dot = connected, Amber dot = not logged in
 
-### ✅ D2c: Supabase Client Setup — DONE
-- `client.ts` — Browser client (already existed, verified)
-- `server.ts` — Server client with cookies (already existed, verified)
-- `middleware.ts` — Auth middleware (redirects to /login if not authenticated)
-- Hooks: use-user, use-daily-entry, use-health-metrics, use-rocket-business
-- Types: TypeScript interfaces for all tables
+2. **useDailyEntrySupabase hook** — created for syncing daily entries
+   - Loads from Supabase (if user is logged in)
+   - Falls back to localStorage for instant UI + offline
+   - Saves to BOTH Supabase + localStorage on changes
+   - Handles auth state gracefully
 
-### ✅ D2d: Theme & Aesthetic — DONE
-- **Light mode** CSS variables match project brief exactly:
-  - `--background: #F6F2EB` (warm cream)
-  - `--primary: #7A8B65` (sage green)
-  - `--accent: #D4A76A` (gold)
-  - `--destructive: #E85D78` (rose)
-  - `--foreground: #3D3B38` (espresso)
-- **Dark mode** matches brief:
-  - `--background: #1E1A16` (deep charcoal)
-  - Same primary/accent/destructive colors
-- **ThemeProvider** component with `useTheme()` hook
-- Wrapped root layout with ThemeProvider
-
-### ✅ D2e: New Pages — DONE
-- `/planner/calendar/yearly` → redirects to `/planner/yearly`
-- `/planner/calendar/monthly` → redirects to `/planner/monthly`
-- `/planner/calendar/weekly` → redirects to `/planner/weekly`
-- `/planner/calendar/daily` → redirects to `/planner/daily`
-- `/planner/health` → redirects to `/planner/oura`
-- `/planner/routines` → redirects to `/planner/sacred-routines`
+### Still needed for full D3:
+- **Daily page** — integrate useDailyEntrySupabase hook (events, mood, habits, gratitude, water)
+- **Habits page** — connect to Supabase `habits` table
+- **Notes page** — connect to Supabase `notes` table
+- **Settings page** — connect to Supabase `user_settings` table
 
 ---
 
-## 📋 Full Route Map (matches project brief)
-
-```
-(planner)/
-├── (auth)/
-│   ├── login/page.tsx
-│   └── signup/page.tsx
-├── (dashboard)/
-│   ├── planner/
-│   │   ├── page.tsx              # Dashboard
-│   │   ├── calendar/
-│   │   │   ├── yearly/ → /planner/yearly
-│   │   │   ├── monthly/ → /planner/monthly
-│   │   │   ├── weekly/ → /planner/weekly
-│   │   │   └── daily/ → /planner/daily
-│   │   ├── routines/ → /planner/sacred-routines
-│   │   ├── body-temple/page.tsx
-│   │   ├── nourishment/page.tsx
-│   │   ├── moon-cycle/page.tsx
-│   │   ├── home-sanctuary/page.tsx
-│   │   ├── rocket-realm/page.tsx
-│   │   ├── rocket-business/page.tsx
-│   │   ├── content-creation/page.tsx
-│   │   ├── abundance/page.tsx
-│   │   ├── health/ → /planner/oura
-│   │   ├── notes/page.tsx
-│   │   └── settings/page.tsx
-```
+## 🎯 D4: New Features (Ready to Start)
+**Time:** 30 min
+**Scope:**
+- Whiteboard notes (using `whiteboard_data` JSONB column)
+- Oura API proxy route
+- Meal macros in Daily page (protein, carbs, fat, calories)
 
 ---
 
-## 📝 What's Next?
+## 🎯 D5: Polish (Ready to Start)
+**Time:** 30 min
+**Scope:**
+- Animations (Framer Motion refinements)
+- Responsive design fixes
+- Performance optimizations
 
-**D2 is complete!** Options:
+---
 
-| Option | What |
-|--------|------|
-| **Verify** | Check the live site to confirm all changes work |
-| **D3** | Connect existing pages to real Supabase data (replace localStorage) |
-| **D4** | Add more features (whiteboard notes, Oura API proxy, meal macros) |
-| **D5** | Polish — animations, responsive design, performance |
+## 📝 User Decision Needed
 
-**What would you like to do next?**
+**D3 is partially complete.** I can either:
+
+**Option A:** Continue D3 — fully connect Daily, Habits, Notes, Settings to Supabase (45 min)
+**Option B:** Start D4 — add new features (whiteboard, Oura, meal macros) (30 min)
+**Option C:** Start D5 — polish and refinements (30 min)
+
+**Which option?** Or should I continue with D3 first before moving on?
 
