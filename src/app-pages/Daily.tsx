@@ -558,34 +558,32 @@ export default function Daily() {
 
                 {/* Time slots */}
                 <div>
-                  {TIME_SLOTS.map((slot, idx) => (
+                  {TIME_SLOTS.map((slot) => {
+                    const isHour = slot.minute === 0
+                    const isHalfHour = slot.minute === 30
+                    return (
                     <div
                       key={`${slot.hour}-${slot.minute}`}
                       className="flex"
-                      style={{ height: '20px' }}
+                      style={{ height: isHour ? '28px' : '20px' }}
                     >
-                      {/* Time label - on hour and half-hour */}
+                      {/* Time label - only on the hour */}
                       <div className="w-[70px] shrink-0 pr-2 text-right flex items-center justify-end">
-                        {slot.minute === 0 && (
+                        {isHour && (
                           <span className="font-mono text-xs font-semibold text-warm-600">
                             {slot.label}
-                          </span>
-                        )}
-                        {slot.minute === 30 && (
-                          <span className="font-mono text-[10px] text-warm-400">
-                            :30
                           </span>
                         )}
                       </div>
 
                       {/* Slot */}
                       <div
-                        className={`flex-1 relative border-b cursor-pointer transition-colors hover:bg-rose-50/60 ${
-                          slot.minute === 0
-                            ? 'border-warm-200 bg-white'
-                            : slot.minute === 30
-                              ? 'border-warm-150 bg-warm-50/30'
-                              : 'border-warm-100/50 bg-white'
+                        className={`flex-1 relative cursor-pointer transition-colors hover:bg-rose-50/40 ${
+                          isHour
+                            ? 'border-b border-warm-200 bg-white'
+                            : isHalfHour
+                              ? 'border-b border-dashed border-warm-150 bg-warm-50/20'
+                              : 'border-b border-warm-100/30 bg-white'
                         }`}
                         onClick={() => {
                           setAddingEventHour(slot.hour)
@@ -643,7 +641,7 @@ export default function Daily() {
                         )}
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
             </div>
