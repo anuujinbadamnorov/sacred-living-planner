@@ -42,7 +42,11 @@ export interface DailyEntry {
   id: string
   user_id: string
   date: string
+  focus: string
+  priorities: string[]
+  tasks: { id: string; text: string; completed: boolean; priority: string }[]
   events: { id: string; time: string; label: string; completed: boolean }[]
+  notes: string
   habits_completed: string[]
   mood: string
   gratitude: string
