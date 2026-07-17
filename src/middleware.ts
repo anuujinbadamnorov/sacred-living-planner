@@ -27,15 +27,8 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user && !request.nextUrl.pathname.startsWith('/login') && !request.nextUrl.pathname.startsWith('/auth')) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    return NextResponse.redirect(url, 302)
-  }
+  // Refresh session but don't redirect - let pages handle auth client-side
+  await supabase.auth.getUser()
 
   return supabaseResponse
 }
