@@ -224,8 +224,12 @@ export default function Dashboard() {
   /* Load saved data */
   useEffect(() => {
     const dateStr = format(todayDate, 'yyyy-MM-dd')
+    // Saved rituals only carry the `done` flags — icons are React components
+    // and cannot survive JSON serialization, so merge onto the static list.
     const savedRituals = getStorageItem(`dashboard-rituals-${dateStr}`, null)
-    if (savedRituals) setRituals(savedRituals)
+    if (Array.isArray(savedRituals)) {
+      setRituals(RITUALS.map((r, i) => ({ ...r, done: Boolean(savedRituals[i]?.done) })))
+    }
     const savedMeds = getStorageItem(`dashboard-meds-${dateStr}`, null)
     if (savedMeds) setMedicines(savedMeds)
     const savedNonNegs = getStorageItem(`dashboard-nonneg-${dateStr}`, null)
@@ -240,7 +244,9 @@ export default function Dashboard() {
   /* Save data */
   const saveData = useCallback(() => {
     const dateStr = format(todayDate, 'yyyy-MM-dd')
-    localStorage.setItem(`dashboard-rituals-${dateStr}`, JSON.stringify(rituals))
+    // Strip `icon` (React component) before persisting — functions/forwardRef
+    // objects do not survive JSON.stringify (they come back as `{}`).
+    localStorage.setItem(`dashboard-rituals-${dateStr}`, JSON.stringify(rituals.map((r) => ({ time: r.time, label: r.label, done: r.done }))))
     localStorage.setItem(`dashboard-meds-${dateStr}`, JSON.stringify(medicines))
     localStorage.setItem(`dashboard-nonneg-${dateStr}`, JSON.stringify(nonNegs))
     localStorage.setItem(`dashboard-intention-${dateStr}`, intention)
