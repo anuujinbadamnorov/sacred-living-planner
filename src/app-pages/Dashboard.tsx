@@ -226,7 +226,7 @@ export default function Dashboard() {
     const dateStr = format(todayDate, 'yyyy-MM-dd')
     // Saved rituals only carry the `done` flags — icons are React components
     // and cannot survive JSON serialization, so merge onto the static list.
-    const savedRituals = getStorageItem(`dashboard-rituals-${dateStr}`, null)
+    const savedRituals = getStorageItem<{ done?: boolean }[] | null>(`dashboard-rituals-${dateStr}`, null)
     if (Array.isArray(savedRituals)) {
       setRituals(RITUALS.map((r, i) => ({ ...r, done: Boolean(savedRituals[i]?.done) })))
     }
