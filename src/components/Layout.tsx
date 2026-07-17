@@ -13,7 +13,7 @@ import {
 import Navbar from './Navbar'
 import Footer from './Footer'
 import SearchModal from './SearchModal'
-import { useThemeStore } from '@/stores/theme'
+import { useTheme } from '@/components/theme-provider'
 
 function getPageTitle(pathname: string): string {
   if (pathname === '/' || pathname === '') return 'Sacred Living Planner'
@@ -53,7 +53,7 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
   const [scrolled, setScrolled] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const { isNightMode, setNightMode } = useThemeStore()
+  const { theme, setTheme } = useTheme()
 
   const pageTitle = getPageTitle(pathname)
   const today = new Date()
@@ -138,12 +138,12 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
             </kbd>
           </button>
           <button
-            onClick={() => setNightMode(!isNightMode)}
+            onClick={() => setTheme(theme === 'night' ? 'day' : 'night')}
             className="p-2 rounded-md transition-colors hover:bg-black/5"
             style={{ color: 'var(--espresso-muted)' }}
-            aria-label={isNightMode ? 'Switch to day mode' : 'Switch to night mode'}
+            aria-label={theme === 'night' ? 'Switch to day mode' : 'Switch to night mode'}
           >
-            {isNightMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {theme === 'night' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center"

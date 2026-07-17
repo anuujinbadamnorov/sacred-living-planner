@@ -51,7 +51,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${inter.variable} ${playfair.variable} ${caveat.variable}`} suppressHydrationWarning>
       <body className="antialiased min-h-screen bg-background text-foreground">
-        <ThemeProvider defaultTheme="day" storageKey="sacred-theme">
+        <ThemeProvider defaultTheme="night" storageKey="sacred-theme">
           <AuthProvider>
             {children}
             <ServiceWorkerCleanup />
