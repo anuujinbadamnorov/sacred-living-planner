@@ -68,6 +68,15 @@
 
 [data-theme="night"] {
   /* Dark mode — matched to reference design (tferuiskhodpy.kimi.page night) */
+  --color-bg: #1A1A2E;
+  --color-surface: #2D2D44;
+  --color-text: #F5F0E8;
+  --color-text-muted: #6B6B8A;
+  --color-accent: #C9A94C;
+  --color-accent-hover: #D9BC66;
+  --color-border: rgba(201, 169, 76, 0.12);
+  --color-calendar-weekend: #23233A;
+
   --cream: #1A1A2E;
   --cream-dark: #2D2D44;
   --espresso: #F5F0E8;
