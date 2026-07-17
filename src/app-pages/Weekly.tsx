@@ -347,7 +347,7 @@ export default function Weekly() {
           <div className="flex items-center gap-2">
             <button
               onClick={goThisWeek}
-              className="px-3 py-2 rounded-md text-sm font-inter font-medium text-rose-600 border border-rose-300 hover:bg-rose-50 transition-colors"
+              className="px-3 py-2 rounded-md text-sm font-inter font-medium text-amber-600 border border-amber-300 hover:bg-amber-50 transition-colors"
             >
               This Week
             </button>
@@ -379,9 +379,9 @@ export default function Weekly() {
                     variants={fadeRight}
                     className={`rounded-lg border transition-all duration-200 cursor-pointer min-h-[280px] flex flex-col ${
                       dayIsToday
-                        ? 'bg-rose-50 border-rose-500 border-t-[3px]'
+                        ? 'bg-amber-50 border-amber-500 border-t-[3px]'
                         : isWeekend
-                          ? 'bg-rose-50/30 border-warm-100'
+                          ? 'bg-amber-50/30 border-warm-100'
                           : 'bg-white border-warm-200 hover:bg-warm-50'
                     }`}
                   >
@@ -395,7 +395,7 @@ export default function Weekly() {
                       </p>
                       <p
                         className={`text-xl font-inter font-medium mt-1 ${
-                          dayIsToday ? 'text-rose-500' : 'text-warm-800'
+                          dayIsToday ? 'text-amber-500' : 'text-warm-800'
                         }`}
                       >
                         {getDate(day)}
@@ -424,7 +424,7 @@ export default function Weekly() {
                         <div key={tIdx} className="flex items-start gap-1.5">
                           <div
                             className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center shrink-0 mt-0.5 ${
-                              task.completed ? 'bg-rose-500 border-rose-500' : 'border-warm-300'
+                              task.completed ? 'bg-amber-500 border-amber-500' : 'border-warm-300'
                             }`}
                           >
                             {task.completed && <Check className="w-2.5 h-2.5 text-white" strokeWidth={3} />}
@@ -469,7 +469,7 @@ export default function Weekly() {
           {/* Meal Planner */}
           <motion.div variants={fadeUp} className="card-planner">
             <h3 className="flex items-center gap-2 mb-4">
-              <UtensilsCrossed className="w-5 h-5 text-rose-500" />
+              <UtensilsCrossed className="w-5 h-5 text-amber-500" />
               Meal Plan
             </h3>
 
@@ -503,7 +503,7 @@ export default function Weekly() {
                               value={dayMeals[mealType] || ''}
                               onChange={(e) => saveMeal(dKey, mealType, e.target.value)}
                               placeholder="..."
-                              className="w-full min-h-[36px] px-1.5 py-1 font-caveat text-sm text-warm-700 bg-transparent border border-warm-100 rounded text-center outline-none focus:border-rose-300 transition-colors placeholder:text-warm-300"
+                              className="w-full min-h-[36px] px-1.5 py-1 font-caveat text-sm text-warm-700 bg-transparent border border-warm-100 rounded text-center outline-none focus:border-amber-300 transition-colors placeholder:text-warm-300"
                             />
                           </td>
                         ))}
@@ -519,13 +519,13 @@ export default function Weekly() {
           <motion.div variants={fadeUp} className="card-planner">
             <div className="flex items-center justify-between mb-4">
               <h3 className="flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5 text-rose-500" />
+                <ShoppingCart className="w-5 h-5 text-amber-500" />
                 Grocery List
               </h3>
               {groceryItems.some((i) => i.checked) && (
                 <button
                   onClick={clearCompletedGrocery}
-                  className="text-xs font-inter text-rose-500 hover:text-rose-600 hover:underline"
+                  className="text-xs font-inter text-amber-500 hover:text-amber-600 hover:underline"
                 >
                   Clear Completed
                 </button>
@@ -549,7 +549,7 @@ export default function Weekly() {
                 onChange={(e) => setNewGroceryText(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addGroceryItem()}
                 placeholder="Add item..."
-                className="flex-1 text-sm font-inter px-3 py-2 rounded-md border border-warm-200 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all placeholder:text-warm-400"
+                className="flex-1 text-sm font-inter px-3 py-2 rounded-md border border-warm-200 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all placeholder:text-warm-400"
               />
               <button
                 onClick={addGroceryItem}
@@ -583,8 +583,8 @@ export default function Weekly() {
                         onClick={() => toggleGroceryItem(item.id)}
                         className={`w-[18px] h-[18px] rounded-[3px] border-[1.5px] flex items-center justify-center shrink-0 transition-all duration-200 ${
                           item.checked
-                            ? 'bg-rose-500 border-rose-500'
-                            : 'border-warm-300 hover:border-rose-300'
+                            ? 'bg-amber-500 border-amber-500'
+                            : 'border-warm-300 hover:border-amber-300'
                         }`}
                       >
                         {item.checked && (
@@ -629,7 +629,7 @@ export default function Weekly() {
           {/* Workout Schedule */}
           <motion.div variants={fadeUp} className="card-planner">
             <h3 className="flex items-center gap-2 mb-4">
-              <Dumbbell className="w-5 h-5 text-rose-500" />
+              <Dumbbell className="w-5 h-5 text-amber-500" />
               Workouts
             </h3>
 
@@ -710,12 +710,12 @@ export default function Weekly() {
         <motion.div variants={fadeUp} className="card-planner overflow-x-auto">
           <div className="flex items-center justify-between mb-4">
             <h3 className="flex items-center gap-2">
-              <Check className="w-5 h-5 text-rose-500" />
+              <Check className="w-5 h-5 text-amber-500" />
               Weekly Habits
             </h3>
             <Link
               href="/planner/goals"
-              className="text-xs font-inter text-rose-500 hover:text-rose-600 hover:underline"
+              className="text-xs font-inter text-amber-500 hover:text-amber-600 hover:underline"
             >
               Manage Habits &rarr;
             </Link>
@@ -728,11 +728,11 @@ export default function Weekly() {
               {weekDays.map((day, idx) => {
                 const isTodayCol = isToday(day)
                 return (
-                  <div key={idx} className={`text-center py-2 rounded-t-md ${isTodayCol ? 'bg-rose-50' : ''}`}>
+                  <div key={idx} className={`text-center py-2 rounded-t-md ${isTodayCol ? 'bg-amber-50' : ''}`}>
                     <p className="text-[0.6875rem] font-inter font-semibold text-warm-500 uppercase">
                       {DAY_ABBREVS[idx]}
                     </p>
-                    <p className={`text-sm font-inter font-medium ${isTodayCol ? 'text-rose-500' : 'text-warm-700'}`}>
+                    <p className={`text-sm font-inter font-medium ${isTodayCol ? 'text-amber-500' : 'text-warm-700'}`}>
                       {getDate(day)}
                     </p>
                   </div>
@@ -772,15 +772,15 @@ export default function Weekly() {
                       const isFilled = !!habit.history[dKey]
                       const isTodayCol = isToday(day)
                       return (
-                        <div key={dIdx} className={`flex justify-center py-1 rounded-md ${isTodayCol ? 'bg-rose-50/50' : ''}`}>
+                        <div key={dIdx} className={`flex justify-center py-1 rounded-md ${isTodayCol ? 'bg-amber-50/50' : ''}`}>
                           <motion.button
                             whileHover={{ scale: 1.15 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => toggleWeeklyHabit(habit.id, dKey)}
                             className={`w-10 h-10 rounded-lg flex items-center justify-center transition-all duration-200 border ${
                               isFilled
-                                ? 'bg-rose-500 border-rose-500'
-                                : 'bg-warm-100 border-warm-200 hover:border-rose-300'
+                                ? 'bg-amber-500 border-amber-500'
+                                : 'bg-warm-100 border-warm-200 hover:border-amber-300'
                             }`}
                           >
                             {isFilled && (
@@ -805,7 +805,7 @@ export default function Weekly() {
             {activeHabits.length === 0 && (
               <p className="text-sm text-warm-400 font-inter text-center py-6">
                 No habits configured.{' '}
-                <Link href="/planner/goals" className="text-rose-500 hover:underline">
+                <Link href="/planner/goals" className="text-amber-500 hover:underline">
                   Create habits &rarr;
                 </Link>
               </p>
@@ -824,7 +824,7 @@ export default function Weekly() {
                       <span className="text-[0.6875rem] font-inter text-warm-500">{pct}%</span>
                       <div className="w-full h-1 bg-warm-100 rounded-full mt-0.5 overflow-hidden">
                         <div
-                          className="h-full bg-rose-400 rounded-full transition-all duration-500"
+                          className="h-full bg-amber-400 rounded-full transition-all duration-500"
                           style={{ width: `${pct}%` }}
                         />
                       </div>

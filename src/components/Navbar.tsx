@@ -210,7 +210,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         {section('Home & Life')}
         {navItem('/planner/home-sanctuary', <Home className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Home Sanctuary')}
         {navItem('/planner/rocket-realm', <PawPrint className="w-4 h-4 shrink-0" strokeWidth={1.5} />, "Rocket's Realm")}
-        {navItem('/planner/rocket-business', <Briefcase className="w-4 h-4 shrink-0" strokeWidth={1.5} />, "Rocket's Business")}
+        {navItem('/planner/rocket-business', <Briefcase className="w-4 h-4 shrink-0" strokeWidth={1.5} />, "Business")}
 
         {section('Abundance')}
         {navItem('/planner/content-creation', <Sparkles className="w-4 h-4 shrink-0" strokeWidth={1.5} />, 'Content & Creation')}

@@ -19,19 +19,19 @@ import { cn } from '@/lib/utils'
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number]
 
-const MONTH_GRADIENTS = [
-  'linear-gradient(135deg, #8B7355 0%, #D4C5B0 50%, #F5F0EB 100%)',   // Jan — warm taupe
-  'linear-gradient(135deg, #B5A396 0%, #E8DDD0 50%, #FDFAF5 100%)',   // Feb — soft mauve
-  'linear-gradient(135deg, #7A8B65 0%, #A8B89A 50%, #E8F0E0 100%)',   // Mar — sage green
-  'linear-gradient(135deg, #D4A76A 0%, #E8C9A0 50%, #F5ECD8 100%)',   // Apr — golden amber
-  'linear-gradient(135deg, #C4704B 0%, #E8A87A 50%, #F5DDD0 100%)',    // May — terracotta
-  'linear-gradient(135deg, #6B8E8A 0%, #A8C5C2 50%, #E0F0EE 100%)',   // Jun — seafoam
-  'linear-gradient(135deg, #D4A76A 0%, #F0D498 50%, #FDF5E0 100%)',   // Jul — warm gold
-  'linear-gradient(135deg, #9B8B7A 0%, #C4B5A5 50%, #E8E0D8 100%)',   // Aug — warm grey
-  'linear-gradient(135deg, #8B7355 0%, #B5A396 50%, #DDD5C8 100%)',   // Sep — autumn taupe
-  'linear-gradient(135deg, #C4704B 0%, #D4A76A 50%, #E8D4B0 100%)',  // Oct — copper
-  'linear-gradient(135deg, #7A6B5A 0%, #A89B8A 50%, #D4CBC0 100%)',   // Nov — deep brown
-  'linear-gradient(135deg, #6B8E8A 0%, #8BA5A2 50%, #C5D5D2 100%)',   // Dec — winter sage
+const MONTH_IMAGES = [
+  'IMG_1315.JPG',
+  'IMG_1339.JPG',
+  'IMG_1350.JPG',
+  'IMG_1378.JPG',
+  'IMG_1387.JPG',
+  'IMG_1394.JPG',
+  'IMG_1401.JPG',
+  'IMG_2966.jpg',
+  'IMG_2973.PNG',
+  'IMG_2981.jpg',
+  'IMG_2988.jpg',
+  'IMG_2995.jpg',
 ]
 
 const HOLIDAYS_2026 = [
@@ -95,10 +95,12 @@ function MiniMonth({
       onClick={() => router.push(`/planner/monthly/${month}`)}
       className="relative rounded-xl overflow-hidden text-left transition-all duration-200 shadow-sm hover:shadow-md"
     >
-      {/* Background gradient */}
-      <div
-        className="absolute inset-0"
-        style={{ background: MONTH_GRADIENTS[month], backgroundSize: 'cover', backgroundPosition: 'center' }}
+      {/* Background photo */}
+      <img
+        src={`/inspo/${MONTH_IMAGES[month]}`}
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+        loading="lazy"
       />
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" />

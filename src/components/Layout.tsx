@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { format } from 'date-fns'
 import {
   Search,
@@ -9,6 +10,7 @@ import {
   Moon,
   ChevronLeft,
   ChevronRight,
+  Settings,
 } from 'lucide-react'
 import Navbar from './Navbar'
 import Footer from './Footer'
@@ -145,6 +147,14 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
           >
             {theme === 'night' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
+          <Link
+            href="/planner/settings"
+            className="p-2 rounded-md transition-colors hover:bg-black/5"
+            style={{ color: 'var(--espresso-muted)' }}
+            aria-label="Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </Link>
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center"
             style={{ background: 'var(--border-light)' }}

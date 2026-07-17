@@ -491,7 +491,7 @@ export default function Daily() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25 }}
             >
-              <p className="font-playfair font-medium text-rose-600 text-base">
+              <p className="font-playfair font-medium text-amber-600 text-base">
                 {format(currentDate, 'EEEE')}
               </p>
               <h1 className="font-playfair font-semibold text-warm-900" style={{ fontSize: 'clamp(1.5rem, 4vw, 2.5rem)', lineHeight: 1.1 }}>
@@ -504,7 +504,7 @@ export default function Daily() {
           <div className="flex items-center gap-2">
             <button
               onClick={goToday}
-              className="px-3 py-2 rounded-md text-sm font-inter font-medium text-rose-600 border border-rose-300 hover:bg-rose-50 transition-colors"
+              className="px-3 py-2 rounded-md text-sm font-inter font-medium text-amber-600 border border-amber-300 hover:bg-amber-50 transition-colors"
             >
               Today
             </button>
@@ -550,7 +550,7 @@ export default function Daily() {
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Focus */}
             <div className="flex-1">
-              <label className="label-style text-rose-500 flex items-center gap-2 mb-2">
+              <label className="label-style text-amber-500 flex items-center gap-2 mb-2">
                 <Target className="w-3.5 h-3.5" />
                 TODAY&apos;S FOCUS
               </label>
@@ -578,7 +578,7 @@ export default function Daily() {
                     transition={{ delay: i * 0.08 }}
                     className="flex items-center gap-2"
                   >
-                    <span className="font-playfair font-medium text-rose-400 text-base w-5">
+                    <span className="font-playfair font-medium text-amber-400 text-base w-5">
                       {i + 1}.
                     </span>
                     <input
@@ -608,7 +608,7 @@ export default function Daily() {
             <div className="card-planner overflow-hidden">
               <div className="flex items-center justify-between mb-4 p-6 pb-0">
                 <h3 className="flex items-center gap-2">
-                  <CalendarIcon className="w-5 h-5 text-rose-500" />
+                  <CalendarIcon className="w-5 h-5 text-amber-500" />
                   Schedule
                 </h3>
                 <button
@@ -628,7 +628,7 @@ export default function Daily() {
                       setStorageItem(`planner-events-${currentDateStr}`, updated)
                     }
                   }}
-                  className="text-xs font-inter font-medium text-rose-600 hover:text-rose-700 transition-colors flex items-center gap-1"
+                  className="text-xs font-inter font-medium text-amber-600 hover:text-amber-700 transition-colors flex items-center gap-1"
                 >
                   <Sunrise className="w-3.5 h-3.5" /> Load Routine
                 </button>
@@ -641,8 +641,8 @@ export default function Daily() {
                     className="absolute left-0 right-0 z-20 flex items-center pointer-events-none"
                     style={{ top: `${currentTimePos}px` }}
                   >
-                    <div className="w-2 h-2 rounded-full bg-rose-500 -ml-1" />
-                    <div className="flex-1 h-0.5 bg-rose-500" />
+                    <div className="w-2 h-2 rounded-full bg-amber-500 -ml-1" />
+                    <div className="flex-1 h-0.5 bg-amber-500" />
                   </div>
                 )}
 
@@ -668,7 +668,7 @@ export default function Daily() {
 
                       {/* Slot */}
                       <div
-                        className={`flex-1 relative cursor-pointer transition-colors hover:bg-rose-50/40 ${
+                        className={`flex-1 relative cursor-pointer transition-colors hover:bg-amber-50/40 ${
                           isHour
                             ? 'border-b border-warm-200 bg-white'
                             : isHalfHour
@@ -698,9 +698,9 @@ export default function Daily() {
                                   ev.stopPropagation()
                                   deleteEvent(event.id)
                                 }}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-rose-200"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded hover:bg-amber-200"
                               >
-                                <Trash2 className="w-3 h-3 text-rose-600" />
+                                <Trash2 className="w-3 h-3 text-amber-600" />
                               </button>
                             </div>
                           ))}
@@ -708,7 +708,7 @@ export default function Daily() {
                         {/* Inline add event */}
                         {addingEventHour === slot.hour && addingEventMinute === slot.minute && (
                           <div
-                            className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-sm bg-white border border-rose-300 flex items-center px-2 z-10 shadow-sm"
+                            className="absolute inset-x-1 top-0.5 bottom-0.5 rounded-sm bg-white border border-amber-300 flex items-center px-2 z-10 shadow-sm"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <input
@@ -750,7 +750,7 @@ export default function Daily() {
                     onClick={() => setTaskFilter(f)}
                     className={`px-3 py-1 rounded-md text-xs font-inter font-medium transition-colors capitalize ${
                       taskFilter === f
-                        ? 'bg-rose-500 text-white'
+                        ? 'bg-amber-500 text-white'
                         : 'text-warm-500 hover:bg-warm-100'
                     }`}
                   >
@@ -782,8 +782,8 @@ export default function Daily() {
                           onClick={() => toggleTask(task.id)}
                           className={`w-[18px] h-[18px] rounded-[3px] border-[1.5px] flex items-center justify-center shrink-0 transition-all duration-200 ${
                             task.completed
-                              ? 'bg-rose-500 border-rose-500'
-                              : 'border-warm-300 hover:border-rose-300 bg-white'
+                              ? 'bg-amber-500 border-amber-500'
+                              : 'border-warm-300 hover:border-amber-300 bg-white'
                           }`}
                         >
                           {task.completed && (
@@ -828,7 +828,7 @@ export default function Daily() {
                   onChange={(e) => setNewTaskText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addTask()}
                   placeholder="Add a task..."
-                  className="flex-1 text-sm font-inter px-3 py-2 rounded-md border border-warm-200 outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition-all placeholder:text-warm-400"
+                  className="flex-1 text-sm font-inter px-3 py-2 rounded-md border border-warm-200 outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100 transition-all placeholder:text-warm-400"
                 />
                 <button
                   onClick={addTask}
@@ -844,7 +844,7 @@ export default function Daily() {
                 <div className="mt-4">
                   <div className="w-full h-2 bg-warm-200 rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-rose-500 rounded-full"
+                      className="h-full bg-amber-500 rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${taskProgress}%` }}
                       transition={{ duration: 0.4, ease: 'easeOut' }}
@@ -861,7 +861,7 @@ export default function Daily() {
             {/* Notes */}
             <div className="card-planner">
               <h3 className="flex items-center gap-2 mb-3">
-                <PenLine className="w-5 h-5 text-rose-500" />
+                <PenLine className="w-5 h-5 text-amber-500" />
                 Notes
               </h3>
               <div
@@ -884,18 +884,18 @@ export default function Daily() {
             </div>
 
             {/* Gratitude */}
-            <div className="card-planner bg-rose-50/40">
+            <div className="card-planner bg-amber-50/40">
               <h3 className="flex items-center gap-2 mb-1">
-                <Heart className="w-5 h-5 text-rose-400" />
+                <Heart className="w-5 h-5 text-amber-400" />
                 Gratitude
               </h3>
-              <p className="font-caveat text-rose-600 text-base mb-3">
+              <p className="font-caveat text-amber-600 text-base mb-3">
                 What are you grateful for today?
               </p>
               <div className="space-y-3">
                 {gratitude.map((g, i) => (
                   <div key={g.id} className="flex items-center gap-2">
-                    <span className="text-rose-400 font-caveat text-base">{i + 1}.</span>
+                    <span className="text-amber-400 font-caveat text-base">{i + 1}.</span>
                     <input
                       type="text"
                       value={g.text}
@@ -919,7 +919,7 @@ export default function Daily() {
               {/* Mood Tracker */}
               <div className="card-planner">
                 <h4 className="flex items-center gap-2 mb-3 text-sm">
-                  <Smile className="w-4 h-4 text-rose-500" />
+                  <Smile className="w-4 h-4 text-amber-500" />
                   Today&apos;s Mood
                 </h4>
                 <div className="flex items-center justify-center gap-3">
@@ -998,21 +998,21 @@ export default function Daily() {
                   saveFocus(e.target.value)
                 }}
                 placeholder="Set your intention..."
-                className="w-full min-h-[60px] p-2 font-caveat text-base text-warm-700 bg-transparent outline-none resize-none border border-warm-100 rounded-md focus:border-rose-300 transition-colors"
+                className="w-full min-h-[60px] p-2 font-caveat text-base text-warm-700 bg-transparent outline-none resize-none border border-warm-100 rounded-md focus:border-amber-300 transition-colors"
               />
             </div>
 
             {/* Daily Habits */}
             <div className="card-planner">
               <h3 className="flex items-center gap-2 mb-4">
-                <Check className="w-5 h-5 text-rose-500" />
+                <Check className="w-5 h-5 text-amber-500" />
                 Habits
               </h3>
               {habitsData.length === 0 ? (
                 <p className="text-sm text-warm-400 font-inter text-center py-4">
                   No habits configured yet.
                   <br />
-                  <Link href="/planner/goals" className="text-rose-500 hover:underline">
+                  <Link href="/planner/goals" className="text-amber-500 hover:underline">
                     Manage Habits &rarr;
                   </Link>
                 </p>
@@ -1030,8 +1030,8 @@ export default function Daily() {
                         <div
                           className={`w-4 h-4 rounded-sm border flex items-center justify-center transition-all duration-200 ${
                             isChecked
-                              ? 'bg-rose-500 border-rose-500'
-                              : 'border-warm-300 group-hover:border-rose-300'
+                              ? 'bg-amber-500 border-amber-500'
+                              : 'border-warm-300 group-hover:border-amber-300'
                           }`}
                         >
                           {isChecked && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
@@ -1049,7 +1049,7 @@ export default function Daily() {
                   {habitsData.length > 7 && (
                     <Link
                       href="/planner/goals"
-                      className="text-xs text-rose-500 font-inter hover:underline block mt-2"
+                      className="text-xs text-amber-500 font-inter hover:underline block mt-2"
                     >
                       +{habitsData.length - 7} more habits &rarr;
                     </Link>
@@ -1125,20 +1125,20 @@ export default function Daily() {
             {/* Pelvic Floor Exercise */}
             <div className="card-planner">
               <h3 className="flex items-center gap-2 mb-4">
-                <Heart className="w-5 h-5 text-rose-400" />
+                <Heart className="w-5 h-5 text-amber-400" />
                 Pelvic Floor
               </h3>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-rose-400 focus:ring-rose-300" />
+                  <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-amber-400 focus:ring-amber-300" />
                   <span className="text-sm font-inter text-warm-700">Morning Kegels (3 sets of 10)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-rose-400 focus:ring-rose-300" />
+                  <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-amber-400 focus:ring-amber-300" />
                   <span className="text-sm font-inter text-warm-700">Evening Kegels (3 sets of 10)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-rose-400 focus:ring-rose-300" />
+                  <input type="checkbox" className="w-4 h-4 rounded border-warm-300 text-amber-400 focus:ring-amber-300" />
                   <span className="text-sm font-inter text-warm-700">Deep Breathing (5 min)</span>
                 </div>
               </div>

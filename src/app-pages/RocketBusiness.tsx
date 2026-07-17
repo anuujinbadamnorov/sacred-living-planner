@@ -698,7 +698,7 @@ export default function RocketBusiness() {
                     return (
                       <div key={cat} className="flex items-center gap-3">
       <HeroSection
-        title={`Rocket's Business`}
+        title={`Business`}
         subtitle="The business of caring"
         imageIndex={12}
       />

@@ -36,7 +36,7 @@ const DAY_ABBREVS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
 const CATEGORY_COLORS: Record<string, string> = {
   Work: 'bg-info',
-  Personal: 'bg-rose-400',
+  Personal: 'bg-amber-400',
   Health: 'bg-success',
   Other: 'bg-warning',
 }
@@ -278,7 +278,7 @@ export default function Monthly() {
               Today
             </button>
             <div className="flex rounded-md border border-warm-200 overflow-hidden">
-              <button className="px-3 py-2 bg-rose-500 text-white font-inter text-xs font-medium">
+              <button className="px-3 py-2 bg-amber-500 text-white font-inter text-xs font-medium">
                 Month
               </button>
               <button
@@ -332,10 +332,10 @@ export default function Monthly() {
                       {/* Week number hover button */}
                       <button
                         onClick={() => handleWeekClick(week)}
-                        className="absolute left-0 top-0 bottom-0 w-5 opacity-0 group-hover/week:opacity-100 bg-rose-50 hover:bg-rose-100 flex items-center justify-center transition-opacity z-10"
+                        className="absolute left-0 top-0 bottom-0 w-5 opacity-0 group-hover/week:opacity-100 bg-amber-50 hover:bg-amber-100 flex items-center justify-center transition-opacity z-10"
                         title="View week"
                       >
-                        <ChevronRight className="w-3 h-3 text-rose-500" />
+                        <ChevronRight className="w-3 h-3 text-amber-500" />
                       </button>
                       {week.map((day, dayIdx) => {
                         const inMonth = isSameMonth(day, displayDate)
@@ -360,7 +360,7 @@ export default function Monthly() {
                               'min-h-[100px] p-1.5 border border-warm-200 -mt-px -ml-px cursor-pointer transition-colors duration-150 flex flex-col gap-1',
                               !inMonth && 'opacity-30 bg-warm-50',
                               weekend && inMonth && 'bg-warm-50/50',
-                              isSelected && 'ring-2 ring-rose-500 ring-inset z-10',
+                              isSelected && 'ring-2 ring-amber-500 ring-inset z-10',
                               !isSelected && 'hover:bg-warm-100'
                             )}
                           >
@@ -370,14 +370,14 @@ export default function Monthly() {
                                 className={cn(
                                   'font-inter text-sm font-medium w-7 h-7 flex items-center justify-center rounded-full',
                                   dayIsToday
-                                    ? 'bg-rose-500 text-white'
+                                    ? 'bg-amber-500 text-white'
                                     : 'text-warm-700'
                                 )}
                               >
                                 {format(day, 'd')}
                               </span>
                               {holiday && inMonth && (
-                                <span className="font-inter text-[0.625rem] text-rose-500 truncate max-w-[70%] text-right leading-tight">
+                                <span className="font-inter text-[0.625rem] text-amber-500 truncate max-w-[70%] text-right leading-tight">
                                   {holiday}
                                 </span>
                               )}
@@ -444,7 +444,7 @@ export default function Monthly() {
                     transition={{ duration: 0.2 }}
                   >
                     <h4 className="mb-3 flex items-center gap-2">
-                      <CalendarCheck className="w-4 h-4 text-rose-500" />
+                      <CalendarCheck className="w-4 h-4 text-amber-500" />
                       {format(selectedDate, 'EEEE, MMM d')}
                     </h4>
 
@@ -464,7 +464,7 @@ export default function Monthly() {
                                 className={cn(
                                   'w-[18px] h-[18px] rounded-[3px] border flex items-center justify-center transition-colors shrink-0',
                                   task.completed
-                                    ? 'bg-rose-500 border-rose-500'
+                                    ? 'bg-amber-500 border-amber-500'
                                     : 'border-warm-300'
                                 )}
                               >
@@ -535,7 +535,7 @@ export default function Monthly() {
 
                     <button
                       onClick={() => router.push(`/planner/daily/${dateKey(selectedDate)}`)}
-                      className="mt-4 w-full py-2 rounded-md border border-rose-200 text-rose-600 font-inter text-xs font-medium hover:bg-rose-50 transition-colors flex items-center justify-center gap-1"
+                      className="mt-4 w-full py-2 rounded-md border border-amber-200 text-amber-600 font-inter text-xs font-medium hover:bg-amber-50 transition-colors flex items-center justify-center gap-1"
                     >
                       Open Daily View
                     </button>
@@ -559,7 +559,7 @@ export default function Monthly() {
               transition={{ duration: 0.5, ease: EASE, delay: 0.3 }}
             >
               <h4 className="mb-3 flex items-center gap-2">
-                <Clock className="w-4 h-4 text-rose-500" />
+                <Clock className="w-4 h-4 text-amber-500" />
                 Upcoming
               </h4>
               {upcomingEvents.length > 0 ? (
@@ -624,7 +624,7 @@ export default function Monthly() {
               transition={{ duration: 0.5, ease: EASE, delay: 0.5 }}
             >
               <h4 className="mb-3 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-500" />
+                <AlertCircle className="w-4 h-4 text-amber-500" />
                 Holidays
               </h4>
               {(() => {
@@ -703,7 +703,7 @@ export default function Monthly() {
                     value={eventTitle}
                     onChange={(e) => setEventTitle(e.target.value)}
                     placeholder="Event title"
-                    className="w-full px-3 py-2 rounded-md border border-warm-200 bg-white font-inter text-sm text-warm-700 placeholder:text-warm-400 focus:border-rose-400 focus:outline-none focus:ring-[3px] focus:ring-rose-500/10 transition-all"
+                    className="w-full px-3 py-2 rounded-md border border-warm-200 bg-white font-inter text-sm text-warm-700 placeholder:text-warm-400 focus:border-amber-400 focus:outline-none focus:ring-[3px] focus:ring-amber-500/10 transition-all"
                     autoFocus
                   />
                 </div>
@@ -717,7 +717,7 @@ export default function Monthly() {
                       type="time"
                       value={eventTime}
                       onChange={(e) => setEventTime(e.target.value)}
-                      className="w-full px-3 py-2 rounded-md border border-warm-200 bg-white font-inter text-sm text-warm-700 focus:border-rose-400 focus:outline-none focus:ring-[3px] focus:ring-rose-500/10 transition-all"
+                      className="w-full px-3 py-2 rounded-md border border-warm-200 bg-white font-inter text-sm text-warm-700 focus:border-amber-400 focus:outline-none focus:ring-[3px] focus:ring-amber-500/10 transition-all"
                     />
                   </div>
                   <div>
@@ -727,7 +727,7 @@ export default function Monthly() {
                     <select
                       value={eventCategory}
                       onChange={(e) => setEventCategory(e.target.value)}
-                      className="w-full px-3 py-2 rounded-md border border-warm-200 bg-white font-inter text-sm text-warm-700 focus:border-rose-400 focus:outline-none focus:ring-[3px] focus:ring-rose-500/10 transition-all"
+                      className="w-full px-3 py-2 rounded-md border border-warm-200 bg-white font-inter text-sm text-warm-700 focus:border-amber-400 focus:outline-none focus:ring-[3px] focus:ring-amber-500/10 transition-all"
                     >
                       <option value="Personal">Personal</option>
                       <option value="Work">Work</option>
@@ -746,7 +746,7 @@ export default function Monthly() {
                     onChange={(e) => setEventNotes(e.target.value)}
                     placeholder="Add notes..."
                     rows={3}
-                    className="w-full px-3 py-2 rounded-md border border-warm-200 bg-white font-inter text-sm text-warm-700 placeholder:text-warm-400 focus:border-rose-400 focus:outline-none focus:ring-[3px] focus:ring-rose-500/10 transition-all resize-none"
+                    className="w-full px-3 py-2 rounded-md border border-warm-200 bg-white font-inter text-sm text-warm-700 placeholder:text-warm-400 focus:border-amber-400 focus:outline-none focus:ring-[3px] focus:ring-amber-500/10 transition-all resize-none"
                   />
                 </div>
               </div>

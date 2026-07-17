@@ -1,7 +1,5 @@
 'use client'
 
-import { Sidebar } from '@/components/sidebar'
-import { Topbar } from '@/components/topbar'
 import { useAuth } from '@/components/AuthProvider'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -35,15 +33,7 @@ export default function DashboardLayout({
     return null
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Topbar />
-      <div className="flex">
-        <Sidebar />
-        <main className="flex-1 p-6 md:p-8 lg:ml-64 pt-20">
-          {children}
-        </main>
-      </div>
-    </div>
-  )
+  // Navigation shell (sidebar/header) is provided by the planner layout —
+  // rendering a second one here caused double sidebars and a doubled left margin.
+  return <>{children}</>
 }
