@@ -86,6 +86,7 @@ const SACRED_DOCUMENTS = [
 
 function Whiteboard() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const dprRef = useRef(1)
   const [isDrawing, setIsDrawing] = useState(false)
   const [brushColor, setBrushColor] = useState('#2C2420')
   const [brushSize, setBrushSize] = useState(3)
@@ -103,16 +104,24 @@ function Whiteboard() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Load saved drawing
+    // Scale the backing store for HiDPI/retina screens (e.g. iPad) so
+    // Apple Pencil strokes render crisp instead of blurry
+    const dpr = window.devicePixelRatio || 1
+    dprRef.current = dpr
+    const cssWidth = canvas.clientWidth || 600
+    canvas.width = Math.round(cssWidth * dpr)
+    canvas.height = Math.round(400 * dpr)
+
+    // Load saved drawing (stretch to current canvas size)
     const saved = localStorage.getItem(WHITEBOARD_KEY)
     if (saved) {
       const img = new Image()
-      img.onload = () => ctx.drawImage(img, 0, 0)
+      img.onload = () => ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
       img.src = saved
     }
   }, [])
 
-  const getPos = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const getPos = (e: { clientX: number; clientY: number }) => {
     const canvas = canvasRef.current
     if (!canvas) return { x: 0, y: 0 }
     const rect = canvas.getBoundingClientRect()
@@ -137,12 +146,20 @@ function Whiteboard() {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     if (!ctx) return
-    const { x, y } = getPos(e)
-    ctx.lineWidth = brushSize
+    // Pressure-sensitive line width for Apple Pencil; mouse stays constant
+    const pressure = e.pointerType === 'pen' ? Math.max(e.pressure, 0.15) * 2 : 1
+    ctx.lineWidth = brushSize * dprRef.current * pressure
     ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
     ctx.strokeStyle = brushColor
-    ctx.lineTo(x, y)
-    ctx.stroke()
+    // Coalesced events give smoother curves at the Pencil's 120Hz+ sample rate
+    const native = e.nativeEvent as PointerEvent & { getCoalescedEvents?: () => PointerEvent[] }
+    const events = native.getCoalescedEvents?.() ?? [native]
+    events.forEach((ev) => {
+      const { x, y } = getPos(ev)
+      ctx.lineTo(x, y)
+      ctx.stroke()
+    })
   }
 
   const stopDrawing = () => {
@@ -238,7 +255,7 @@ function Whiteboard() {
         style={{ background: '#FAFAF8', touchAction: 'none' }}
       />
       <p className="font-body text-xs mt-2" style={{ color: 'var(--espresso-muted)' }}>
-        Draw freely with your mouse or finger. Changes auto-save.
+        Draw with your mouse, finger, or Apple Pencil — strokes are pressure-sensitive and auto-save.
       </p>
     </div>
   )
