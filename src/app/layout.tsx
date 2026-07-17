@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, Inter } from 'next/font/google'
+import { Cormorant_Garamond, Inter, Playfair_Display, Caveat } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider } from '@/components/AuthProvider'
 import ServiceWorkerCleanup from '@/components/ServiceWorkerCleanup'
@@ -15,6 +15,20 @@ const cormorant = Cormorant_Garamond({
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-playfair',
+  display: 'swap',
+})
+
+const caveat = Caveat({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-caveat',
   display: 'swap',
 })
 
@@ -35,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${cormorant.variable} ${inter.variable} ${playfair.variable} ${caveat.variable}`} suppressHydrationWarning>
       <body className="antialiased min-h-screen bg-background text-foreground">
         <ThemeProvider defaultTheme="day" storageKey="sacred-theme">
           <AuthProvider>

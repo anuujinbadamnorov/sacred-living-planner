@@ -4,35 +4,35 @@
 
 :root {
   /* Sacred Living — warm cream & earthy tones */
-  --color-bg: #FDFBF7;
+  --color-bg: #F6F2EB;
   --color-surface: #FFFFFF;
-  --color-text: #3A3228;
-  --color-text-muted: #8A8278;
-  --color-accent: #B5A642;
-  --color-accent-hover: #A0903A;
+  --color-text: #2C1810;
+  --color-text-muted: #B8A99A;
+  --color-accent: #D4AF37;
+  --color-accent-hover: #C19F2E;
   --color-border: #E5E0D8;
   --color-success: #6B8E6B;
-  --color-warning: #B5A642;
+  --color-warning: #D4AF37;
   --color-error: #C4706B;
   --color-calendar-weekend: #F5F0EB;
   --font-heading: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
 
-  --cream: #FDFBF7;
-  --cream-dark: #F5F0E8;
-  --espresso: #3A3228;
+  --cream: #F6F2EB;
+  --cream-dark: #EDE8E0;
+  --espresso: #2C1810;
   --espresso-light: #5C4D42;
-  --espresso-muted: #8A8278;
-  --border-light: #E5E0D8;
+  --espresso-muted: #B8A99A;
+  --border-light: rgba(212, 175, 55, 0.18);
   --border-medium: #D5CBB8;
   --rose-soft: #C9A8A0;
-  --sage: #7A8B6A;
-  --gold: #B5A642;
+  --sage: #8BA88C;
+  --gold: #D4AF37;
   --cognac: #A67C52;
   --terracotta: #C4706B;
   --terracotta-light: #D4886A;
   --lake: #7B9EA8;
-  --warm-50: #FDFBF7;
+  --warm-50: #F6F2EB;
   --warm-100: #FAF7F2;
   --warm-200: #F5F0E8;
   --warm-300: #EDE6D8;
@@ -67,51 +67,51 @@
 }
 
 [data-theme="night"] {
-  /* Dark mode — matches project brief exactly */
-  --cream: #1E1A16;
-  --cream-dark: #2A2622;
-  --espresso: #F6F2EB;
+  /* Dark mode — matched to reference design (tferuiskhodpy.kimi.page night) */
+  --cream: #1A1A2E;
+  --cream-dark: #2D2D44;
+  --espresso: #F5F0E8;
   --espresso-light: #D5CCBF;
-  --espresso-muted: #A8A59E;
-  --border-light: #3A3632;
-  --border-medium: #4D4438;
+  --espresso-muted: #6B6B8A;
+  --border-light: rgba(201, 169, 76, 0.12);
+  --border-medium: #3D3D5C;
   --rose-soft: #E85D78;
-  --sage: #7A8B65;
-  --gold: #D4A76A;
-  --cognac: #B5A642;
+  --sage: #8BA88C;
+  --gold: #C9A94C;
+  --cognac: #D4A76A;
   --terracotta: #E85D78;
   --terracotta-light: #F07088;
   --lake: #6B8F9A;
-  --warm-50: #1E1A16;
-  --warm-100: #2A2622;
-  --warm-200: #3A3632;
-  --warm-300: #4D4438;
-  --warm-400: #6B6860;
+  --warm-50: #1A1A2E;
+  --warm-100: #2D2D44;
+  --warm-200: #3D3D5C;
+  --warm-300: #4D4D6B;
+  --warm-400: #6B6B8A;
   --warm-500: #8A877E;
   --warm-600: #A8A59E;
   --warm-700: #D5CCBF;
   --warm-800: #EDE6D8;
-  --warm-900: #F6F2EB;
+  --warm-900: #F5F0E8;
 
-  --background: 30 12% 10%;
-  --foreground: 38 30% 95%;
-  --card: 30 10% 15%;
-  --card-foreground: 38 30% 95%;
-  --popover: 30 10% 15%;
-  --popover-foreground: 38 30% 95%;
-  --primary: 93 15% 47%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 30 8% 20%;
-  --secondary-foreground: 38 30% 95%;
-  --muted: 30 10% 15%;
-  --muted-foreground: 36 6% 63%;
-  --accent: 36 50% 62%;
-  --accent-foreground: 38 30% 95%;
-  --destructive: 348 76% 63%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 30 8% 20%;
-  --input: 30 8% 20%;
-  --ring: 93 15% 47%;
+  --background: 240 27% 14%;
+  --foreground: 40 33% 94%;
+  --card: 240 21% 22%;
+  --card-foreground: 40 33% 94%;
+  --popover: 240 21% 22%;
+  --popover-foreground: 40 33% 94%;
+  --primary: 43 50% 54%;
+  --primary-foreground: 240 27% 14%;
+  --secondary: 240 21% 22%;
+  --secondary-foreground: 40 33% 94%;
+  --muted: 240 21% 22%;
+  --muted-foreground: 245 12% 48%;
+  --accent: 43 50% 54%;
+  --accent-foreground: 240 27% 14%;
+  --destructive: 0 37% 49%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 43 50% 54% / 0.12;
+  --input: 240 21% 22%;
+  --ring: 43 50% 54%;
 }
 
 /* Also support class-based dark mode (shadcn default) */
@@ -156,6 +156,14 @@ body {
   font-weight: 300;
   letter-spacing: -0.01em;
   line-height: 1.15;
+}
+
+.font-playfair {
+  font-family: var(--font-playfair), 'Playfair Display', Georgia, serif;
+}
+
+.font-caveat {
+  font-family: var(--font-caveat), 'Caveat', cursive;
 }
 
 .font-handwriting {

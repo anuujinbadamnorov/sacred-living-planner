@@ -50,8 +50,8 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
           fontSize: '13px',
           width: '100%',
           textDecoration: 'none',
-          backgroundColor: active ? 'rgba(180, 157, 120, 0.12)' : 'transparent',
-          color: active ? '#7A6B52' : '#6B5E4F',
+          backgroundColor: active ? 'rgba(212, 175, 55, 0.12)' : 'transparent',
+          color: active ? 'var(--gold)' : 'var(--espresso-muted)',
           fontWeight: active ? 500 : 400,
           transition: 'all 0.25s ease',
           minHeight: '38px',
@@ -60,14 +60,14 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         }}
         onMouseEnter={(e) => {
           if (!active) {
-            e.currentTarget.style.backgroundColor = 'rgba(180, 157, 120, 0.06)'
-            e.currentTarget.style.color = '#4A4035'
+            e.currentTarget.style.backgroundColor = 'rgba(212, 175, 55, 0.06)'
+            e.currentTarget.style.color = 'var(--espresso)'
           }
         }}
         onMouseLeave={(e) => {
           if (!active) {
             e.currentTarget.style.backgroundColor = 'transparent'
-            e.currentTarget.style.color = '#6B5E4F'
+            e.currentTarget.style.color = 'var(--espresso-muted)'
           }
         }}
       >
@@ -85,7 +85,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         fontWeight: 500,
         letterSpacing: '0.2em',
         textTransform: 'uppercase',
-        color: '#B5A996',
+        color: 'var(--espresso-muted)',
         margin: 0,
         flexShrink: 0,
         fontFamily: "'Inter', system-ui, sans-serif",
@@ -103,42 +103,42 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid rgba(180, 157, 120, 0.15)',
+        borderRight: '1px solid var(--border-light)',
         zIndex: 50,
         width: collapsed ? 64 : 240,
-        backgroundColor: '#FDFAF5',
+        backgroundColor: 'var(--cream)',
         transition: 'width 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
       }}
     >
       {/* Elegant Branding */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        gap: '10px', 
-        padding: '22px 16px 18px', 
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '22px 16px 18px',
         flexShrink: 0,
-        borderBottom: '1px solid rgba(180, 157, 120, 0.1)',
+        borderBottom: '1px solid var(--border-light)',
       }}>
         <div style={{
-          width: 32, 
-          height: 32, 
+          width: 32,
+          height: 32,
           borderRadius: '50%',
-          backgroundColor: '#D4C5B0', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
+          backgroundColor: 'var(--gold)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           flexShrink: 0,
-          boxShadow: '0 1px 4px rgba(180, 157, 120, 0.2)',
+          boxShadow: '0 1px 4px rgba(212, 175, 55, 0.25)',
         }}>
-          <Flower2 className="w-4 h-4" style={{ color: '#FDFAF5' }} strokeWidth={1.5} />
+          <Flower2 className="w-4 h-4" style={{ color: 'var(--cream)' }} strokeWidth={1.5} />
         </div>
         {!collapsed && (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ 
-              fontFamily: "'Cormorant Garamond', 'Playfair Display', serif", 
-              fontSize: '18px', 
+            <span style={{
+              fontFamily: "'Cormorant Garamond', 'Playfair Display', serif",
+              fontSize: '18px',
               fontWeight: 500,
-              color: '#3D3228', 
+              color: 'var(--espresso)',
               whiteSpace: 'nowrap',
               letterSpacing: '0.03em',
               lineHeight: 1.2,
@@ -147,7 +147,7 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
             </span>
             <span style={{
               fontSize: '9px',
-              color: '#B5A996',
+              color: 'var(--espresso-muted)',
               letterSpacing: '0.18em',
               textTransform: 'uppercase',
               fontWeight: 400,
@@ -171,12 +171,12 @@ export default function Navbar({ collapsed = false, onToggle }: NavbarProps) {
           background: 'transparent',
           border: 'none',
           cursor: 'pointer',
-          color: '#B5A996',
+          color: 'var(--espresso-muted)',
           flexShrink: 0,
           transition: 'color 0.2s ease',
         }}
-        onMouseEnter={(e) => { e.currentTarget.style.color = '#7A6B52' }}
-        onMouseLeave={(e) => { e.currentTarget.style.color = '#B5A996' }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--gold)' }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--espresso-muted)' }}
         aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         {collapsed ? <Menu className="w-3.5 h-3.5" strokeWidth={1.5} /> : <X className="w-3.5 h-3.5" strokeWidth={1.5} />}
