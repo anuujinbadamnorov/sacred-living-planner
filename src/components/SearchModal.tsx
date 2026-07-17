@@ -108,13 +108,13 @@ export default function SearchModal({
       // Search daily entries
       const { data: daily } = await supabase
         .from('daily_entries')
-        .select('id, entry_date, focus, notes, gratitude')
+        .select('id, entry_date, focus, morning_notes, evening_reflection, gratitude')
         .eq('user_id', user.id)
-        .or(`focus.ilike.%${q}%,notes.ilike.%${q}%,gratitude.ilike.%${q}%`)
+        .or(`focus.ilike.%${q}%,morning_notes.ilike.%${q}%,evening_reflection.ilike.%${q}%,gratitude.ilike.%${q}%`)
         .limit(5)
 
-      daily?.forEach((d: { id: string; entry_date: string; focus: string | null; notes: string | null; gratitude: string | null }) => {
-        const snippet = d.focus || d.notes || d.gratitude || ''
+      daily?.forEach((d: { id: string; entry_date: string; focus: string | null; morning_notes: string | null; evening_reflection: string | null; gratitude: string | null }) => {
+        const snippet = d.focus || d.morning_notes || d.evening_reflection || d.gratitude || ''
         allResults.push({
           id: d.id,
           type: 'daily',

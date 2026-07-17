@@ -198,6 +198,8 @@ function HealthPreviewCard({
 /* ═══════════════════════════════════════════════════════ */
 
 export default function Dashboard() {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
   const { currentThemeId } = useThemeStore()
   const { theme } = useTheme()
   const [today, setToday] = useState<Date | null>(null)
@@ -207,10 +209,10 @@ export default function Dashboard() {
   const [nonNegs, setNonNegs] = useState(NON_NEGOTIABLES)
   const [intention, setIntention] = useState('')
   const [showAnxiety, setShowAnxiety] = useState(false)
-  const [affirmation] = useState(() => {
-    if (typeof window === 'undefined') return AFFIRMATIONS[0]
-    return AFFIRMATIONS[Math.floor(Math.random() * AFFIRMATIONS.length)]
-  })
+  const [affirmation, setAffirmation] = useState(AFFIRMATIONS[0])
+  useEffect(() => {
+    setAffirmation(AFFIRMATIONS[Math.floor(Math.random() * AFFIRMATIONS.length)])
+  }, [])
   const [healthData, setHealthData] = useState({
     sleep: 78, readiness: 82, activity: 65, steps: 8432, hrv: 65, restingHR: 52,
   })
@@ -279,6 +281,17 @@ export default function Dashboard() {
     { label: getCyclePhase(todayDate), icon: Leaf },
     { label: getSeason(todayDate), icon: Sun },
   ]
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground font-serif">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-12">

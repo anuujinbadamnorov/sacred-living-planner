@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import { AuthProvider } from '@/components/AuthProvider'
+import ServiceWorkerCleanup from '@/components/ServiceWorkerCleanup'
 import './globals.css'
 
 const cormorant = Cormorant_Garamond({
@@ -39,6 +40,7 @@ export default function RootLayout({
         <ThemeProvider defaultTheme="day" storageKey="sacred-theme">
           <AuthProvider>
             {children}
+            <ServiceWorkerCleanup />
           </AuthProvider>
         </ThemeProvider>
       </body>
