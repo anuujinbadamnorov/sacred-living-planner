@@ -296,7 +296,20 @@ export default function Daily() {
       setTasks((entry.tasks as TaskItem[]) || [])
       setEvents((entry.events as TimeEvent[]) || [])
       setNotes((entry.notes as string) || '')
-      const gratTexts = (entry.gratitude as string[]) || ['', '', '']
+      // gratitude is stored in a TEXT column, so rows saved as JSON come
+      // back as a string like '["a","b"]' (or legacy newline-joined text)
+      const rawGratitude = entry.gratitude as unknown
+      let gratTexts: string[] = ['', '', '']
+      if (Array.isArray(rawGratitude)) {
+        gratTexts = rawGratitude.map(String)
+      } else if (typeof rawGratitude === 'string' && rawGratitude) {
+        try {
+          const parsed = JSON.parse(rawGratitude)
+          gratTexts = Array.isArray(parsed) ? parsed.map(String) : [rawGratitude]
+        } catch {
+          gratTexts = rawGratitude.split('\n')
+        }
+      }
       setGratitude(gratTexts.map((text, i) => ({ id: `g${i}`, text })))
       setMood((entry.mood as Mood) || null)
       setWaterCount((entry.water_intake as number) || 0)
