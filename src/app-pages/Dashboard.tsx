@@ -200,23 +200,28 @@ function HealthPreviewCard({
 export default function Dashboard() {
   const { currentThemeId } = useThemeStore()
   const { theme } = useTheme()
-  const [today, setToday] = useState(new Date())
+  const [today, setToday] = useState<Date | null>(null)
+  useEffect(() => { setToday(new Date()) }, [])
   const [rituals, setRituals] = useState(RITUALS)
   const [medicines, setMedicines] = useState(MEDICINES)
   const [nonNegs, setNonNegs] = useState(NON_NEGOTIABLES)
   const [intention, setIntention] = useState('')
   const [showAnxiety, setShowAnxiety] = useState(false)
-  const [affirmation] = useState(() => AFFIRMATIONS[Math.floor(Math.random() * AFFIRMATIONS.length)])
+  const [affirmation] = useState(() => {
+    if (typeof window === 'undefined') return AFFIRMATIONS[0]
+    return AFFIRMATIONS[Math.floor(Math.random() * AFFIRMATIONS.length)]
+  })
   const [healthData, setHealthData] = useState({
     sleep: 78, readiness: 82, activity: 65, steps: 8432, hrv: 65, restingHR: 52,
   })
   const [ouraToken, setOuraToken] = useState('')
   const [ouraConnected, setOuraConnected] = useState(false)
   const { getStorageItem } = usePlanner()
-
+  const todayDate = today ?? new Date()
+  
   /* Load saved data */
   useEffect(() => {
-    const dateStr = format(today, 'yyyy-MM-dd')
+    const dateStr = format(todayDate, 'yyyy-MM-dd')
     const savedRituals = getStorageItem(`dashboard-rituals-${dateStr}`, null)
     if (savedRituals) setRituals(savedRituals)
     const savedMeds = getStorageItem(`dashboard-meds-${dateStr}`, null)
@@ -232,7 +237,7 @@ export default function Dashboard() {
 
   /* Save data */
   const saveData = useCallback(() => {
-    const dateStr = format(today, 'yyyy-MM-dd')
+    const dateStr = format(todayDate, 'yyyy-MM-dd')
     localStorage.setItem(`dashboard-rituals-${dateStr}`, JSON.stringify(rituals))
     localStorage.setItem(`dashboard-meds-${dateStr}`, JSON.stringify(medicines))
     localStorage.setItem(`dashboard-nonneg-${dateStr}`, JSON.stringify(nonNegs))
@@ -247,7 +252,7 @@ export default function Dashboard() {
     if (!ouraToken) return
     const fetchOura = async () => {
       try {
-        const res = await fetch(`/api/oura?token=${ouraToken}&date=${format(today, 'yyyy-MM-dd')}`)
+        const res = await fetch(`/api/oura?token=${ouraToken}&date=${format(todayDate, 'yyyy-MM-dd')}`)
         if (res.ok) {
           const data = await res.json()
           setHealthData({
@@ -270,9 +275,9 @@ export default function Dashboard() {
     : 0
 
   const tags = [
-    { label: getMoonPhase(today), icon: Moon },
-    { label: getCyclePhase(today), icon: Leaf },
-    { label: getSeason(today), icon: Sun },
+    { label: getMoonPhase(todayDate), icon: Moon },
+    { label: getCyclePhase(todayDate), icon: Leaf },
+    { label: getSeason(todayDate), icon: Sun },
   ]
 
   return (
@@ -285,10 +290,10 @@ export default function Dashboard() {
         className="text-center space-y-3"
       >
         <h1 className="font-display text-[clamp(2.5rem,5vw,4rem)] font-semibold leading-tight" style={{ color: 'var(--espresso)' }}>
-          {getGreeting(today)}
+          {getGreeting(todayDate)}
         </h1>
         <p className="font-body text-sm" style={{ color: 'var(--espresso-muted)' }}>
-          {format(today, 'EEEE, MMMM d, yyyy')}
+          {format(todayDate, 'EEEE, MMMM d, yyyy')}
         </p>
         <div className="flex items-center justify-center gap-2 flex-wrap">
           {tags.map((tag) => (
