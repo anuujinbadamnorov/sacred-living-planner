@@ -63,6 +63,18 @@ interface GratitudeItem {
 
 type Mood = 1 | 2 | 3 | 4 | 5 | null
 
+interface MealEntry {
+  text: string
+  p: string
+  c: string
+  f: string
+  kcal: string
+}
+
+const EMPTY_MEAL: MealEntry = { text: '', p: '', c: '', f: '', kcal: '' }
+
+const MEAL_NAMES = ['Breakfast', 'Lunch', 'Dinner', 'Snack'] as const
+
 const MOODS: { value: Mood; emoji: string; label: string }[] = [
   { value: 1, emoji: '\u{1F634}', label: 'Terrible' },
   { value: 2, emoji: '\u{1F615}', label: 'Bad' },
@@ -260,6 +272,21 @@ export default function Daily() {
   const [waterCount, setWaterCount] = useState(() =>
     getStorageItem<number>(`planner-water-${currentDateStr}`, 0)
   )
+
+  /* ── Data: Meals (with macros) ── */
+  const [meals, setMeals] = useState<Record<string, MealEntry>>(() =>
+    getStorageItem(`planner-meals-${currentDateStr}`, {
+      Breakfast: { ...EMPTY_MEAL },
+      Lunch: { ...EMPTY_MEAL },
+      Dinner: { ...EMPTY_MEAL },
+      Snack: { ...EMPTY_MEAL },
+    })
+  )
+  const updateMeal = (meal: string, patch: Partial<MealEntry>) => {
+    const updated = { ...meals, [meal]: { ...EMPTY_MEAL, ...meals[meal], ...patch } }
+    setMeals(updated)
+    setStorageItem(`planner-meals-${currentDateStr}`, updated)
+  }
 
   /* ── Data: Habits ── */
   const [habitsData, setHabitsData] = useState(() => getHabits())
@@ -1037,17 +1064,38 @@ export default function Daily() {
                 <Utensils className="w-5 h-5 text-amber-600" />
                 Nourishment
               </h3>
-              <div className="space-y-2">
-                {['Breakfast', 'Lunch', 'Dinner', 'Snack'].map((meal) => (
-                  <div key={meal} className="flex items-center gap-2">
-                    <span className="text-xs font-inter font-medium text-warm-500 w-16">{meal}</span>
-                    <input
-                      type="text"
-                      placeholder={`${meal}...`}
-                      className="flex-1 text-sm font-inter outline-none bg-transparent border-b border-warm-200 focus:border-amber-400 transition-colors py-1 text-warm-700 placeholder:text-warm-300"
-                    />
-                  </div>
-                ))}
+              <div className="space-y-3">
+                {MEAL_NAMES.map((meal) => {
+                  const entry = meals[meal] || EMPTY_MEAL
+                  return (
+                    <div key={meal} className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-inter font-medium text-warm-500 w-16">{meal}</span>
+                        <input
+                          type="text"
+                          value={entry.text}
+                          onChange={(e) => updateMeal(meal, { text: e.target.value })}
+                          placeholder={`${meal}...`}
+                          className="flex-1 text-sm font-inter outline-none bg-transparent border-b border-warm-200 focus:border-amber-400 transition-colors py-1 text-warm-700 placeholder:text-warm-300"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 pl-16">
+                        {(['p', 'c', 'f', 'kcal'] as const).map((field) => (
+                          <input
+                            key={field}
+                            type="text"
+                            inputMode="numeric"
+                            value={entry[field]}
+                            onChange={(e) => updateMeal(meal, { [field]: e.target.value })}
+                            placeholder={field === 'kcal' ? 'Kcal' : field.toUpperCase()}
+                            className="w-12 text-xs font-inter outline-none bg-transparent border-b border-warm-200 focus:border-amber-400 transition-colors py-0.5 text-warm-600 placeholder:text-warm-300 text-center"
+                          />
+                        ))}
+                        <span className="text-[0.6rem] font-inter text-warm-400">P / C / F / Kcal</span>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 

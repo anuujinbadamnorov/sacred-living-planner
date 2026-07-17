@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePlanner } from '@/hooks/usePlanner'
 import { useThemeStore } from '@/stores/theme'
 import { useTheme } from '@/components/theme/ThemeProvider'
+import { useAuth } from '@/components/AuthProvider'
 import { format, addDays } from 'date-fns'
 import {
   Sun,
@@ -35,6 +36,8 @@ import {
   Check,
   NotebookPen,
   Settings,
+  Cloud,
+  CloudOff,
 } from 'lucide-react'
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number]
@@ -202,6 +205,7 @@ export default function Dashboard() {
   useEffect(() => { setMounted(true) }, [])
   const { currentThemeId } = useThemeStore()
   const { theme } = useTheme()
+  const { user } = useAuth()
   const [today, setToday] = useState<Date | null>(null)
   useEffect(() => { setToday(new Date()) }, [])
   const [rituals, setRituals] = useState(RITUALS)
@@ -325,6 +329,18 @@ export default function Dashboard() {
               {tag.label}
             </span>
           ))}
+          {/* Cloud Sync badge — always visible, shows auth status */}
+          <span
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-body"
+            style={{
+              background: user ? 'rgba(122,139,101,0.12)' : 'var(--cream-dark)',
+              color: user ? 'var(--sage)' : 'var(--espresso-muted)',
+              border: '1px solid var(--border-light)',
+            }}
+          >
+            {user ? <Cloud className="w-3 h-3" /> : <CloudOff className="w-3 h-3" />}
+            {user ? 'Cloud Sync On' : 'Local Only'}
+          </span>
         </div>
       </motion.div>
 
