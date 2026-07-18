@@ -22,6 +22,13 @@ import {
   Zap,
   Brain,
   Heart,
+  Circle,
+  Stethoscope,
+  Smile,
+  Scissors,
+  Shield,
+  Droplets,
+  Utensils,
 } from 'lucide-react'
 
 /* ─── Types ─── */
@@ -54,12 +61,36 @@ interface CommandProgress {
   practiced: number
 }
 
+interface CareMilestone {
+  id: string
+  name: string
+  intervalDays: number
+  lastDone: string | null // ISO date 'YYYY-MM-DD'
+  icon: string
+}
+
+interface FeedingDay {
+  am: boolean
+  pm: boolean
+  note: string
+}
+
+interface PottyEvent {
+  id: string
+  type: 'pee' | 'poop'
+  time: string // 'HH:MM'
+}
+
 /* ─── Constants ─── */
 const STORAGE_KEYS = {
   exercise: 'rocket-exercise',
   training: 'rocket-training',
   photos: 'rocket-photos',
   commands: 'rocket-commands',
+  milestones: 'rocket-care-milestones',
+  rotation: 'rocket-rotation-log',
+  feeding: 'rocket-feeding-log',
+  potty: 'rocket-potty-log',
 }
 
 const DAILY_SCHEDULE = [
@@ -92,8 +123,56 @@ const PHOTO_COLORS = ['bg-rose-200', 'bg-sky-200', 'bg-amber-200', 'bg-emerald-2
 
 const ACTIVITY_TYPES = ['Walk', 'Run', 'Hike', 'Play', 'Training']
 
-/* ─── Storage Helpers ─── */
+/* ─── Care & Health Constants ─── */
+const MILESTONE_ICONS: Record<string, typeof PawPrint> = {
+  stethoscope: Stethoscope,
+  smile: Smile,
+  scissors: Scissors,
+  shield: Shield,
+  droplets: Droplets,
+  paw: PawPrint,
+}
+
+const DEFAULT_MILESTONES: CareMilestone[] = [
+  { id: 'vet', name: 'Vet visit', intervalDays: 180, lastDone: null, icon: 'stethoscope' },
+  { id: 'dental', name: 'Dental', intervalDays: 180, lastDone: null, icon: 'smile' },
+  { id: 'grooming', name: 'Grooming', intervalDays: 45, lastDone: null, icon: 'scissors' },
+  { id: 'nails', name: 'Nail trim', intervalDays: 21, lastDone: null, icon: 'paw' },
+  { id: 'flea', name: 'Flea/tick prevention', intervalDays: 30, lastDone: null, icon: 'shield' },
+  { id: 'bath', name: 'Bath', intervalDays: 42, lastDone: null, icon: 'droplets' },
+]
+
+const CARE_ROTATION = [
+  { day: 'Mon', task: 'Brush teeth' },
+  { day: 'Tue', task: 'Clean ears' },
+  { day: 'Wed', task: 'Brush coat thoroughly' },
+  { day: 'Thu', task: 'Brush teeth' },
+  { day: 'Fri', task: 'Check paws & nails' },
+  { day: 'Sat', task: 'Brush teeth' },
+  { day: 'Sun', task: 'Brush coat + tidy feathering' },
+]
+
+const DAY_MS = 86400000
+
+function daysSince(iso: string): number {
+  const [y, m, d] = iso.split('-').map(Number)
+  const then = new Date(y, (m || 1) - 1, d || 1).getTime()
+  const now = new Date()
+  const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  return Math.max(0, Math.round((todayMidnight - then) / DAY_MS))
+}
+
+function milestoneFreshness(m: CareMilestone): { label: string; pill: string; dot: string } {
+  if (!m.lastDone) return { label: 'never logged', pill: 'bg-warm-100 text-warm-500', dot: 'bg-warm-300' }
+  const d = daysSince(m.lastDone)
+  if (d > m.intervalDays) return { label: `${d - m.intervalDays}d overdue`, pill: 'bg-red-100 text-red-600', dot: 'bg-red-500' }
+  if (d >= Math.floor(m.intervalDays * 0.75)) return { label: 'due soon', pill: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' }
+  return { label: 'on track', pill: 'bg-emerald-100 text-emerald-700', dot: 'bg-emerald-500' }
+}
+
+/* ─── Storage Helpers (SSR-guarded) ─── */
 function load<T>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback
   try {
     const r = localStorage.getItem(key)
     return r ? JSON.parse(r) : fallback
@@ -102,6 +181,7 @@ function load<T>(key: string, fallback: T): T {
   }
 }
 function save<T>(key: string, v: T) {
+  if (typeof window === 'undefined') return
   localStorage.setItem(key, JSON.stringify(v))
 }
 
@@ -154,10 +234,21 @@ export default function RocketRealm() {
   const [newPhotoCaption, setNewPhotoCaption] = useState('')
   const [activeWeek, setActiveWeek] = useState(1)
 
+  /* Care & Health State */
+  const [milestones, setMilestones] = useState<CareMilestone[]>(() => load(STORAGE_KEYS.milestones, DEFAULT_MILESTONES))
+  const [newMilestone, setNewMilestone] = useState({ name: '', interval: '30' })
+  const [rotationLog, setRotationLog] = useState<Record<string, boolean>>(() => load(STORAGE_KEYS.rotation, {}))
+  const [feedingLog, setFeedingLog] = useState<Record<string, FeedingDay>>(() => load(STORAGE_KEYS.feeding, {}))
+  const [pottyLog, setPottyLog] = useState<Record<string, PottyEvent[]>>(() => load(STORAGE_KEYS.potty, {}))
+
   /* Persistence */
   useEffect(() => save(STORAGE_KEYS.exercise, exercise), [exercise])
   useEffect(() => save(STORAGE_KEYS.training, training), [training])
   useEffect(() => save(STORAGE_KEYS.photos, photos), [photos])
+  useEffect(() => save(STORAGE_KEYS.milestones, milestones), [milestones])
+  useEffect(() => save(STORAGE_KEYS.rotation, rotationLog), [rotationLog])
+  useEffect(() => save(STORAGE_KEYS.feeding, feedingLog), [feedingLog])
+  useEffect(() => save(STORAGE_KEYS.potty, pottyLog), [pottyLog])
 
   /* Derived Stats */
   const today = new Date().toISOString().split('T')[0]
@@ -244,6 +335,72 @@ export default function RocketRealm() {
   const removeTraining = useCallback((id: string) => {
     setTraining((prev) => prev.filter((t) => t.id !== id))
   }, [])
+
+  /* ─── Care & Health Derived ─── */
+  const todayIdx = (new Date().getDay() + 6) % 7 // Monday = 0
+  const rotationDoneToday = !!rotationLog[today]
+  const feedingToday: FeedingDay = feedingLog[today] ?? { am: false, pm: false, note: '' }
+  const pottyToday = pottyLog[today] ?? []
+  const peeCount = pottyToday.filter((e) => e.type === 'pee').length
+  const poopCount = pottyToday.filter((e) => e.type === 'poop').length
+
+  /* ─── Care & Health Handlers ─── */
+  const logMilestoneToday = useCallback((id: string) => {
+    setMilestones((prev) => prev.map((m) => (m.id === id ? { ...m, lastDone: today } : m)))
+  }, [today])
+
+  const setMilestoneDate = useCallback((id: string, date: string) => {
+    setMilestones((prev) => prev.map((m) => (m.id === id ? { ...m, lastDone: date || null } : m)))
+  }, [])
+
+  const addMilestone = useCallback(() => {
+    if (!newMilestone.name.trim()) return
+    setMilestones((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        name: newMilestone.name.trim(),
+        intervalDays: parseInt(newMilestone.interval) || 30,
+        lastDone: null,
+        icon: 'paw',
+      },
+    ])
+    setNewMilestone({ name: '', interval: '30' })
+  }, [newMilestone])
+
+  const removeMilestone = useCallback((id: string) => {
+    setMilestones((prev) => prev.filter((m) => m.id !== id))
+  }, [])
+
+  const toggleRotationToday = useCallback(() => {
+    setRotationLog((prev) => ({ ...prev, [today]: !prev[today] }))
+  }, [today])
+
+  const toggleFeeding = useCallback((meal: 'am' | 'pm') => {
+    setFeedingLog((prev) => {
+      const day = prev[today] ?? { am: false, pm: false, note: '' }
+      return { ...prev, [today]: { ...day, [meal]: !day[meal] } }
+    })
+  }, [today])
+
+  const setFeedingNote = useCallback((note: string) => {
+    setFeedingLog((prev) => {
+      const day = prev[today] ?? { am: false, pm: false, note: '' }
+      return { ...prev, [today]: { ...day, note } }
+    })
+  }, [today])
+
+  const addPotty = useCallback((type: PottyEvent['type']) => {
+    const time = new Date().toTimeString().slice(0, 5)
+    setPottyLog((prev) => ({
+      ...prev,
+      [today]: [...(prev[today] ?? []), { id: Date.now().toString(), type, time }],
+    }))
+  }, [today])
+
+  const removePotty = useCallback((id: string) => {
+    setPottyLog((prev) => ({ ...prev, [today]: (prev[today] ?? []).filter((e) => e.id !== id) }))
+  }, [today])
 
   return (
     <>
@@ -376,9 +533,301 @@ export default function RocketRealm() {
           </motion.section>
         </div>
 
-        {/* ═══════════════ EXERCISE TRACKER ═══════════════ */}
+        {/* ═══════════════ HEALTH & CARE LOG ═══════════════ */}
         <motion.section
           custom={6}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          className="card-planner"
+        >
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 rounded-full bg-sky-100 flex items-center justify-center">
+              <Stethoscope className="w-4 h-4 text-sky-600" />
+            </div>
+            <div>
+              <h2 className="font-playfair text-xl font-semibold text-warm-800">Health &amp; Care Log</h2>
+              <p className="font-caveat text-base text-warm-500">Vet, dental, grooming — every milestone on record</p>
+            </div>
+          </div>
+
+          {/* Add Custom Milestone */}
+          <div className="flex gap-2 mb-5">
+            <input
+              type="text"
+              placeholder="Custom milestone (e.g. Anal gland expression)..."
+              value={newMilestone.name}
+              onChange={(e) => setNewMilestone((p) => ({ ...p, name: e.target.value }))}
+              onKeyDown={(e) => e.key === 'Enter' && addMilestone()}
+              className="flex-1 px-3 py-2 rounded-md border border-warm-200 font-inter text-sm text-warm-700 bg-white focus:outline-none focus:border-sky-300"
+            />
+            <input
+              type="number"
+              placeholder="Days"
+              title="Typical interval in days"
+              value={newMilestone.interval}
+              onChange={(e) => setNewMilestone((p) => ({ ...p, interval: e.target.value }))}
+              className="w-20 px-3 py-2 rounded-md border border-warm-200 font-inter text-sm text-warm-700 bg-white focus:outline-none focus:border-sky-300"
+            />
+            <button
+              onClick={addMilestone}
+              className="px-3 py-2 bg-sky-500 text-white rounded-md font-inter text-sm font-medium hover:bg-sky-600 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Milestone Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {milestones.map((m) => {
+              const f = milestoneFreshness(m)
+              const Icon = MILESTONE_ICONS[m.icon] || PawPrint
+              const d = m.lastDone ? daysSince(m.lastDone) : null
+              return (
+                <div key={m.id} className="p-4 rounded-md bg-white border border-warm-200 group">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="w-8 h-8 rounded-full bg-sky-50 flex items-center justify-center shrink-0">
+                      <Icon className="w-4 h-4 text-sky-600" />
+                    </div>
+                    <span className="font-inter text-sm font-semibold text-warm-800 flex-1 truncate">{m.name}</span>
+                    <span className={`flex items-center gap-1 text-[0.6875rem] px-1.5 py-0.5 rounded-full font-inter font-medium shrink-0 ${f.pill}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${f.dot}`} />
+                      {f.label}
+                    </span>
+                    <button
+                      onClick={() => removeMilestone(m.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-warm-100 text-warm-400 transition-all shrink-0"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <p className="font-inter text-xs text-warm-500 mb-3">
+                    last: {m.lastDone ?? 'never'}
+                    {d !== null ? ` · ${d} day${d === 1 ? '' : 's'} ago` : ''} · every ~{m.intervalDays}d
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={m.lastDone ?? ''}
+                      onChange={(e) => setMilestoneDate(m.id, e.target.value)}
+                      className="flex-1 min-w-0 px-2 py-1.5 rounded-md border border-warm-200 font-inter text-xs text-warm-700 bg-white focus:outline-none focus:border-sky-300"
+                    />
+                    <button
+                      onClick={() => logMilestoneToday(m.id)}
+                      className="px-2.5 py-1.5 rounded-md font-inter text-xs font-medium text-white shrink-0 transition-colors"
+                      style={{ background: 'var(--sage)' }}
+                    >
+                      Log today
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </motion.section>
+
+        {/* ═══════════════ DAILY CARE ROTATION + FEEDING ═══════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Daily Care Rotation */}
+          <motion.section
+            custom={7}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            className="card-planner"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center">
+                <CalendarDays className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <h2 className="font-playfair text-xl font-semibold text-warm-800">Daily Care Rotation</h2>
+                <p className="font-caveat text-base text-warm-500">One small task each day — never everything at once</p>
+              </div>
+            </div>
+
+            {/* Today's Task */}
+            <div
+              className="flex items-center gap-3 p-4 rounded-md mb-4"
+              style={{ background: 'rgba(212,175,55,0.08)', border: '1px solid var(--gold)' }}
+            >
+              <button onClick={toggleRotationToday} className="shrink-0" title="Mark today's task done">
+                {rotationDoneToday ? (
+                  <CheckCircle2 className="w-6 h-6 text-emerald-500" />
+                ) : (
+                  <Circle className="w-6 h-6 text-warm-400" />
+                )}
+              </button>
+              <div>
+                <p className="font-inter text-xs uppercase tracking-wider" style={{ color: 'var(--gold)' }}>
+                  Today · {CARE_ROTATION[todayIdx].day}
+                </p>
+                <p className={`font-inter text-sm font-semibold ${rotationDoneToday ? 'line-through text-warm-400' : 'text-warm-800'}`}>
+                  {CARE_ROTATION[todayIdx].task}
+                </p>
+              </div>
+            </div>
+
+            {/* Full Week */}
+            <div className="space-y-1.5">
+              {CARE_ROTATION.map((r, i) => (
+                <div
+                  key={r.day}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-md border ${
+                    i === todayIdx ? 'border-amber-300 bg-amber-50/60' : 'border-warm-100 bg-white'
+                  }`}
+                >
+                  <span className={`font-inter text-xs font-semibold w-8 ${i === todayIdx ? 'text-amber-700' : 'text-warm-400'}`}>
+                    {r.day}
+                  </span>
+                  <span className={`font-inter text-sm flex-1 ${i === todayIdx ? 'text-warm-800 font-medium' : 'text-warm-500'}`}>
+                    {r.task}
+                  </span>
+                  {i === todayIdx && !rotationDoneToday && (
+                    <span className="text-xs font-inter" style={{ color: 'var(--gold)' }}>today</span>
+                  )}
+                  {i === todayIdx && rotationDoneToday && <CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+                </div>
+              ))}
+            </div>
+          </motion.section>
+
+          {/* Feeding Schedule */}
+          <motion.section
+            custom={8}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            className="card-planner"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center">
+                <Utensils className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <h2 className="font-playfair text-xl font-semibold text-warm-800">Feeding Schedule</h2>
+                <p className="font-caveat text-base text-warm-500">Two meals a day · resets each morning</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-4">
+              {([
+                { key: 'am', label: 'Breakfast', time: '~7:30 AM' },
+                { key: 'pm', label: 'Dinner', time: '~6:00 PM' },
+              ] as const).map((meal) => (
+                <button
+                  key={meal.key}
+                  onClick={() => toggleFeeding(meal.key)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-md border transition-all ${
+                    feedingToday[meal.key]
+                      ? 'bg-emerald-50 border-emerald-300 shadow-sm'
+                      : 'bg-white border-warm-200 hover:border-warm-300'
+                  }`}
+                >
+                  {feedingToday[meal.key] ? (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-warm-400 shrink-0" />
+                  )}
+                  <div className="text-left flex-1">
+                    <p className={`font-inter text-sm font-semibold ${feedingToday[meal.key] ? 'text-emerald-800' : 'text-warm-700'}`}>
+                      {meal.label}
+                    </p>
+                    <p className={`font-inter text-xs ${feedingToday[meal.key] ? 'text-emerald-600' : 'text-warm-400'}`}>
+                      {meal.time}
+                    </p>
+                  </div>
+                  {feedingToday[meal.key] && (
+                    <span className="text-xs font-inter font-medium text-emerald-600">fed</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            <input
+              type="text"
+              placeholder="What was fed today? (optional)"
+              value={feedingToday.note}
+              onChange={(e) => setFeedingNote(e.target.value)}
+              className="w-full px-3 py-2 rounded-md border border-warm-200 font-inter text-sm text-warm-700 bg-white focus:outline-none focus:border-emerald-300"
+            />
+            <p className="font-caveat text-base text-warm-500 mt-2">
+              Saved under today&apos;s date — a fresh bowl tomorrow
+            </p>
+          </motion.section>
+        </div>
+
+        {/* ═══════════════ POTTY LOG ═══════════════ */}
+        <motion.section
+          custom={9}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          className="card-planner"
+        >
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-sky-100 flex items-center justify-center">
+                <Droplets className="w-4 h-4 text-sky-600" />
+              </div>
+              <div>
+                <h2 className="font-playfair text-xl font-semibold text-warm-800">Potty Log</h2>
+                <p className="font-caveat text-base text-warm-500">Tap when it happens — time stamps itself</p>
+              </div>
+            </div>
+            <span className="font-inter text-sm" style={{ color: 'var(--espresso-muted)' }}>
+              {peeCount} pee &middot; {poopCount} poop today
+            </span>
+          </div>
+
+          {/* Quick Log Buttons */}
+          <div className="flex gap-2 mb-5">
+            <button
+              onClick={() => addPotty('pee')}
+              className="flex items-center gap-1.5 px-4 py-2 bg-sky-500 text-white rounded-md font-inter text-sm font-medium hover:bg-sky-600 transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Pee
+            </button>
+            <button
+              onClick={() => addPotty('poop')}
+              className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 text-white rounded-md font-inter text-sm font-medium hover:bg-amber-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" /> Poop
+            </button>
+          </div>
+
+          {/* Today's Timeline */}
+          {pottyToday.length === 0 ? (
+            <p className="font-caveat text-lg text-warm-400 text-center py-6">
+              Nothing logged yet today — every walk tells a story
+            </p>
+          ) : (
+            <div>
+              {pottyToday.map((ev, i) => (
+                <div key={ev.id} className="flex gap-3 group">
+                  <div className="flex flex-col items-center">
+                    <span className={`w-3 h-3 rounded-full mt-1 shrink-0 ${ev.type === 'pee' ? 'bg-sky-400' : 'bg-amber-700'}`} />
+                    {i < pottyToday.length - 1 && <div className="w-px flex-1 bg-warm-200" />}
+                  </div>
+                  <div className="pb-4 flex-1 flex items-center gap-3 min-w-0">
+                    <span className="font-inter text-xs text-warm-400 w-12 shrink-0">{ev.time}</span>
+                    <span className="font-inter text-sm text-warm-700 capitalize flex-1">{ev.type}</span>
+                    <button
+                      onClick={() => removePotty(ev.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-warm-100 text-warm-400 transition-all shrink-0"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.section>
+
+        {/* ═══════════════ EXERCISE TRACKER ═══════════════ */}
+        <motion.section
+          custom={10}
           variants={cardVariants}
           initial="hidden"
           animate="visible"
@@ -489,7 +938,7 @@ export default function RocketRealm() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Training Rotation */}
           <motion.section
-            custom={7}
+            custom={11}
             variants={cardVariants}
             initial="hidden"
             animate="visible"
@@ -539,7 +988,7 @@ export default function RocketRealm() {
 
           {/* Commands Tracker */}
           <motion.section
-            custom={8}
+            custom={12}
             variants={cardVariants}
             initial="hidden"
             animate="visible"
@@ -579,7 +1028,7 @@ export default function RocketRealm() {
 
         {/* ═══════════════ TRAINING SESSION LOG ═══════════════ */}
         <motion.section
-          custom={9}
+          custom={13}
           variants={cardVariants}
           initial="hidden"
           animate="visible"
@@ -682,7 +1131,7 @@ export default function RocketRealm() {
 
         {/* ═══════════════ PHOTO GALLERY ═══════════════ */}
         <motion.section
-          custom={10}
+          custom={14}
           variants={cardVariants}
           initial="hidden"
           animate="visible"
