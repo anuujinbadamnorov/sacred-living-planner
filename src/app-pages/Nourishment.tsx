@@ -34,10 +34,12 @@ import {
   Target,
   ThermometerSun,
   Flame,
-
+  UtensilsCrossed,
+  BookOpen,
 } from 'lucide-react'
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { getDinnersForWeek, RECIPES } from '@/data/recipes'
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -298,6 +300,16 @@ export default function Nourishment() {
   const [logFats, setLogFats] = useState('')
   const [logFiber, setLogFiber] = useState('')
   const [logCalories, setLogCalories] = useState('')
+
+  // Weekly dinner plan from your TikTok recipe library
+  const [shuffleSeed, setShuffleSeed] = useState(0)
+  const [expandedRecipe, setExpandedRecipe] = useState<string | null>(null)
+  const [recipeFilter, setRecipeFilter] = useState<string>('all')
+  const now = new Date()
+  const weekNum = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 1).getTime()) / (7 * 24 * 60 * 60 * 1000))
+  const weekDinners = getDinnersForWeek(weekNum + shuffleSeed)
+  const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+  const filteredRecipes = recipeFilter === 'all' ? RECIPES : RECIPES.filter((r) => r.category === recipeFilter)
 
   // Load from localStorage
   useEffect(() => {
@@ -1006,6 +1018,130 @@ export default function Nourishment() {
         {/* ─── PREP TAB ─── */}
         {activeTab === 'prep' && (
           <div className="space-y-8">
+            {/* This Week's Dinner Plan — from your TikTok recipe library */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: EASE }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="font-playfair text-2xl text-warm-900 flex items-center gap-2">
+                  <UtensilsCrossed className="w-5 h-5" style={{ color: GOLD }} />
+                  This Week's Dinners
+                </h2>
+                <button
+                  onClick={() => setShuffleSeed((s) => s + 1)}
+                  className="font-inter text-xs px-3 py-1.5 rounded-full transition-colors"
+                  style={{ backgroundColor: `${GOLD}18`, color: GOLD }}
+                >
+                  Shuffle week
+                </button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {weekDinners.map((recipe, i) => (
+                  <motion.div
+                    key={recipe.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: EASE, delay: i * 0.05 }}
+                    className="card-planner cursor-pointer"
+                    style={{ borderLeft: `3px solid ${GOLD}` }}
+                    onClick={() => setExpandedRecipe(expandedRecipe === recipe.id ? null : recipe.id)}
+                  >
+                    <p className="font-inter text-[0.6rem] uppercase tracking-[0.15em] text-warm-500 mb-1">
+                      {DAY_NAMES[i]}
+                    </p>
+                    <h3 className="font-playfair text-base text-warm-900 mb-1">{recipe.name}</h3>
+                    <p className="font-inter text-xs text-warm-500">
+                      {recipe.creator}
+                      {recipe.time ? ` · ${recipe.time}` : ''}
+                      {recipe.protein ? ` · ${recipe.protein}g protein` : ''}
+                    </p>
+                    {expandedRecipe === recipe.id && (
+                      <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--border-light)' }}>
+                        <p className="font-inter text-xs font-medium text-warm-700 mb-1">Ingredients</p>
+                        <ul className="space-y-0.5 mb-2">
+                          {recipe.ingredients.map((ing, j) => (
+                            <li key={j} className="font-inter text-xs text-warm-600">• {ing}</li>
+                          ))}
+                        </ul>
+                        {recipe.steps && (
+                          <>
+                            <p className="font-inter text-xs font-medium text-warm-700 mb-1">Steps</p>
+                            <ol className="space-y-0.5">
+                              {recipe.steps.map((step, j) => (
+                                <li key={j} className="font-inter text-xs text-warm-600">{j + 1}. {step}</li>
+                              ))}
+                            </ol>
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Recipe Library */}
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: EASE, delay: 0.1 }}
+            >
+              <h2 className="font-playfair text-2xl text-warm-900 mb-3 flex items-center gap-2">
+                <BookOpen className="w-5 h-5" style={{ color: SAGE }} />
+                Recipe Library
+                <span className="font-inter text-xs text-warm-500 font-normal">from your TikTok saves</span>
+              </h2>
+              <div className="flex flex-wrap gap-2 mb-4">
+                {['all', 'breakfast', 'lunch', 'dinner', 'soup', 'snack', 'dessert', 'drink'].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setRecipeFilter(cat)}
+                    className="font-inter text-xs px-3 py-1.5 rounded-full capitalize transition-colors"
+                    style={{
+                      backgroundColor: recipeFilter === cat ? SAGE : 'var(--cream-dark)',
+                      color: recipeFilter === cat ? 'white' : 'var(--espresso-muted)',
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {filteredRecipes.map((recipe) => (
+                  <div
+                    key={recipe.id}
+                    className="card-planner cursor-pointer"
+                    onClick={() => setExpandedRecipe(expandedRecipe === recipe.id ? null : recipe.id)}
+                  >
+                    <h3 className="font-playfair text-sm text-warm-900 mb-0.5">{recipe.name}</h3>
+                    <p className="font-inter text-xs text-warm-500">
+                      {recipe.creator}
+                      {recipe.time ? ` · ${recipe.time}` : ''}
+                      {recipe.protein ? ` · ${recipe.protein}g P` : ''}
+                    </p>
+                    {expandedRecipe === recipe.id && (
+                      <div className="mt-2 pt-2" style={{ borderTop: '1px solid var(--border-light)' }}>
+                        <ul className="space-y-0.5 mb-1">
+                          {recipe.ingredients.map((ing, j) => (
+                            <li key={j} className="font-inter text-xs text-warm-600">• {ing}</li>
+                          ))}
+                        </ul>
+                        {recipe.steps && (
+                          <ol className="space-y-0.5">
+                            {recipe.steps.map((step, j) => (
+                              <li key={j} className="font-inter text-xs text-warm-600">{j + 1}. {step}</li>
+                            ))}
+                          </ol>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
             {/* Weekly Meal Prep */}
             <motion.div
               initial={{ opacity: 0, y: 16 }}
