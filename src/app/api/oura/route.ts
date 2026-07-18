@@ -36,6 +36,16 @@ export async function GET(request: Request) {
     )
     const activityData = activityRes.ok ? await activityRes.json() : null
 
+    // If every request failed, surface Oura's error instead of silent nulls
+    // (e.g. invalid/expired token returns 401 — the UI can tell the user)
+    if (!sleepRes.ok && !readinessRes.ok && !activityRes.ok) {
+      const status = sleepRes.status || 502
+      return NextResponse.json(
+        { error: `Oura API rejected the request (status ${status}). Check that your token is valid and hasn't been revoked.` },
+        { status: status === 401 ? 401 : 502 }
+      )
+    }
+
     // Extract metrics
     const sleep = sleepData?.data?.[0]
     const readiness = readinessData?.data?.[0]
@@ -47,8 +57,10 @@ export async function GET(request: Request) {
       readiness_score: readiness?.score || null,
       activity_score: activity?.score || null,
       steps: activity?.steps || null,
-      hrv: readiness?.hrv_average || null,
-      resting_hr: sleep?.resting_heart_rate || null,
+      // Oura v2 exposes average_hrv on sleep, not readiness
+      hrv: sleep?.average_hrv || readiness?.average_hrv || null,
+      // v2 sleep has lowest_heart_rate / average_heart_rate (no resting_heart_rate)
+      resting_hr: sleep?.lowest_heart_rate || sleep?.average_heart_rate || null,
       deep_sleep: sleep?.deep_sleep_duration ? Math.round(sleep.deep_sleep_duration / 60) : null,
       rem_sleep: sleep?.rem_sleep_duration ? Math.round(sleep.rem_sleep_duration / 60) : null,
       total_sleep: sleep?.total_sleep_duration ? Math.round(sleep.total_sleep_duration / 60) : null,
