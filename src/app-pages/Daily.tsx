@@ -728,7 +728,7 @@ export default function Daily() {
         </motion.div>
 
         {/* ── 3-Column Layout ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px 300px', gap: '24px' }}>
+        <div className="grid grid-cols-1 xl:grid-cols-[1fr_400px_300px] gap-6">
           {/* ═══════════ LEFT COLUMN: Schedule & Tasks ═══════════ */}
           <motion.div variants={fadeUp} className="space-y-6">
             {/* Time-Blocking Schedule */}

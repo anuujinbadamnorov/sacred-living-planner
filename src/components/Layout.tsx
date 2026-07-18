@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Settings,
+  Menu,
 } from 'lucide-react'
 import Navbar from './Navbar'
 import Footer from './Footer'
@@ -55,10 +56,26 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
   const [scrolled, setScrolled] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const [mobileNavOpen, setMobileNavOpen] = useState(false)
   const { theme, setTheme } = useTheme()
 
   const pageTitle = getPageTitle(pathname)
   const today = new Date()
+
+  // Track viewport for responsive layout
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  // Close the mobile drawer on navigation
+  useEffect(() => {
+    setMobileNavOpen(false)
+  }, [pathname])
 
   // Ctrl/Cmd + K shortcut for search
   useEffect(() => {
@@ -86,15 +103,41 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
     <div className="min-h-[100dvh]" style={{ background: 'var(--cream)' }}>
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
-      <Navbar
-        collapsed={sidebarCollapsed}
-        onToggle={() => setSidebarCollapsed((c) => !c)}
-      />
+      {isMobile ? (
+        <>
+          {mobileNavOpen && (
+            <div
+              onClick={() => setMobileNavOpen(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 55 }}
+            />
+          )}
+          <div
+            style={{
+              position: 'fixed',
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: 240,
+              zIndex: 60,
+              transform: mobileNavOpen ? 'translateX(0)' : 'translateX(-102%)',
+              transition: 'transform 0.3s cubic-bezier(0.22, 1, 0.36, 1)',
+              pointerEvents: mobileNavOpen ? 'auto' : 'none',
+            }}
+          >
+            <Navbar collapsed={false} onToggle={() => setMobileNavOpen(false)} />
+          </div>
+        </>
+      ) : (
+        <Navbar
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed((c) => !c)}
+        />
+      )}
 
       <header
-        className="fixed top-0 right-0 z-40 flex items-center justify-between px-8 transition-all duration-500"
+        className={`fixed top-0 right-0 z-40 flex items-center justify-between transition-all duration-500 ${isMobile ? 'px-4' : 'px-8'}`}
         style={{
-          left: sidebarWidth,
+          left: isMobile ? 0 : sidebarWidth,
           height: 80,
           background: 'var(--cream)',
           borderBottom: '1px solid var(--border-light)',
@@ -102,11 +145,22 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
         }}
       >
         <div className="flex items-center gap-4">
+          {isMobile && (
+            <button
+              onClick={() => setMobileNavOpen(true)}
+              className="p-2 -ml-2 rounded-md transition-colors hover:bg-black/5"
+              style={{ color: 'var(--espresso-muted)' }}
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          )}
           <h3 className="font-display text-xl" style={{ color: 'var(--espresso)' }}>
             {pageTitle}
           </h3>
         </div>
 
+        {!isMobile && (
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
           <button
             className="p-1.5 rounded-md transition-colors"
@@ -126,6 +180,7 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
+        )}
 
         <div className="flex items-center gap-3">
           <button
@@ -171,9 +226,9 @@ export default function PlannerLayout({ children }: PlannerLayoutProps) {
 
       <main
         className="min-h-[100dvh] transition-all duration-300"
-        style={{ marginLeft: sidebarWidth, paddingTop: 80, background: 'var(--cream)' }}
+        style={{ marginLeft: isMobile ? 0 : sidebarWidth, paddingTop: 80, background: 'var(--cream)' }}
       >
-        <div className="p-8 lg:p-12 max-w-6xl mx-auto">
+        <div className="p-4 md:p-8 lg:p-12 max-w-6xl mx-auto">
           {children}
         </div>
         <Footer />

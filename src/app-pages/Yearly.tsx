@@ -288,7 +288,7 @@ export default function Yearly() {
         </motion.div>
 
         {/* ── 12-Month Grid ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {months.map((month, i) => (
             <motion.div
               key={month}
