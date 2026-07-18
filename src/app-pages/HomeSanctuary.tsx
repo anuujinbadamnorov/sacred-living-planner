@@ -22,6 +22,8 @@ import {
   ChevronRight,
   Plus,
   Trash2,
+  Wrench,
+  Check,
 } from 'lucide-react'
 
 /* ─── Types ─── */
@@ -46,12 +48,20 @@ interface DailyZone {
   color: string
 }
 
+interface MaintenanceTask {
+  id: string
+  task: string
+  frequency: 'daily' | 'weekly' | 'monthly' | 'biannual' | 'annual'
+  lastDone: string | null // ISO date 'YYYY-MM-DD'
+}
+
 /* ─── Constants ─── */
 const STORAGE_KEYS = {
   zones: 'home-sanctuary-zones',
   weeklyZone: 'home-sanctuary-weekly-zone',
   shopping: 'home-sanctuary-shopping',
   adhdItems: 'home-sanctuary-adhd',
+  maintenance: 'home-maintenance-tasks',
 }
 
 const DEFAULT_DAILY_ZONES: DailyZone[] = [
@@ -174,6 +184,74 @@ const CAT_LABELS: Record<string, string> = {
   dog: 'Rocket',
 }
 
+/* ─── Maintenance Schedule ─── */
+type MaintenanceFrequency = MaintenanceTask['frequency']
+type MaintenanceStatus = 'done' | 'due' | 'overdue'
+
+const FREQUENCY_DAYS: Record<MaintenanceFrequency, number> = {
+  daily: 1,
+  weekly: 7,
+  monthly: 30,
+  biannual: 180,
+  annual: 365,
+}
+
+const FREQUENCY_LABELS: Record<MaintenanceFrequency, string> = {
+  daily: 'Daily',
+  weekly: 'Weekly',
+  monthly: 'Monthly',
+  biannual: 'Every 6 Months',
+  annual: 'Annually',
+}
+
+const FREQUENCY_ORDER: MaintenanceFrequency[] = ['daily', 'weekly', 'monthly', 'biannual', 'annual']
+
+const STATUS_PILL: Record<MaintenanceStatus, string> = {
+  done: 'bg-emerald-100 text-emerald-700',
+  due: 'bg-amber-100 text-amber-700',
+  overdue: 'bg-red-100 text-red-600',
+}
+
+const DEFAULT_MAINTENANCE_TASKS: MaintenanceTask[] = [
+  { id: 'm1', task: 'Floors deep clean (vacuum + mop)', frequency: 'weekly', lastDone: null },
+  { id: 'm2', task: 'Bathroom deep clean', frequency: 'weekly', lastDone: null },
+  { id: 'm3', task: 'Fridge deep clean', frequency: 'monthly', lastDone: null },
+  { id: 'm4', task: 'Garbage disposal refresh', frequency: 'monthly', lastDone: null },
+  { id: 'm5', task: 'Dishwasher clean cycle', frequency: 'monthly', lastDone: null },
+  { id: 'm6', task: 'Washing machine clean cycle', frequency: 'monthly', lastDone: null },
+  { id: 'm7', task: 'Oven deep clean', frequency: 'biannual', lastDone: null },
+  { id: 'm8', task: 'Windows inside & out', frequency: 'biannual', lastDone: null },
+  { id: 'm9', task: 'Descale coffee maker / kettle', frequency: 'biannual', lastDone: null },
+  { id: 'm10', task: 'Rotate & vacuum mattress', frequency: 'biannual', lastDone: null },
+  { id: 'm11', task: 'Clean behind appliances', frequency: 'annual', lastDone: null },
+  { id: 'm12', task: 'Air vents & filters', frequency: 'annual', lastDone: null },
+  { id: 'm13', task: 'Closet declutter', frequency: 'annual', lastDone: null },
+]
+
+const DAY_MS = 86400000
+
+function todayISO(): string {
+  return new Date().toISOString().split('T')[0]
+}
+
+function daysSince(iso: string): number {
+  const [y, m, d] = iso.split('-').map(Number)
+  const then = new Date(y, (m || 1) - 1, d || 1).getTime()
+  const now = new Date()
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  return Math.max(0, Math.round((today - then) / DAY_MS))
+}
+
+function getTaskStatus(t: MaintenanceTask): { status: MaintenanceStatus; label: string } {
+  const interval = FREQUENCY_DAYS[t.frequency]
+  if (!t.lastDone) return { status: 'due', label: 'Due now' }
+  const elapsed = daysSince(t.lastDone)
+  if (elapsed > interval * 1.5) return { status: 'overdue', label: `${elapsed - interval} days overdue` }
+  if (elapsed >= interval) return { status: 'due', label: 'Due now' }
+  const remaining = interval - elapsed
+  return { status: 'done', label: `Due in ${remaining} day${remaining === 1 ? '' : 's'}` }
+}
+
 /* ─── Storage Helpers ─── */
 function load<T>(key: string, fallback: T): T {
   try {
@@ -204,10 +282,14 @@ export default function HomeSanctuary() {
   const [shopping, setShopping] = useState<ShoppingItem[]>(() => load(STORAGE_KEYS.shopping, DEFAULT_SHOPPING))
   const [newItem, setNewItem] = useState('')
   const [newCategory, setNewCategory] = useState<ShoppingItem['category']>('produce')
+  const [maintenance, setMaintenance] = useState<MaintenanceTask[]>(() => load(STORAGE_KEYS.maintenance, DEFAULT_MAINTENANCE_TASKS))
+  const [newTaskText, setNewTaskText] = useState('')
+  const [newTaskFreq, setNewTaskFreq] = useState<MaintenanceFrequency>('weekly')
 
   useEffect(() => save(STORAGE_KEYS.zones, zones), [zones])
   useEffect(() => save(STORAGE_KEYS.weeklyZone, weeklyZoneIdx), [weeklyZoneIdx])
   useEffect(() => save(STORAGE_KEYS.shopping, shopping), [shopping])
+  useEffect(() => save(STORAGE_KEYS.maintenance, maintenance), [maintenance])
 
   const toggleZoneTask = useCallback((zoneId: string, taskId: string) => {
     setZones((prev) =>
@@ -237,9 +319,36 @@ export default function HomeSanctuary() {
     setZones((prev) => prev.map((z) => ({ ...z, tasks: z.tasks.map((t) => ({ ...t, checked: false })) })))
   }, [])
 
+  const addMaintenanceTask = useCallback(() => {
+    if (!newTaskText.trim()) return
+    setMaintenance((prev) => [
+      ...prev,
+      { id: Date.now().toString(), task: newTaskText.trim(), frequency: newTaskFreq, lastDone: null },
+    ])
+    setNewTaskText('')
+  }, [newTaskText, newTaskFreq])
+
+  const removeMaintenanceTask = useCallback((id: string) => {
+    setMaintenance((prev) => prev.filter((t) => t.id !== id))
+  }, [])
+
+  const markMaintenanceDone = useCallback((id: string) => {
+    const today = todayISO()
+    setMaintenance((prev) => prev.map((t) => (t.id === id ? { ...t, lastDone: today } : t)))
+  }, [])
+
   const completedTasks = zones.reduce((sum, z) => sum + z.tasks.filter((t) => t.checked).length, 0)
   const totalTasks = zones.reduce((sum, z) => sum + z.tasks.length, 0)
   const resetProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0
+
+  const maintenanceCounts = maintenance.reduce(
+    (acc, t) => {
+      const st = getTaskStatus(t).status
+      acc[st === 'done' ? 'onTrack' : st] += 1
+      return acc
+    },
+    { due: 0, overdue: 0, onTrack: 0 }
+  )
 
   return (
     <>
@@ -452,9 +561,112 @@ export default function HomeSanctuary() {
           </motion.section>
         </div>
 
-        {/* ═══════════════ ADHD-FRIENDLY ENVIRONMENT ═══════════════ */}
+        {/* ═══════════════ HOME MAINTENANCE SCHEDULE ═══════════════ */}
         <motion.section
           custom={3}
+          variants={cardVariants}
+          initial="hidden"
+          animate="visible"
+          className="card-planner"
+        >
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-amber-100 flex items-center justify-center">
+                <Wrench className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <h2 className="font-playfair text-xl font-semibold text-warm-800">Home Maintenance Schedule</h2>
+                <p className="font-caveat text-base text-warm-500">Recurring care that keeps the sanctuary humming</p>
+              </div>
+            </div>
+            <span className="font-inter text-sm" style={{ color: 'var(--espresso-muted)' }}>
+              {maintenanceCounts.due} due &middot; {maintenanceCounts.overdue} overdue &middot; {maintenanceCounts.onTrack} on track
+            </span>
+          </div>
+
+          {/* Add Task */}
+          <div className="flex gap-2 mb-5">
+            <input
+              type="text"
+              placeholder="Add maintenance task..."
+              value={newTaskText}
+              onChange={(e) => setNewTaskText(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && addMaintenanceTask()}
+              className="flex-1 px-3 py-2 rounded-md border border-warm-200 font-inter text-sm text-warm-700 bg-white focus:outline-none focus:border-amber-300"
+            />
+            <select
+              value={newTaskFreq}
+              onChange={(e) => setNewTaskFreq(e.target.value as MaintenanceFrequency)}
+              className="px-3 py-2 rounded-md border border-warm-200 font-inter text-sm text-warm-700 bg-white focus:outline-none focus:border-amber-300"
+            >
+              {FREQUENCY_ORDER.map((f) => (
+                <option key={f} value={f}>{FREQUENCY_LABELS[f]}</option>
+              ))}
+            </select>
+            <button
+              onClick={addMaintenanceTask}
+              className="px-3 py-2 bg-amber-500 text-white rounded-md font-inter text-sm font-medium hover:bg-amber-600 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Tasks grouped by frequency */}
+          <div className="space-y-5">
+            {FREQUENCY_ORDER.map((freq) => {
+              const group = maintenance.filter((t) => t.frequency === freq)
+              if (group.length === 0) return null
+              return (
+                <div key={freq}>
+                  <h4
+                    className="font-inter text-xs font-semibold uppercase tracking-wider mb-2"
+                    style={{ color: 'var(--espresso-muted)' }}
+                  >
+                    {FREQUENCY_LABELS[freq]}
+                  </h4>
+                  <div className="space-y-2">
+                    {group.map((t) => {
+                      const st = getTaskStatus(t)
+                      return (
+                        <div
+                          key={t.id}
+                          className="flex items-center gap-3 px-3 py-3 rounded-md bg-white border border-warm-200 group"
+                        >
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-inter font-medium shrink-0 ${STATUS_PILL[st.status]}`}>
+                            {st.label}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-inter text-sm text-warm-700 truncate">{t.task}</p>
+                            <p className="font-inter text-xs text-warm-400">
+                              last done: {t.lastDone ?? 'never'}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => markMaintenanceDone(t.id)}
+                            className="flex items-center gap-1 px-2.5 py-1 rounded-md font-inter text-xs font-medium shrink-0 text-white transition-colors"
+                            style={{ background: 'var(--sage)' }}
+                          >
+                            <Check className="w-3 h-3" /> Done
+                          </button>
+                          <button
+                            onClick={() => removeMaintenanceTask(t.id)}
+                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-warm-100 text-warm-400 transition-all shrink-0"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </motion.section>
+
+        {/* ═══════════════ ADHD-FRIENDLY ENVIRONMENT ═══════════════ */}
+        <motion.section
+          custom={4}
           variants={cardVariants}
           initial="hidden"
           animate="visible"
@@ -488,7 +700,7 @@ export default function HomeSanctuary() {
 
         {/* ═══════════════ SUPPLY SHOPPING LIST ═══════════════ */}
         <motion.section
-          custom={4}
+          custom={5}
           variants={cardVariants}
           initial="hidden"
           animate="visible"
