@@ -238,6 +238,9 @@ interface DailyCycleEntry {
   cravings: number
   flow: 'none' | 'light' | 'medium' | 'heavy'
   notes: string
+  bbt: string
+  hrv: string
+  weight: string
 }
 
 const defaultCycleEntry = (date: string): DailyCycleEntry => ({
@@ -251,6 +254,9 @@ const defaultCycleEntry = (date: string): DailyCycleEntry => ({
   cravings: 0,
   flow: 'none',
   notes: '',
+  bbt: '',
+  hrv: '',
+  weight: '',
 })
 
 /* ──────────────────── Pregnancy prep data ──────────────────── */
@@ -273,6 +279,33 @@ export default function MoonCycle() {
     '2026-03-15'
   )
   const [cycleLength, setCycleLength] = useLsState<number>('planner-cycle-length', 32)
+
+  // Period start history (for regularity tracking)
+  const [periodStarts, setPeriodStarts] = useLsState<string[]>('planner-cycle-period-starts', [])
+
+  const logPeriodStartToday = useCallback(() => {
+    setPeriodStarts((prev) => {
+      const next = prev.includes(lastPeriodDate) ? prev : [...prev, lastPeriodDate]
+      return next.sort()
+    })
+    setLastPeriodDate(tk)
+  }, [lastPeriodDate, setPeriodStarts, setLastPeriodDate, tk])
+
+  // Regularity stats from period start history
+  const cycleStats = useMemo(() => {
+    const starts = [...new Set([...periodStarts, lastPeriodDate])].sort()
+    const lengths = starts.slice(1).map((s, i) =>
+      Math.round((new Date(s).getTime() - new Date(starts[i]).getTime()) / 86400000)
+    )
+    const avg = lengths.length ? Math.round(lengths.reduce((a, b) => a + b, 0) / lengths.length) : cycleLength
+    return {
+      starts,
+      lengths,
+      avg,
+      min: lengths.length ? Math.min(...lengths) : null,
+      max: lengths.length ? Math.max(...lengths) : null,
+    }
+  }, [periodStarts, lastPeriodDate, cycleLength])
 
   // Symptom tracking
   const [cycleEntries, setCycleEntries] = useLsState<Record<string, DailyCycleEntry>>(
@@ -360,6 +393,66 @@ export default function MoonCycle() {
     }
     return days
   }, [cycleEntries])
+
+  // Same cycle day last cycle (for quick comparison), searching ±2 days for a logged entry
+  const lastCycleSameDay = useMemo(() => {
+    const prev = new Date(tk)
+    prev.setDate(prev.getDate() - cycleLength)
+    for (let delta = 0; delta <= 2; delta++) {
+      const offsets = delta === 0 ? [0] : [-delta, delta]
+      for (const off of offsets) {
+        const d = new Date(prev)
+        d.setDate(d.getDate() + off)
+        const dk = d.toISOString().split('T')[0]
+        if (cycleEntries[dk]) return { date: dk, entry: cycleEntries[dk] }
+      }
+    }
+    return null
+  }, [tk, cycleLength, cycleEntries])
+
+  // Phase-based recommendations (meal / movement / pelvic / sleep)
+  const phaseRecs = useMemo(() => {
+    const byId: Record<string, string> = {
+      'ginger-scallion-chicken-soup': 'Ginger Scallion Chicken Soup',
+      'hot-girl-tomato-egg-soup': 'Hot Girl Tomato-Egg Soup',
+      'red-cabbage-slaw': 'Red Cabbage Slaw (iron-boosting)',
+      'edamame-meal-prep-salad': 'Edamame Meal Prep Salad',
+      'baked-oats': 'Baked Oats',
+      'asian-cucumber-salad': 'Asian Cucumber Salad',
+      'pad-see-ew-ricepaper': 'Rice Paper Pad See Ew',
+      'greek-fries-chicken': 'Greek Chicken + Tzatziki',
+      'shaking-beef-udon': 'Shaking Beef + Udon',
+      'nourish-bowl': 'Chicken & Brussels Nourish Bowl',
+      'strawberry-chia-pudding': 'Strawberry Chia Pudding',
+      'lemon-chicken-soup': 'Lemon Chicken Soup',
+    }
+    return [
+      {
+        meals: ['ginger-scallion-chicken-soup', 'hot-girl-tomato-egg-soup', 'red-cabbage-slaw'],
+        movement: 'Rest, gentle walks, yin yoga. Skip intense training.',
+        pelvic: 'Rest — no kegels on heavy flow days. Warm compress instead.',
+        sleep: 'Aim for 8-9h. Body temperature drops; keep warm.',
+      },
+      {
+        meals: ['edamame-meal-prep-salad', 'baked-oats', 'asian-cucumber-salad'],
+        movement: 'Build intensity: pilates, strength training, new skills.',
+        pelvic: '3 sets of 10 kegels daily. Energy is rising — build the habit.',
+        sleep: '7.5-8.5h. Great phase for morning routines.',
+      },
+      {
+        meals: ['pad-see-ew-ricepaper', 'greek-fries-chicken', 'shaking-beef-udon'],
+        movement: 'Peak power: HIIT, heavy lifts, sprints.',
+        pelvic: 'Full routine — 3x10 kegels plus 10-second holds.',
+        sleep: 'You may feel wired; magnesium + earlier wind-down.',
+      },
+      {
+        meals: ['nourish-bowl', 'strawberry-chia-pudding', 'lemon-chicken-soup'],
+        movement: 'Scale back: long walks, stretching, light pilates.',
+        pelvic: 'Gentle — 2 sets of 10, focus on full release/relaxation.',
+        sleep: 'Prioritize 8h+. Progesterone raises body temp — keep the room cool.',
+      },
+    ].map((p) => ({ ...p, mealNames: p.meals.map((id) => byId[id] || id) }))
+  }, [])
 
   return (
     <>
@@ -843,6 +936,27 @@ export default function MoonCycle() {
             </div>
           </motion.div>
 
+          {/* Biometrics */}
+          <motion.div variants={fadeUp} className="grid grid-cols-3 gap-4 mb-5">
+            {[
+              { label: 'BBT (°F)', value: todayEntry.bbt, key: 'bbt' as const, placeholder: '97.4' },
+              { label: 'HRV (ms)', value: todayEntry.hrv, key: 'hrv' as const, placeholder: '65' },
+              { label: 'Weight (lbs)', value: todayEntry.weight, key: 'weight' as const, placeholder: '—' },
+            ].map((f) => (
+              <div key={f.key} className="p-3 rounded-lg border border-warm-200 bg-warm-50/30">
+                <span className="font-inter text-xs font-semibold text-warm-700 block mb-1">{f.label}</span>
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={f.value}
+                  placeholder={f.placeholder}
+                  onChange={(e) => updateTodayEntry({ [f.key]: e.target.value })}
+                  className="w-full bg-transparent font-inter text-sm text-warm-800 outline-none border-b border-warm-200 focus:border-[#c9a96e] transition-colors py-0.5"
+                />
+              </div>
+            ))}
+          </motion.div>
+
           {/* Notes */}
           <motion.div variants={fadeUp} className="mb-5">
             <label className="font-inter text-xs font-semibold text-warm-700 mb-1 block">
@@ -854,6 +968,76 @@ export default function MoonCycle() {
               placeholder="How does your body feel today? Any observations..."
               className="planner-input w-full p-3 rounded-lg border border-warm-200 bg-white/70 min-h-[60px] text-sm"
             />
+          </motion.div>
+
+          {/* Same cycle day last cycle — quick comparison */}
+          <motion.div variants={fadeUp} className="mb-5 p-4 rounded-lg border border-warm-200 bg-warm-50/30">
+            <p className="font-inter text-xs font-semibold text-warm-700 mb-3">
+              Same cycle day last cycle — quick comparison
+            </p>
+            {lastCycleSameDay ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="font-inter text-[10px] uppercase tracking-wider text-warm-400 mb-2">
+                    Today · Day {currentCycleDay}
+                  </p>
+                  {[
+                    ['Energy', todayEntry.energy],
+                    ['Mood', todayEntry.mood],
+                    ['Anxiety', todayEntry.anxiety],
+                    ['Sleep', todayEntry.sleep],
+                    ['Cramps', todayEntry.cramps],
+                    ['Bloating', todayEntry.bloating],
+                    ['Cravings', todayEntry.cravings],
+                  ].map(([label, val]) => (
+                    <div key={label as string} className="flex justify-between font-inter text-xs text-warm-600 py-0.5">
+                      <span>{label}</span>
+                      <span className="font-semibold text-warm-800">{val}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between font-inter text-xs text-warm-600 py-0.5">
+                    <span>Flow</span>
+                    <span className="font-semibold text-warm-800 capitalize">{todayEntry.flow}</span>
+                  </div>
+                </div>
+                <div style={{ borderLeft: '1px solid var(--border-light)', paddingLeft: '1rem' }}>
+                  <p className="font-inter text-[10px] uppercase tracking-wider text-warm-400 mb-2">
+                    {new Date(lastCycleSameDay.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} · Day {currentCycleDay}
+                  </p>
+                  {[
+                    ['Energy', lastCycleSameDay.entry.energy],
+                    ['Mood', lastCycleSameDay.entry.mood],
+                    ['Anxiety', lastCycleSameDay.entry.anxiety],
+                    ['Sleep', lastCycleSameDay.entry.sleep],
+                    ['Cramps', lastCycleSameDay.entry.cramps],
+                    ['Bloating', lastCycleSameDay.entry.bloating],
+                    ['Cravings', lastCycleSameDay.entry.cravings],
+                  ].map(([label, val]) => (
+                    <div key={label as string} className="flex justify-between font-inter text-xs text-warm-600 py-0.5">
+                      <span>{label}</span>
+                      <span className="font-semibold text-warm-800">{val}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between font-inter text-xs text-warm-600 py-0.5">
+                    <span>Flow</span>
+                    <span className="font-semibold text-warm-800 capitalize">{lastCycleSameDay.entry.flow}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="font-inter text-xs text-warm-500">
+                No entry logged for day {currentCycleDay} last cycle. Keep logging daily and the comparison
+                will appear here automatically.
+              </p>
+            )}
+            {lastCycleSameDay?.entry.notes && (
+              <div className="mt-3 pt-2" style={{ borderTop: '1px solid var(--border-light)' }}>
+                <p className="font-inter text-[10px] uppercase tracking-wider text-warm-400 mb-1">
+                  Notes from last cycle
+                </p>
+                <p className="font-inter text-xs text-warm-600 italic">“{lastCycleSameDay.entry.notes}”</p>
+              </div>
+            )}
           </motion.div>
 
           {/* Trend mini-chart */}
@@ -902,6 +1086,135 @@ export default function MoonCycle() {
                 <div className="w-2 h-2 rounded-full bg-[#e85d78]" />
                 <span className="font-inter text-[10px] text-warm-500">Mood</span>
               </div>
+            </div>
+          </motion.div>
+        </motion.section>
+
+        {/* ═══════════ Cycle Regularity ═══════════ */}
+        <motion.section
+          variants={stagger}
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true }}
+          className="chic-card"
+        >
+          <motion.div variants={fadeUp} className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#c9a96e]/15 flex items-center justify-center">
+                <CalendarDays className="w-5 h-5 text-[#c9a96e]" />
+              </div>
+              <div>
+                <h2 className="font-playfair text-2xl text-warm-900">Cycle Regularity</h2>
+                <p className="font-inter text-xs text-warm-500">Your rhythm over time</p>
+              </div>
+            </div>
+            <button
+              onClick={logPeriodStartToday}
+              className="font-inter text-xs px-3 py-2 rounded-full bg-[#9e2a3b] text-white hover:opacity-90 transition-opacity"
+            >
+              Period started today
+            </button>
+          </motion.div>
+
+          <motion.div variants={fadeUp} className="grid grid-cols-3 gap-4 mb-4">
+            <div className="p-3 rounded-lg border border-warm-200 bg-warm-50/30 text-center">
+              <p className="font-inter text-[10px] uppercase tracking-wider text-warm-400">Average</p>
+              <p className="font-playfair text-2xl text-warm-900">{cycleStats.avg} days</p>
+            </div>
+            <div className="p-3 rounded-lg border border-warm-200 bg-warm-50/30 text-center">
+              <p className="font-inter text-[10px] uppercase tracking-wider text-warm-400">Shortest</p>
+              <p className="font-playfair text-2xl text-warm-900">{cycleStats.min ?? '—'}</p>
+            </div>
+            <div className="p-3 rounded-lg border border-warm-200 bg-warm-50/30 text-center">
+              <p className="font-inter text-[10px] uppercase tracking-wider text-warm-400">Longest</p>
+              <p className="font-playfair text-2xl text-warm-900">{cycleStats.max ?? '—'}</p>
+            </div>
+          </motion.div>
+
+          {cycleStats.lengths.length > 0 ? (
+            <motion.div variants={fadeUp}>
+              <p className="font-inter text-xs font-semibold text-warm-700 mb-2">Cycle length history</p>
+              <div className="flex items-end gap-2 h-16">
+                {cycleStats.lengths.map((len, i) => (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                    <span className="font-inter text-[9px] text-warm-500">{len}</span>
+                    <div
+                      className="w-full rounded-t-sm bg-[#c9a96e]"
+                      style={{ height: `${Math.min(100, (len / 45) * 100)}%`, opacity: 0.5 + 0.5 * (i / cycleStats.lengths.length) }}
+                    />
+                  </div>
+                ))}
+              </div>
+              {cycleStats.min !== null && cycleStats.max !== null && cycleStats.max - cycleStats.min <= 4 && (
+                <p className="font-inter text-xs text-[#3d8b5a] mt-2">Very regular — variation within 4 days.</p>
+              )}
+              {cycleStats.min !== null && cycleStats.max !== null && cycleStats.max - cycleStats.min > 7 && (
+                <p className="font-inter text-xs text-[#e0744c] mt-2">
+                  Irregular — {cycleStats.max - cycleStats.min} days of variation. Worth tracking closely.
+                </p>
+              )}
+            </motion.div>
+          ) : (
+            <motion.p variants={fadeUp} className="font-inter text-xs text-warm-500">
+              Log at least two period starts to see your cycle lengths and regularity. Use the button
+              above when your period begins.
+            </motion.p>
+          )}
+        </motion.section>
+
+        {/* ═══════════ Phase Recommendations ═══════════ */}
+        <motion.section
+          variants={stagger}
+          initial="initial"
+          whileInView="animate"
+          viewport={{ once: true }}
+          className="chic-card"
+        >
+          <motion.div variants={fadeUp} className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-full bg-[#6b4c7a]/15 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-[#6b4c7a]" />
+            </div>
+            <div>
+              <h2 className="font-playfair text-2xl text-warm-900">
+                For Your {phaseNames[currentPhase]} Phase
+              </h2>
+              <p className="font-inter text-xs text-warm-500">
+                Day {currentCycleDay} — meal, movement, pelvic &amp; sleep guidance
+              </p>
+            </div>
+          </motion.div>
+
+          <motion.div variants={fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-lg border border-warm-200 bg-warm-50/30">
+              <p className="font-inter text-xs font-semibold text-warm-700 mb-2 flex items-center gap-2">
+                <Utensils className="w-3.5 h-3.5 text-[#c9a96e]" /> Meals for this phase
+              </p>
+              <ul className="space-y-1">
+                {phaseRecs[currentPhase].mealNames.map((m) => (
+                  <li key={m} className="font-inter text-sm text-warm-700">• {m}</li>
+                ))}
+              </ul>
+              <p className="font-inter text-[10px] text-warm-400 mt-2">
+                Full recipes in Nourishment → Prep → Recipe Library
+              </p>
+            </div>
+            <div className="p-4 rounded-lg border border-warm-200 bg-warm-50/30">
+              <p className="font-inter text-xs font-semibold text-warm-700 mb-2 flex items-center gap-2">
+                <Zap className="w-3.5 h-3.5 text-[#3d8b5a]" /> Movement
+              </p>
+              <p className="font-inter text-sm text-warm-700">{phaseRecs[currentPhase].movement}</p>
+            </div>
+            <div className="p-4 rounded-lg border border-warm-200 bg-warm-50/30">
+              <p className="font-inter text-xs font-semibold text-warm-700 mb-2 flex items-center gap-2">
+                <Heart className="w-3.5 h-3.5 text-[#e85d78]" /> Pelvic floor
+              </p>
+              <p className="font-inter text-sm text-warm-700">{phaseRecs[currentPhase].pelvic}</p>
+            </div>
+            <div className="p-4 rounded-lg border border-warm-200 bg-warm-50/30">
+              <p className="font-inter text-xs font-semibold text-warm-700 mb-2 flex items-center gap-2">
+                <Bed className="w-3.5 h-3.5 text-[#6b4c7a]" /> Sleep
+              </p>
+              <p className="font-inter text-sm text-warm-700">{phaseRecs[currentPhase].sleep}</p>
             </div>
           </motion.div>
         </motion.section>
