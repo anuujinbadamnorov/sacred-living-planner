@@ -35,6 +35,15 @@ const caveat = Caveat({
 export const metadata: Metadata = {
   title: 'Sacred Living Planner',
   description: 'Your sacred space for intention, growth, and daily alignment.',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    title: 'Sacred',
+    statusBarStyle: 'black-translucent',
+  },
+  icons: {
+    apple: '/apple-touch-icon.png',
+  },
 }
 
 export const viewport: Viewport = {
