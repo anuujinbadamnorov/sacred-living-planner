@@ -20,9 +20,14 @@ import {
   Unlink,
   Check,
   Zap,
+  User,
+  Mail,
+  CreditCard,
+  LogOut,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { usePlanner } from '@/hooks/usePlanner'
+import { useAuth } from '@/components/AuthProvider'
 import { useThemeStore } from '@/stores/theme'
 import { useTheme } from '@/components/theme/ThemeProvider'
 import { createClient } from '@/lib/supabase'
@@ -74,6 +79,7 @@ function saveSettings(settings: AppSettings) {
 export default function Settings() {
   const { currentThemeId, isNightMode, setTheme: setThemeId, setNightMode } = useThemeStore()
   const { theme: currentTheme } = useTheme()
+  const { user, profile, isLoading: authLoading, isPro, signOut } = useAuth()
   const [themesList, setThemesList] = useState<Theme[]>([])
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS)
   const [showResetModal, setShowResetModal] = useState(false)
@@ -183,6 +189,10 @@ export default function Settings() {
     ? new Date(lastBackup).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : 'Never'
 
+  const formattedPeriodEnd = profile?.current_period_end
+    ? new Date(profile.current_period_end).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : null
+
   return (
     <div className="space-y-8 max-w-3xl">
       <HeroSection
@@ -201,6 +211,70 @@ export default function Settings() {
             <h1 className="font-playfair text-[clamp(1.75rem,3vw,2.5rem)] font-medium text-warm-900">Settings</h1>
           </div>
           <p className="text-warm-500 font-inter text-sm mt-1">Personalize your planner experience.</p>
+        </motion.div>
+
+        {/* ====== ACCOUNT ====== */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.02 }}
+          className="card-planner"
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <User className="w-5 h-5" style={{ color: 'var(--gold)' }} />
+            <h2 className="font-playfair text-xl font-medium text-warm-800">Account</h2>
+          </div>
+          <p className="text-warm-500 font-inter text-sm mb-4">Your sign-in and subscription details.</p>
+
+          <div className="space-y-1">
+            {/* Email */}
+            <div className="flex items-center justify-between py-2">
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-warm-500" />
+                <span className="font-inter text-sm text-warm-700">Email</span>
+              </div>
+              <span className="font-inter text-sm text-warm-800">
+                {authLoading ? 'Loading...' : user?.email ?? 'Not signed in'}
+              </span>
+            </div>
+
+            {/* Subscription */}
+            <div className="flex items-center justify-between py-2 border-t border-warm-100">
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-warm-500" />
+                <span className="font-inter text-sm text-warm-700">Subscription</span>
+              </div>
+              {isPro ? (
+                <div className="text-right">
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-inter font-medium"
+                    style={{ background: 'rgba(122,139,101,0.12)', color: 'var(--sage)' }}
+                  >
+                    {profile?.subscription_tier === 'pro_monthly' ? 'Pro · Monthly' : 'Pro · Yearly'}
+                  </span>
+                  <p className="text-warm-400 font-inter text-xs mt-1">
+                    Active{formattedPeriodEnd ? ` · Renews ${formattedPeriodEnd}` : ''}
+                  </p>
+                </div>
+              ) : (
+                <span className="font-inter text-sm text-warm-800">
+                  {authLoading ? 'Loading...' : 'Free plan'}
+                </span>
+              )}
+            </div>
+
+            {/* Sign out */}
+            <div className="flex items-center justify-between gap-4 pt-4 border-t border-warm-100">
+              <p className="text-warm-400 font-inter text-xs">Billing management is coming soon.</p>
+              <button
+                onClick={signOut}
+                disabled={!user}
+                className="btn-secondary text-sm shrink-0 flex items-center gap-1"
+              >
+                <LogOut className="w-3.5 h-3.5" /> Sign Out
+              </button>
+            </div>
+          </div>
         </motion.div>
 
         {/* ====== DAY / NIGHT MODE ====== */}

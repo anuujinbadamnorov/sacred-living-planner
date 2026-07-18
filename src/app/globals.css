@@ -64,6 +64,9 @@
   --input: 36 20% 93%;
   --ring: 93 15% 47%;
   --radius: 0.5rem;
+
+  /* Base planner text size — fluid across laptop / iPad / mobile */
+  --planner-font-size: clamp(0.875rem, 0.82rem + 0.3vw, 1.05rem);
 }
 
 [data-theme="night"] {
@@ -148,7 +151,11 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  /* Fluid root size: scales rem-based text from mobile to laptop */
+  font-size: clamp(15px, 14px + 0.25vw, 16.5px);
+}
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
@@ -353,6 +360,13 @@ input::placeholder, textarea::placeholder {
   .planner-button:hover {
     background: var(--espresso-light);
     transform: translateY(-1px);
+  }
+
+  /* Larger touch targets on small viewports */
+  @media (max-width: 640px) {
+    .planner-button {
+      min-height: 44px;
+    }
   }
 
   .planner-input {

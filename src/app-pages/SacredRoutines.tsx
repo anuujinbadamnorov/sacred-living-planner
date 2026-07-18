@@ -31,6 +31,8 @@ import {
   Activity,
   RotateCcw,
   MessageCircle,
+  TrendingUp,
+  Flame,
 } from 'lucide-react'
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number]
@@ -236,6 +238,64 @@ const nonNegotiables = [
   { id: 'nn-sleep', label: 'Bed by 11:30 PM', icon: Moon },
 ]
 
+/* ─────────────────────────── Weekly stats helpers ─────────────────────────── */
+
+const daySectionCounts: Record<string, number> = {
+  morning: morningSteps.length,
+  evening: eveningSteps.length,
+  deepwork: deepWorkItems.length,
+  anxiety: anxietySteps.length,
+  nn: nonNegotiables.length,
+}
+
+function getDayTotals(dateKey: string): { done: number; total: number } {
+  let done = 0
+  let total = 0
+  for (const [suffix, count] of Object.entries(daySectionCounts)) {
+    total += count
+    try {
+      const stored = localStorage.getItem(`planner-sacred-${dateKey}-${suffix}`)
+      if (stored) {
+        const parsed = JSON.parse(stored) as Record<string, boolean>
+        done += Math.min(Object.values(parsed).filter(Boolean).length, count)
+      }
+    } catch {
+      /* ignore malformed entries */
+    }
+  }
+  return { done, total }
+}
+
+function getWeekDateKeys(): string[] {
+  const now = new Date()
+  const daysSinceMonday = (now.getDay() + 6) % 7
+  const keys: string[] = []
+  for (let i = daysSinceMonday; i >= 0; i--) {
+    const d = new Date(now)
+    d.setDate(now.getDate() - i)
+    keys.push(d.toISOString().split('T')[0])
+  }
+  return keys
+}
+
+function getFullDayStreak(): number {
+  let streak = 0
+  const now = new Date()
+  for (let i = 0; ; i++) {
+    const d = new Date(now)
+    d.setDate(now.getDate() - i)
+    const { done, total } = getDayTotals(d.toISOString().split('T')[0])
+    if (total > 0 && done >= total) {
+      streak++
+    } else if (i === 0) {
+      continue // today is still in progress — it doesn't break the streak
+    } else {
+      break
+    }
+  }
+  return streak
+}
+
 /* ─────────────────────────── Component ─────────────────────────── */
 
 export default function SacredRoutines() {
@@ -278,6 +338,32 @@ export default function SacredRoutines() {
   const nnProgress = Math.round(
     (nonNegotiables.filter((n) => nnChecked[n.id]).length / nonNegotiables.length) * 100
   )
+
+  /* ── Overview stats ── */
+  const [weekStats, setWeekStats] = useState({ weekPct: 0, streak: 0 })
+  useEffect(() => {
+    let done = 0
+    let total = 0
+    for (const key of getWeekDateKeys()) {
+      const t = getDayTotals(key)
+      done += t.done
+      total += t.total
+    }
+    setWeekStats({
+      weekPct: total > 0 ? Math.round((done / total) * 100) : 0,
+      streak: getFullDayStreak(),
+    })
+  }, [morningChecked, eveningChecked, deepWorkChecked, anxietyChecked, nnChecked])
+
+  const todayDone =
+    morningSteps.filter((s) => morningChecked[s.label]).length +
+    eveningSteps.filter((s) => eveningChecked[s.label]).length +
+    deepWorkItems.filter((i) => deepWorkChecked[i.id]).length +
+    anxietySteps.filter((s) => anxietyChecked[`anxiety-${s.num}`]).length +
+    nonNegotiables.filter((n) => nnChecked[n.id]).length
+  const todayTotal =
+    morningSteps.length + eveningSteps.length + deepWorkItems.length + anxietySteps.length + nonNegotiables.length
+  const onTrack = weekStats.weekPct >= 70
 
   return (
     <>
@@ -335,6 +421,101 @@ export default function SacredRoutines() {
             </motion.p>
           </div>
         </motion.div>
+
+        {/* ═══════════════ Overview ═══════════════ */}
+        <motion.section variants={stagger} initial="initial" animate="animate">
+          <motion.div variants={fadeUp} className="flex items-center gap-3 mb-4">
+            <div
+              className="w-10 h-10 rounded-full flex items-center justify-center"
+              style={{ background: 'rgba(122,139,101,0.15)' }}
+            >
+              <TrendingUp className="w-5 h-5" style={{ color: 'var(--sage)' }} />
+            </div>
+            <div>
+              <h2 className="font-display text-2xl" style={{ color: 'var(--espresso)' }}>Overview</h2>
+              <p className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>Your week at a glance</p>
+            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* This week's completion */}
+            <motion.div variants={fadeUp} className="card-planner" style={{ padding: '1.25rem' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <TrendingUp className="w-4 h-4" style={{ color: 'var(--gold)' }} />
+                <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>This Week</span>
+              </div>
+              <p className="font-display text-3xl" style={{ color: 'var(--espresso)' }}>{weekStats.weekPct}%</p>
+              <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border-light)' }}>
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: 'var(--gold)' }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${weekStats.weekPct}%` }}
+                  transition={{ duration: 0.8, ease: EASE }}
+                />
+              </div>
+            </motion.div>
+
+            {/* Current streak */}
+            <motion.div variants={fadeUp} className="card-planner" style={{ padding: '1.25rem' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <Flame className="w-4 h-4" style={{ color: 'var(--gold)' }} />
+                <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>Current Streak</span>
+              </div>
+              <p className="font-display text-3xl" style={{ color: 'var(--espresso)' }}>
+                {weekStats.streak}{' '}
+                <span className="font-body text-sm" style={{ color: 'var(--espresso-muted)' }}>
+                  {weekStats.streak === 1 ? 'day' : 'days'}
+                </span>
+              </p>
+              <p className="font-body text-xs mt-1" style={{ color: 'var(--espresso-muted)' }}>
+                All routines completed
+              </p>
+            </motion.div>
+
+            {/* Today's progress */}
+            <motion.div variants={fadeUp} className="card-planner" style={{ padding: '1.25rem' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <Check className="w-4 h-4" style={{ color: 'var(--sage)' }} />
+                <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>Today&apos;s Tasks</span>
+              </div>
+              <p className="font-display text-3xl" style={{ color: 'var(--espresso)' }}>
+                {todayDone}
+                <span className="font-body text-sm" style={{ color: 'var(--espresso-muted)' }}>/{todayTotal}</span>
+              </p>
+              <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border-light)' }}>
+                <motion.div
+                  className="h-full rounded-full"
+                  style={{ background: 'var(--sage)' }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${todayTotal > 0 ? Math.round((todayDone / todayTotal) * 100) : 0}%` }}
+                  transition={{ duration: 0.8, ease: EASE }}
+                />
+              </div>
+            </motion.div>
+
+            {/* On-track indicator */}
+            <motion.div variants={fadeUp} className="card-planner" style={{ padding: '1.25rem' }}>
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="w-4 h-4" style={{ color: onTrack ? 'var(--sage)' : 'var(--gold)' }} />
+                <span className="font-body text-xs" style={{ color: 'var(--espresso-muted)' }}>Status</span>
+              </div>
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-body text-xs font-semibold"
+                style={{
+                  background: onTrack ? 'rgba(122,139,101,0.12)' : 'rgba(201,169,110,0.15)',
+                  color: onTrack ? 'var(--sage)' : 'var(--gold)',
+                }}
+              >
+                {onTrack ? <Check className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+                {onTrack ? 'On track' : 'Needs attention'}
+              </span>
+              <p className="font-body text-xs mt-2" style={{ color: 'var(--espresso-muted)' }}>
+                {onTrack ? 'Keep flowing — you&apos;re doing beautifully' : 'Be gentle, then begin again'}
+              </p>
+            </motion.div>
+          </div>
+        </motion.section>
 
         {/* ═══════════════ Morning Ritual Block ═══════════════ */}
         <motion.section variants={stagger} initial="initial" animate="animate">

@@ -18,6 +18,7 @@ import {
   getYear,
   startOfMonth,
   endOfMonth,
+  differenceInCalendarDays,
 } from 'date-fns'
 import {
   ChevronLeft,
@@ -34,6 +35,7 @@ import {
   Utensils,
   Dumbbell,
   Sunrise,
+  Moon,
 } from 'lucide-react'
 import { usePlanner } from '@/hooks/usePlanner'
 import { useDailyEntry } from '@/hooks/useDailyEntry'
@@ -182,6 +184,60 @@ function getQuoteForDate(dateStr: string): string {
   return QUOTES[idx]
 }
 
+/* ─────────────────────── cycle phase data ─────────────────────── */
+
+interface CyclePhaseInfo {
+  name: string
+  meals: string
+  movement: string
+  pelvicFloor: string
+  sleep: string
+}
+
+const CYCLE_PHASES: CyclePhaseInfo[] = [
+  {
+    name: 'Menstrual',
+    meals: 'Warming, iron-rich meals (soups, stews, lentils)',
+    movement: 'Rest, gentle stretching, slow walks',
+    pelvicFloor: 'No kegels — let the pelvic floor fully relax',
+    sleep: '8–9 hours; honor extra rest',
+  },
+  {
+    name: 'Follicular',
+    meals: 'Fresh, light meals (greens, lean protein, fermented foods)',
+    movement: 'Build intensity — strength & cardio',
+    pelvicFloor: '3×10 kegels daily',
+    sleep: '7.5–8.5 hours',
+  },
+  {
+    name: 'Ovulatory',
+    meals: 'High-protein, antioxidant-rich foods',
+    movement: 'Peak training — HIIT, heavy lifts',
+    pelvicFloor: '3×10 kegels + 10-second holds',
+    sleep: 'Start your wind-down a little earlier',
+  },
+  {
+    name: 'Luteal',
+    meals: 'Comfort & fiber-rich foods (root veggies, whole grains)',
+    movement: 'Scale back — pilates, yoga, walks',
+    pelvicFloor: 'Gentle 2×10 kegels',
+    sleep: '8h+ in a cool room',
+  },
+]
+
+function getCyclePhaseForDay(day: number): CyclePhaseInfo {
+  if (day <= 5) return CYCLE_PHASES[0]
+  if (day <= 14) return CYCLE_PHASES[1]
+  if (day <= 17) return CYCLE_PHASES[2]
+  return CYCLE_PHASES[3]
+}
+
+interface CycleToday {
+  day: number
+  length: number
+  phase: CyclePhaseInfo
+}
+
 /* ─══════════════════════════════════════════════════════ */
 /*                     DAILY PLANNER                       */
 /* ─══════════════════════════════════════════════════════ */
@@ -290,6 +346,28 @@ export default function Daily() {
 
   /* ── Data: Habits ── */
   const [habitsData, setHabitsData] = useState(() => getHabits())
+
+  /* ── Data: Today's Cycle (read after mount for SSR safety) ── */
+  const [cycleLoaded, setCycleLoaded] = useState(false)
+  const [cycleToday, setCycleToday] = useState<CycleToday | null>(null)
+
+  useEffect(() => {
+    const lastPeriod = getStorageItem<string | null>('planner-cycle-last-period', null)
+    const rawLength = getStorageItem<number>('planner-cycle-length', 32)
+    const cycleLength =
+      typeof rawLength === 'number' && Number.isFinite(rawLength) && rawLength > 0
+        ? Math.round(rawLength)
+        : 32
+    if (lastPeriod) {
+      const start = parseISO(lastPeriod)
+      const diffDays = isValid(start) ? differenceInCalendarDays(new Date(), start) : -1
+      if (diffDays >= 0) {
+        const day = (diffDays % cycleLength) + 1
+        setCycleToday({ day, length: cycleLength, phase: getCyclePhaseForDay(day) })
+      }
+    }
+    setCycleLoaded(true)
+  }, [getStorageItem])
 
   /* ── Current time indicator ── */
   const [currentTimePos, setCurrentTimePos] = useState(() => {
@@ -544,6 +622,55 @@ export default function Daily() {
             </p>
           </div>
         </motion.div>
+
+        {/* ── Today's Cycle ── */}
+        {cycleLoaded && (
+          <motion.div variants={fadeUp} className="card-planner">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="flex items-center gap-2 text-sm">
+                <Moon className="w-4 h-4 text-amber-500" />
+                Today&apos;s Cycle
+              </h4>
+              <Link
+                href="/planner/moon-cycle"
+                className="text-xs font-inter text-amber-600 hover:underline flex items-center gap-1"
+              >
+                Moon &amp; Cycle <ChevronRight className="w-3 h-3" />
+              </Link>
+            </div>
+            {cycleToday ? (
+              <>
+                <p className="font-playfair text-lg text-warm-800 mb-3">
+                  Day {cycleToday.day} of {cycleToday.length} —{' '}
+                  <span className="text-amber-600">{cycleToday.phase.name}</span>
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5">
+                  {[
+                    { icon: Utensils, label: 'Meals', text: cycleToday.phase.meals },
+                    { icon: Dumbbell, label: 'Movement', text: cycleToday.phase.movement },
+                    { icon: Heart, label: 'Pelvic Floor', text: cycleToday.phase.pelvicFloor },
+                    { icon: Moon, label: 'Sleep', text: cycleToday.phase.sleep },
+                  ].map(({ icon: Icon, label, text }) => (
+                    <div key={label} className="flex items-start gap-2">
+                      <Icon className="w-3.5 h-3.5 mt-0.5 shrink-0 text-amber-500" />
+                      <p className="text-xs font-inter text-warm-600 leading-relaxed">
+                        <span className="font-medium text-warm-700">{label}:</span> {text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="text-sm font-inter text-warm-500">
+                Set your cycle in{' '}
+                <Link href="/planner/moon-cycle" className="text-amber-600 hover:underline">
+                  Moon &amp; Cycle
+                </Link>{' '}
+                to see phase-based guidance for meals, movement, pelvic floor, and sleep here.
+              </p>
+            )}
+          </motion.div>
+        )}
 
         {/* ── Focus + Priorities Banner ── */}
         <motion.div variants={fadeUp} className="card-planner">

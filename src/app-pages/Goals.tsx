@@ -14,6 +14,8 @@ import {
   Flame,
   Trophy,
   Target,
+  Lightbulb,
+  Check,
 } from 'lucide-react'
 import { usePlanner } from '@/hooks/usePlanner'
 
@@ -80,6 +82,64 @@ const DEFAULT_HABITS: Habit[] = [
   { id: 'h6', name: 'Journal', color: '#f07d94', frequency: 'daily', timesPerWeek: 7, active: true },
 ]
 
+const INSPIRATION_CATEGORIES: { label: string; goalCategory: string; suggestions: string[] }[] = [
+  {
+    label: 'Health & Body',
+    goalCategory: 'health-wellness',
+    suggestions: [
+      'Move my body for 30 minutes every day',
+      'Cook nourishing meals at home five nights a week',
+      'Prioritize 8 hours of sleep each night',
+      'Take a weekly long walk in nature',
+      'Schedule my annual check-ups and screenings',
+    ],
+  },
+  {
+    label: 'Home & Sanctuary',
+    goalCategory: 'creativity',
+    suggestions: [
+      'Declutter one room each month',
+      'Create a cozy morning coffee corner',
+      'Refresh the bedroom into a calm sanctuary',
+      'Build a weekly home reset ritual',
+      'Curate a plant-filled, peaceful living space',
+    ],
+  },
+  {
+    label: 'Business & Money',
+    goalCategory: 'finance',
+    suggestions: [
+      'Build a 3-month emergency fund',
+      'Launch one new income stream this year',
+      'Track spending weekly and honor my budget',
+      'Raise my rates or ask for the promotion',
+      'Automate savings on every payday',
+    ],
+  },
+  {
+    label: 'Relationships',
+    goalCategory: 'relationships',
+    suggestions: [
+      'Plan a monthly date night',
+      'Call family once a week',
+      'Host a quarterly gathering with friends',
+      'Practice one intentional conversation each day',
+      'Write handwritten notes to people I love',
+    ],
+  },
+  {
+    label: 'Growth & Ritual',
+    goalCategory: 'personal-growth',
+    suggestions: [
+      'Journal every morning',
+      'Read 12 books this year',
+      'Meditate for 10 minutes daily',
+      'Create a Sunday planning ritual',
+      'Take one new course or workshop',
+    ],
+  },
+]
+
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                             */
 /* ------------------------------------------------------------------ */
@@ -102,6 +162,7 @@ export default function Goals() {
   const [newGoalCategory, setNewGoalCategory] = useState<string | null>(null)
   const [newGoalText, setNewGoalText] = useState('')
   const [newGoalDesc, setNewGoalDesc] = useState('')
+  const [showInspiration, setShowInspiration] = useState(false)
 
   /* ---- Habits state ---- */
   const [habits, setHabits] = useState<Habit[]>(() => {
@@ -156,6 +217,13 @@ export default function Goals() {
   const deleteGoal = useCallback((id: string) => {
     setGoals((prev) => prev.filter((g) => g.id !== id))
     setExpandedGoal(null)
+  }, [])
+
+  const addSuggestion = useCallback((text: string, category: string) => {
+    setGoals((prev) => {
+      if (prev.some((g) => g.text === text)) return prev
+      return [...prev, { id: uid(), text, category, description: '', progress: 0, milestones: [] }]
+    })
   }, [])
 
   const addMilestone = useCallback((goalId: string, text: string) => {
@@ -246,12 +314,12 @@ export default function Goals() {
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
         >
           <p className="text-sm font-inter font-medium text-warm-500 uppercase tracking-widest mb-1">
-            Goals & Intentions
+            Goals & Vision
           </p>
           <h1 className="font-playfair font-semibold text-warm-900" style={{ fontSize: 'clamp(2rem, 4vw, 3rem)' }}>
-            My Goals for 2026
+            Design Your 2026
           </h1>
-          <p className="text-warm-500 font-inter mt-1">Dream big. Track progress. Celebrate wins.</p>
+          <p className="text-warm-500 font-inter mt-1 italic">&ldquo;A goal without a plan is just a wish.&rdquo;</p>
         </motion.div>
 
         {/* ====== Yearly Goals Section ====== */}
@@ -280,7 +348,12 @@ export default function Goals() {
                     >
                       <Icon className="w-5 h-5" style={{ color: cat.accent }} />
                     </div>
-                    <h3 className="font-playfair font-medium text-warm-800 text-base">{cat.label}</h3>
+                    <div>
+                      <h3 className="font-playfair font-medium text-warm-800 text-base">{cat.label}</h3>
+                      <p className="text-xs font-inter text-warm-400">
+                        {catGoals.length} {catGoals.length === 1 ? 'goal' : 'goals'}
+                      </p>
+                    </div>
                   </div>
                   <button
                     onClick={() => setNewGoalCategory(newGoalCategory === cat.key ? null : cat.key)}
@@ -479,6 +552,178 @@ export default function Goals() {
             )
           })}
         </div>
+
+        {/* ====== 2026 Progress Overview ====== */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.25, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+          className="card-planner"
+        >
+          <p
+            className="text-[0.65rem] uppercase tracking-[0.2em] font-inter font-medium mb-5"
+            style={{ color: 'var(--espresso-muted)' }}
+          >
+            2026 Progress Overview
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-[160px_1fr] gap-6 items-center">
+            {/* Overall */}
+            <div className="flex flex-col items-center gap-2">
+              {(() => {
+                const overall = goals.length > 0
+                  ? Math.round(goals.reduce((sum, g) => sum + g.progress, 0) / goals.length)
+                  : 0
+                const size = 120
+                const stroke = 10
+                const radius = (size - stroke) / 2
+                const circumference = radius * 2 * Math.PI
+                const offset = circumference - (overall / 100) * circumference
+                return (
+                  <>
+                    <div className="relative" style={{ width: size, height: size }}>
+                      <svg width={size} height={size} className="-rotate-90">
+                        <circle cx={size / 2} cy={size / 2} r={radius} stroke="var(--border-light)" strokeWidth={stroke} fill="none" />
+                        <motion.circle
+                          cx={size / 2} cy={size / 2} r={radius}
+                          stroke="var(--gold)"
+                          strokeWidth={stroke}
+                          fill="none"
+                          strokeLinecap="round"
+                          initial={{ strokeDashoffset: circumference }}
+                          animate={{ strokeDashoffset: offset }}
+                          transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+                          style={{ strokeDasharray: circumference }}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="font-playfair text-2xl font-semibold" style={{ color: 'var(--espresso)' }}>{overall}%</span>
+                        <span className="text-[0.6rem] uppercase tracking-wider font-inter" style={{ color: 'var(--espresso-muted)' }}>Overall</span>
+                      </div>
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
+
+            {/* Completion by Category */}
+            <div className="space-y-3">
+              <p className="text-xs font-inter font-medium" style={{ color: 'var(--espresso-muted)' }}>
+                Completion by Category
+              </p>
+              {GOAL_CATEGORIES.map((cat) => {
+                const catGoals = goals.filter((g) => g.category === cat.key)
+                const pct = catGoals.length > 0
+                  ? Math.round(catGoals.reduce((sum, g) => sum + g.progress, 0) / catGoals.length)
+                  : 0
+                return (
+                  <div key={cat.key} className="flex items-center gap-3">
+                    <span className="text-xs font-inter w-32 shrink-0 truncate" style={{ color: 'var(--espresso)' }}>
+                      {cat.label}
+                    </span>
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--cream-dark)' }}>
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ backgroundColor: cat.accent }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                      />
+                    </div>
+                    <span className="text-xs font-inter font-semibold w-9 text-right" style={{ color: 'var(--espresso-muted)' }}>
+                      {pct}%
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ====== Need Inspiration? ====== */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+          className="card-planner"
+        >
+          <button
+            onClick={() => setShowInspiration(!showInspiration)}
+            className="w-full flex items-center justify-between text-left"
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className="w-9 h-9 rounded-lg flex items-center justify-center"
+                style={{ background: 'rgba(212,175,55,0.12)' }}
+              >
+                <Lightbulb className="w-5 h-5" style={{ color: 'var(--gold)' }} />
+              </div>
+              <div>
+                <h2 className="font-playfair font-medium text-warm-900">Need inspiration?</h2>
+                <p className="text-sm font-inter" style={{ color: 'var(--espresso-muted)' }}>
+                  Tap a suggestion to add it to your goals
+                </p>
+              </div>
+            </div>
+            <motion.div animate={{ rotate: showInspiration ? 180 : 0 }} transition={{ duration: 0.25 }}>
+              <ChevronDown className="w-5 h-5" style={{ color: 'var(--espresso-muted)' }} />
+            </motion.div>
+          </button>
+
+          <AnimatePresence>
+            {showInspiration && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+                className="overflow-hidden"
+              >
+                <div className="pt-5 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  {INSPIRATION_CATEGORIES.map((group) => (
+                    <div
+                      key={group.label}
+                      className="rounded-xl p-4"
+                      style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
+                    >
+                      <p
+                        className="text-[0.65rem] uppercase tracking-[0.2em] font-inter font-medium mb-3"
+                        style={{ color: 'var(--espresso-muted)' }}
+                      >
+                        {group.label}
+                      </p>
+                      <div className="space-y-2">
+                        {group.suggestions.map((suggestion) => {
+                          const added = goals.some((g) => g.text === suggestion)
+                          return (
+                            <button
+                              key={suggestion}
+                              onClick={() => addSuggestion(suggestion, group.goalCategory)}
+                              disabled={added}
+                              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-inter text-left transition-colors"
+                              style={{
+                                background: 'var(--cream)',
+                                border: '1px solid var(--border-light)',
+                                color: added ? 'var(--espresso-muted)' : 'var(--espresso)',
+                                opacity: added ? 0.7 : 1,
+                              }}
+                            >
+                              {added ? (
+                                <Check className="w-4 h-4 shrink-0" style={{ color: 'var(--sage)' }} />
+                              ) : (
+                                <Plus className="w-4 h-4 shrink-0" style={{ color: 'var(--gold)' }} />
+                              )}
+                              <span className="flex-1">{suggestion}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
 
         {/* ====== Monthly Check-In Section ====== */}
         <motion.div

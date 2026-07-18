@@ -18,6 +18,8 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
+  Target,
+  ListChecks,
 } from 'lucide-react'
 
 /* ─── Types ─── */
@@ -50,6 +52,7 @@ const STORAGE_KEYS = {
   ideas: 'content-creation-ideas',
   weekly: 'content-creation-weekly',
   batch: 'content-creation-batch',
+  batchDay: 'content-creation-batch-day',
 }
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
@@ -101,8 +104,24 @@ const DEFAULT_WEEKLY: WeeklySlot[] = DAYS.flatMap((day) =>
   }))
 )
 
+/* Weekly Overview */
+const DAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const DAILY_TARGET = 2
+const WEEK_TARGET = DAYS.length * DAILY_TARGET
+
+/* Batch Filming Day */
+const DEFAULT_BATCH_DAY: BatchCheckItem[] = [
+  'Plan themes for the week',
+  'Setup filming area',
+  'Charge all devices',
+  'Film 5-10 videos',
+  'Take thumbnail photos',
+  'Edit and schedule posts',
+].map((text, i) => ({ id: String(i + 1), text, checked: false }))
+
 /* ─── Storage Helpers ─── */
 function load<T>(key: string, fallback: T): T {
+  if (typeof window === 'undefined') return fallback
   try {
     const r = localStorage.getItem(key)
     return r ? JSON.parse(r) : fallback
@@ -112,6 +131,18 @@ function load<T>(key: string, fallback: T): T {
 }
 function save<T>(key: string, v: T) {
   localStorage.setItem(key, JSON.stringify(v))
+}
+
+/* ISO week key (e.g. "2026-W29") — used to reset the batch day checklist weekly */
+function getWeekKey(): string {
+  const d = new Date()
+  const day = (d.getDay() + 6) % 7 // Monday = 0
+  d.setDate(d.getDate() - day + 3) // Thursday of this week
+  const firstThursday = new Date(d.getFullYear(), 0, 4)
+  const fDay = (firstThursday.getDay() + 6) % 7
+  firstThursday.setDate(firstThursday.getDate() - fDay + 3)
+  const week = 1 + Math.round((d.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000))
+  return `${d.getFullYear()}-W${week}`
 }
 
 /* ─── Card Entrance Variants ─── */
@@ -130,6 +161,10 @@ export default function ContentCreation() {
   const [ideas, setIdeas] = useState<ContentIdea[]>(() => load(STORAGE_KEYS.ideas, []))
   const [weekly, setWeekly] = useState<WeeklySlot[]>(() => load(STORAGE_KEYS.weekly, DEFAULT_WEEKLY))
   const [batch, setBatch] = useState<BatchCheckItem[]>(() => load(STORAGE_KEYS.batch, DEFAULT_BATCH))
+  const [batchDay, setBatchDay] = useState<BatchCheckItem[]>(() => {
+    const stored = load<{ week: string; items: BatchCheckItem[] } | null>(STORAGE_KEYS.batchDay, null)
+    return stored && stored.week === getWeekKey() && Array.isArray(stored.items) ? stored.items : DEFAULT_BATCH_DAY
+  })
 
   /* New Idea Inputs */
   const [newIdea, setNewIdea] = useState({ title: '', account: 'triedbyagirl' as 'triedbyagirl' | 'rocket', pillar: '', notes: '' })
@@ -139,6 +174,7 @@ export default function ContentCreation() {
   useEffect(() => save(STORAGE_KEYS.ideas, ideas), [ideas])
   useEffect(() => save(STORAGE_KEYS.weekly, weekly), [weekly])
   useEffect(() => save(STORAGE_KEYS.batch, batch), [batch])
+  useEffect(() => save(STORAGE_KEYS.batchDay, { week: getWeekKey(), items: batchDay }), [batchDay])
 
   /* Derived Stats */
   const totalIdeas = ideas.length
@@ -146,6 +182,17 @@ export default function ContentCreation() {
   const postedCount = ideas.filter((i) => i.status === 'posted').length
   const triedbyagirlWeeklyPosts = WEEKLY_SCHEDULE.reduce((sum, d) => sum + parseInt(d.triedbyagirl.match(/\d+/)?.[0] || '0'), 0)
   const rocketWeeklyPosts = WEEKLY_SCHEDULE.reduce((sum, d) => sum + parseInt(d.rocket.match(/\d+/)?.[0] || '0'), 0)
+
+  /* Weekly Overview derived */
+  const postedByDay = DAYS.map((day) => weekly.filter((s) => s.day === day && s.posted).length)
+  const weekPostedTotal = postedByDay.reduce((sum, n) => sum + n, 0)
+  const weekProgressPct = Math.min(100, Math.round((weekPostedTotal / WEEK_TARGET) * 100))
+  const todayIdx = (new Date().getDay() + 6) % 7 // Monday = 0
+  const onTrack = weekPostedTotal >= todayIdx * DAILY_TARGET
+
+  /* Batch Filming Day derived */
+  const batchDayDone = batchDay.filter((b) => b.checked).length
+  const batchDayPct = Math.round((batchDayDone / batchDay.length) * 100)
 
   /* Handlers */
   const addIdea = useCallback(() => {
@@ -172,6 +219,10 @@ export default function ContentCreation() {
 
   const toggleBatchItem = useCallback((id: string) => {
     setBatch((prev) => prev.map((b) => (b.id === id ? { ...b, checked: !b.checked } : b)))
+  }, [])
+
+  const toggleBatchDayItem = useCallback((id: string) => {
+    setBatchDay((prev) => prev.map((b) => (b.id === id ? { ...b, checked: !b.checked } : b)))
   }, [])
 
   const updateWeeklySlot = useCallback((id: string, content: string) => {
@@ -247,6 +298,127 @@ export default function ContentCreation() {
             </motion.div>
           ))}
         </motion.div>
+
+        {/* ═══════════════ WEEKLY OVERVIEW & BATCH FILMING DAY ═══════════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Weekly Overview */}
+          <motion.section
+            custom={4}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            className="card-planner lg:col-span-2"
+          >
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center">
+                <Target className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <h2 className="font-playfair text-xl font-semibold text-warm-800">Weekly Overview</h2>
+                <p className="font-caveat text-base text-warm-500">
+                  {DAILY_TARGET} posts per day &middot; {WEEK_TARGET} per week
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              {DAY_SHORT.map((label, i) => {
+                const posted = postedByDay[i]
+                const pct = Math.min(100, (posted / DAILY_TARGET) * 100)
+                return (
+                  <div
+                    key={label}
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md ${
+                      i === todayIdx ? 'bg-emerald-50/70 border border-emerald-100' : i % 2 === 0 ? 'bg-warm-50/50' : ''
+                    }`}
+                  >
+                    <span className="w-9 shrink-0 font-inter text-sm font-medium text-warm-700">{label}</span>
+                    <div className="flex-1 h-1.5 rounded-full bg-warm-100 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${posted >= DAILY_TARGET ? 'bg-emerald-400' : 'bg-amber-400'}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="w-16 shrink-0 text-right font-inter text-xs text-warm-500">
+                      {posted} / {DAILY_TARGET} posted
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-warm-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-inter text-xs text-warm-500 uppercase tracking-wide">Week progress</span>
+                <div className="flex items-center gap-2">
+                  <span className="font-playfair text-sm font-semibold text-warm-800">{weekProgressPct}%</span>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-inter font-medium ${
+                      onTrack ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                    }`}
+                  >
+                    {onTrack ? 'On track' : 'Behind target'}
+                  </span>
+                </div>
+              </div>
+              <div className="h-2 rounded-full bg-warm-100 overflow-hidden">
+                <div className="h-full rounded-full bg-emerald-400 transition-all" style={{ width: `${weekProgressPct}%` }} />
+              </div>
+              <p className="font-inter text-xs text-warm-400 mt-2">
+                {weekPostedTotal} of {WEEK_TARGET} posts published this week
+              </p>
+            </div>
+          </motion.section>
+
+          {/* Batch Filming Day */}
+          <motion.section
+            custom={5}
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            className="card-planner"
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-full bg-violet-100 flex items-center justify-center">
+                <ListChecks className="w-4 h-4 text-violet-600" />
+              </div>
+              <div>
+                <h2 className="font-playfair text-xl font-semibold text-warm-800">Batch Filming Day</h2>
+                <p className="font-caveat text-base text-warm-500">Complete all steps for a productive batch day</p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mb-2">
+              <span className="font-inter text-xs text-warm-500 uppercase tracking-wide">
+                {batchDayDone} of {batchDay.length} done
+              </span>
+              <span className="font-playfair text-sm font-semibold text-warm-800">{batchDayPct}%</span>
+            </div>
+            <div className="h-2 rounded-full bg-warm-100 overflow-hidden mb-4">
+              <div className="h-full rounded-full bg-violet-400 transition-all" style={{ width: `${batchDayPct}%` }} />
+            </div>
+
+            <div className="space-y-1.5">
+              {batchDay.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => toggleBatchDayItem(item.id)}
+                  className="flex items-center gap-3 w-full text-left px-3 py-2.5 rounded-md hover:bg-warm-50 transition-colors"
+                >
+                  {item.checked ? (
+                    <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-warm-400 shrink-0" />
+                  )}
+                  <span className={`font-inter text-sm ${item.checked ? 'text-warm-400 line-through' : 'text-warm-700'}`}>
+                    {item.text}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <p className="font-inter text-xs text-warm-400 mt-3 px-1">Resets every Monday</p>
+          </motion.section>
+        </div>
 
         {/* ═══════════════ WEEKLY CONTENT SCHEDULE ═══════════════ */}
         <motion.section

@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import HeroSection from '@/components/HeroSection'
 import {
   Trophy,
   Heart,
   CloudRain,
   Lightbulb,
   Compass,
+  BookOpen,
   X,
 } from 'lucide-react'
 import { usePlanner } from '@/hooks/usePlanner'
@@ -15,6 +15,13 @@ import { usePlanner } from '@/hooks/usePlanner'
 /* ------------------------------------------------------------------ */
 /*  Types                                                               */
 /* ------------------------------------------------------------------ */
+
+interface MonthReview {
+  wins: string
+  challenges: string
+  lessons: string
+  gratitude: string
+}
 
 interface ReflectionData {
   wins: string[]
@@ -30,6 +37,7 @@ interface ReflectionData {
   biggestWin: string
   challengedBy: string
   learned: string
+  review: MonthReview
 }
 
 /* ------------------------------------------------------------------ */
@@ -37,6 +45,11 @@ interface ReflectionData {
 /* ------------------------------------------------------------------ */
 
 const MONTHS = [
+  { value: 0, label: 'January', full: 'January 2026' },
+  { value: 1, label: 'February', full: 'February 2026' },
+  { value: 2, label: 'March', full: 'March 2026' },
+  { value: 3, label: 'April', full: 'April 2026' },
+  { value: 4, label: 'May', full: 'May 2026' },
   { value: 5, label: 'June', full: 'June 2026' },
   { value: 6, label: 'July', full: 'July 2026' },
   { value: 7, label: 'August', full: 'August 2026' },
@@ -55,6 +68,13 @@ const REFLECTION_QUOTES = [
   "What we think, we become. What we feel, we attract. What we imagine, we create.",
 ]
 
+const DEFAULT_REVIEW: MonthReview = {
+  wins: '',
+  challenges: '',
+  lessons: '',
+  gratitude: '',
+}
+
 const DEFAULT_REFLECTION: ReflectionData = {
   wins: ['', '', '', '', ''],
   gratitude: ['', '', '', '', ''],
@@ -69,6 +89,17 @@ const DEFAULT_REFLECTION: ReflectionData = {
   biggestWin: '',
   challengedBy: '',
   learned: '',
+  review: DEFAULT_REVIEW,
+}
+
+/* Merge stored data over the defaults so saves from before the
+   `review` field existed still load with a complete shape. */
+function withDefaults(stored: ReflectionData | null): ReflectionData {
+  return {
+    ...DEFAULT_REFLECTION,
+    ...(stored ?? {}),
+    review: { ...DEFAULT_REVIEW, ...(stored?.review ?? {}) },
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -82,9 +113,20 @@ export default function Reflection() {
 
   /* ---- Resolve current month ---- */
   const currentMonthIndex = useMemo(() => {
-    if (monthParam === 'current') return 0
-    const idx = MONTHS.findIndex((m) => m.label.toLowerCase() === monthParam?.toLowerCase())
-    return idx >= 0 ? idx : 0
+    if (!monthParam || monthParam === 'current') {
+      const now = new Date()
+      const idx = MONTHS.findIndex((m) => m.value === now.getMonth())
+      return now.getFullYear() === 2026 && idx >= 0 ? idx : 0
+    }
+    const byLabel = MONTHS.findIndex((m) => m.label.toLowerCase() === monthParam.toLowerCase())
+    if (byLabel >= 0) return byLabel
+    // Search links use a YYYY-MM month_start — match it against the storage months.
+    const dateMatch = /^(\d{4})-(\d{2})/.exec(monthParam)
+    if (dateMatch && dateMatch[1] === '2026') {
+      const idx = MONTHS.findIndex((m) => m.value === parseInt(dateMatch[2], 10) - 1)
+      if (idx >= 0) return idx
+    }
+    return 0
   }, [monthParam])
 
   const currentMonth = MONTHS[currentMonthIndex]
@@ -94,7 +136,7 @@ export default function Reflection() {
   /* ---- State ---- */
   const [reflection, setReflection] = useState<ReflectionData>(() => {
     const stored = getStorageItem<ReflectionData | null>(storageKey, null)
-    return stored || { ...DEFAULT_REFLECTION }
+    return withDefaults(stored)
   })
 
   const [saveIndicator, setSaveIndicator] = useState(false)
@@ -102,7 +144,7 @@ export default function Reflection() {
   /* ---- Persist ---- */
   useEffect(() => {
     const stored = getStorageItem<ReflectionData | null>(storageKey, null)
-    setReflection(stored || { ...DEFAULT_REFLECTION })
+    setReflection(withDefaults(stored))
   }, [storageKey, getStorageItem])
 
   useEffect(() => {
@@ -126,6 +168,11 @@ export default function Reflection() {
       arr[index] = value
       return { ...prev, [key]: arr }
     })
+    showSaved()
+  }, [showSaved])
+
+  const updateReview = useCallback((key: keyof MonthReview, value: string) => {
+    setReflection((prev) => ({ ...prev, review: { ...prev.review, [key]: value } }))
     showSaved()
   }, [showSaved])
 
@@ -202,6 +249,55 @@ export default function Reflection() {
               </motion.button>
             )
           })}
+        </motion.div>
+
+        {/* ====== Month in Review ====== */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
+          className="card-planner"
+        >
+          <div className="flex items-center gap-2.5 mb-1">
+            <BookOpen className="w-5 h-5" style={{ color: 'var(--gold)' }} />
+            <h3 className="font-playfair font-medium" style={{ color: 'var(--espresso)' }}>Month in Review</h3>
+          </div>
+          <p className="text-xs font-inter mb-5" style={{ color: 'var(--espresso-muted)' }}>
+            Your {currentMonth.full} snapshot &mdash; saved automatically, and always here when you look back
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {[
+              { key: 'wins' as const, label: "This Month's Wins", hint: 'What went well? What are you proud of?', icon: Trophy, color: 'var(--gold)' },
+              { key: 'challenges' as const, label: 'Challenges', hint: 'What was difficult this month?', icon: CloudRain, color: '#7a8e9e' },
+              { key: 'lessons' as const, label: 'Lessons Learned', hint: 'What did these experiences teach you?', icon: Lightbulb, color: 'var(--gold)' },
+              { key: 'gratitude' as const, label: 'Gratitude', hint: 'What are you thankful for this month?', icon: Heart, color: 'var(--sage)' },
+            ].map((field) => (
+              <div
+                key={field.key}
+                className="rounded-md p-4"
+                style={{ background: 'var(--cream-dark)', border: '1px solid var(--border-light)' }}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <field.icon className="w-4 h-4" style={{ color: field.color }} />
+                  <label className="text-sm font-inter font-medium" style={{ color: 'var(--espresso)' }}>
+                    {field.label}
+                  </label>
+                </div>
+                <p className="text-xs font-inter mb-2" style={{ color: 'var(--espresso-muted)' }}>{field.hint}</p>
+                <textarea
+                  value={reflection.review[field.key]}
+                  onChange={(e) => updateReview(field.key, e.target.value)}
+                  placeholder="Write your thoughts..."
+                  rows={3}
+                  className="w-full px-3 py-2 text-base font-caveat bg-white/60 border rounded-md focus:outline-none focus:border-[var(--gold)] resize-none placeholder:text-warm-400"
+                  style={{ ...linedStyle, color: 'var(--espresso)', borderColor: 'var(--border-light)' }}
+                />
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-xs font-inter text-center" style={{ color: 'var(--espresso-muted)' }}>
+            Choose a month above to revisit or update past reviews &mdash; each month keeps its own page.
+          </p>
         </motion.div>
 
         {/* ====== Reflection Prompts ====== */}

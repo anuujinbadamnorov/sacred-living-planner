@@ -4,6 +4,7 @@ export interface Profile {
   avatar_url: string | null
   subscription_tier: string | null
   subscription_status: string | null
+  current_period_end: string | null
   created_at: string
   updated_at: string
 }
